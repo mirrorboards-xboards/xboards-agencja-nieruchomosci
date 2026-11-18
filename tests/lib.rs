@@ -32,6 +32,8 @@ mod konsjerz;
 #[cfg(test)]
 mod kontroler;
 #[cfg(test)]
+mod najem;
+#[cfg(test)]
 mod oferta;
 #[cfg(test)]
 mod poszukiwanie;
@@ -44,7 +46,11 @@ mod sprawa;
 #[cfg(test)]
 mod sprawa_dodatki;
 #[cfg(test)]
+mod sprawa_pieniadze;
+#[cfg(test)]
 mod sprawa_porzadek;
+#[cfg(test)]
+mod sprawa_strony;
 #[cfg(test)]
 mod stanowiska_bez_rodzajow;
 #[cfg(test)]

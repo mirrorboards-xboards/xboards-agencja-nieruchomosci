@@ -739,10 +739,6 @@ pub(crate) fn conclude_contract(
 /// Writes the contract `contract_id` (see [`contract`]) whose one party `party_id` Kontroler
 /// checked (`tozsamosc-<id>`), hands it over for signing and concludes it without a withdrawal
 /// date (the Python default `sposob_zawarcia` is „w_lokalu_biura”).
-#[allow(
-    dead_code,
-    reason = "the scenarios of najem use it; they are ported after this module"
-)]
 pub(crate) fn concluded_contract(
     room: &impl MetaRoom,
     contract_id: &str,
