@@ -1,12 +1,13 @@
 //! The kind `sprawa-notatki` of the room `cases/transakcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-notatki";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Notatki przekazania: jedyny sposób, w jaki agenci rozmawiają ze sobą (zasada „Teczka jest
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-notatki",
+    requires: &[&super::sprawa_uczestnicy::KIND],
+    migrations: &[
+        r#"-- Notatki przekazania: jedyny sposób, w jaki agenci rozmawiają ze sobą (zasada „Teczka jest
 -- wspólnym stanem sprawy”). Notatka jest prośbą od stanowiska do stanowiska; trafia też do
 -- następcy agenta. Gdy w teczce pracuje dwóch Kontrolerów (R1), notatka do Kontrolera wskazuje
 -- klienta, którego Kontrolera dotyczy. Pisze ją każdy członek teczki, który ma prawo pisać.
@@ -125,7 +126,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.od_stanowiska`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -312,7 +314,7 @@ FROM sprawa_notatki_wiersze
 ORDER BY notatka_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WierszeNotatekRow::from_row).collect()
 }
 
@@ -330,6 +332,7 @@ pub fn wskaz_wiersz_notatki(
     params: &WskazWierszNotatkiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_notatki_wiersze (notatka_id, dotyczy_tabela, dotyczy_id)
@@ -398,7 +401,7 @@ FROM sprawa_notatki_wpisy
 ORDER BY utworzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NotatkiRow::from_row).collect()
 }
 
@@ -461,7 +464,7 @@ ORDER BY utworzono, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NotatkiOtwarteDoStanowiskaRow::from_row).collect()
 }
 
@@ -486,6 +489,7 @@ pub fn dopisz_notatke(
     params: &DopiszNotatkeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_notatki_wpisy (id, od, od_stanowiska, do_stanowiska, do_klienta_uczestnik_id,
@@ -537,6 +541,7 @@ pub fn oznacz_notatke_jako_wykonana(
     params: &OznaczNotatkeJakoWykonanaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_notatki_wpisy
@@ -563,6 +568,7 @@ pub fn odrzuc_notatke(
     params: &OdrzucNotatkeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_notatki_wpisy

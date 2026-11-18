@@ -1,12 +1,13 @@
 //! The kind `stanowisko-zrodla` of the room `positions/posrednictwo/kierownik_posrednictwa`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "stanowisko-zrodla";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Źródła: jak rzetelne okazały się osoby, instytucje, portale, rejestry, dokumenty i agenci, od
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "stanowisko-zrodla",
+    requires: &[],
+    migrations: &[
+        r#"-- Źródła: jak rzetelne okazały się osoby, instytucje, portale, rejestry, dokumenty i agenci, od
 -- których agent coś wie. Po nieprawdzie źródła agent ocenia na nowo wszystko, co od niego wie
 -- (operacja ustalenia_od_zrodla w stanowisko-ustalenia, a u kierownika działu także zwyczaje_od_zrodla).
 --
@@ -149,7 +150,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -464,7 +466,7 @@ FROM stanowisko_zrodla_wpisy
 ORDER BY ocena = 'nierzetelne' DESC, ocena = 'zastrzezenia' DESC, nazwa, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZrodlaRow::from_row).collect()
 }
 
@@ -485,6 +487,7 @@ pub fn wpisz_zrodlo(
     params: &WpiszZrodloParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO stanowisko_zrodla_wpisy (id, nazwa, rodzaj, wpis_odnosnik, tozsamosc, ocena)
@@ -521,6 +524,7 @@ pub fn ocen_zrodlo(
     params: &OcenZrodloParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE stanowisko_zrodla_wpisy
@@ -586,7 +590,7 @@ ORDER BY zaszlo, id"#,
             ("zrodlo_id", xmeta_room::ToSqlValue::to_sql_value(&params.zrodlo_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZdarzeniaZrodlaRow::from_row).collect()
 }
 
@@ -630,7 +634,7 @@ WHERE zgloszono IS NULL
 ORDER BY zaszlo, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZdarzeniaDoZgloszeniaRow::from_row).collect()
 }
 
@@ -670,7 +674,7 @@ GROUP BY zrodlo_id, rodzaj
 ORDER BY zrodlo_id, rodzaj"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZdarzeniaZrodelRow::from_row).collect()
 }
 
@@ -691,6 +695,7 @@ pub fn dopisz_zdarzenie_zrodla(
     params: &DopiszZdarzenieZrodlaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO stanowisko_zrodla_zdarzenia (zrodlo_id, zaszlo, rodzaj, opis, dotyczy_tabela, dotyczy_odnosnik)
@@ -730,6 +735,7 @@ pub fn odnotuj_zgloszenie_zdarzenia(
     params: &OdnotujZgloszenieZdarzeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE stanowisko_zrodla_zdarzenia

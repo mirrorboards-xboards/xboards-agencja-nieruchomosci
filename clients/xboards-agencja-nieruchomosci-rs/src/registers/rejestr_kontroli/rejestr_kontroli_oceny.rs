@@ -1,12 +1,16 @@
 //! The kind `rejestr-kontroli-oceny` of the room `registers/rejestr_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "rejestr-kontroli-oceny";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Ocena ryzyka klienta (art. 33 AML) i ocena ryzyka całego biura (art. 27 AML). Ocenę klienta
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "rejestr-kontroli-oceny",
+    requires: &[
+        &super::rejestr_kontroli_decyzje::KIND,
+        &super::rejestr_kontroli_klienci::KIND,
+    ],
+    migrations: &[
+        r#"-- Ocena ryzyka klienta (art. 33 AML) i ocena ryzyka całego biura (art. 27 AML). Ocenę klienta
 -- proponuje Kontroler, Kierownik kontroli wpisuje ją do zatwierdzenia, a zatwierdza osoba
 -- wyznaczona do obowiązków z ustawy decyzją podpisaną kluczem. Gdy osoba wyznaczona ocenę zmienia,
 -- Kierownik wpisuje nową ocenę z jej poziomem i środkami.
@@ -221,7 +225,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `klientow.poziom`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -360,7 +365,7 @@ FROM rejestr_kontroli_oceny_biura
 ORDER BY wersja DESC"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OcenyRyzykaBiuraRow::from_row).collect()
 }
 
@@ -386,6 +391,7 @@ pub fn wpisz_ocene_ryzyka_biura(
     params: &WpiszOceneRyzykaBiuraParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_oceny_biura (id, wersja, czynniki, sporzadzono, aktualizacja_do,
@@ -481,7 +487,7 @@ ORDER BY wpisano DESC, id"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OcenyRyzykaKlientaRow::from_row).collect()
 }
 
@@ -506,6 +512,7 @@ pub fn wpisz_ocene_ryzyka_klienta(
     params: &WpiszOceneRyzykaKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_oceny_klientow (id, klient_id, poziom, czynniki, srodki, zaproponowal,
@@ -550,6 +557,7 @@ pub fn wpisz_zatwierdzenie_oceny(
     params: &WpiszZatwierdzenieOcenyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_oceny_klientow

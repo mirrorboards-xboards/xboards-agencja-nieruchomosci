@@ -1,12 +1,13 @@
 //! The kind `katalog-ofert-oferty` of the room `registers/katalog_ofert`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "katalog-ofert-oferty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Katalog ofert biura: każda oferta sprzedaży i najmu długoterminowego z teczki oferty, tylko
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "katalog-ofert-oferty",
+    requires: &[],
+    migrations: &[
+        r#"-- Katalog ofert biura: każda oferta sprzedaży i najmu długoterminowego z teczki oferty, tylko
 -- w zakresie, na który pozwolił klient, z wersjami, ogłoszeniami i statusem. Opiekun
 -- poszukującego dobiera z niego oferty biura, a Recepcja rozpoznaje numer oferty albo ogłoszenia.
 -- Pokój jest jeden na biuro.
@@ -372,7 +373,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy katalogu się nie usuwa (R9); błąd poprawia nowa wersja');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `statusy.status`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -607,7 +609,7 @@ FROM katalog_ofert_oferty_ogloszenia
 ORDER BY oferta_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OgloszeniaOfertRow::from_row).collect()
 }
 
@@ -661,7 +663,7 @@ WHERE portal = :portal
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(OfertaPoOgloszeniuRow::from_row).transpose()
 }
 
@@ -680,6 +682,7 @@ pub fn wpisz_ogloszenie(
     params: &WpiszOgloszenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO katalog_ofert_oferty_ogloszenia (oferta_id, portal, numer_ogloszenia, od)
@@ -714,6 +717,7 @@ pub fn zakoncz_ogloszenie(
     params: &ZakonczOgloszenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE katalog_ofert_oferty_ogloszenia
@@ -773,7 +777,7 @@ ORDER BY id"#,
             ("oferta_id", xmeta_room::ToSqlValue::to_sql_value(&params.oferta_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StatusyOfertyRow::from_row).collect()
 }
 
@@ -793,6 +797,7 @@ pub fn zmien_status_oferty(
     params: &ZmienStatusOfertyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO katalog_ofert_oferty_statusy (oferta_id, status, od, zrodlo_odnosnik, wpisal)
@@ -883,7 +888,7 @@ ORDER BY id DESC"#,
             ("oferta_id", xmeta_room::ToSqlValue::to_sql_value(&params.oferta_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WersjeOfertyRow::from_row).collect()
 }
 
@@ -915,6 +920,7 @@ pub fn wpisz_wersje_oferty(
     params: &WpiszWersjeOfertyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO katalog_ofert_oferty_wersje (oferta_id, od, powierzchnia, lokalizacja_przyblizona,
@@ -1075,7 +1081,7 @@ JOIN katalog_ofert_oferty_statusy AS statusy ON statusy.oferta_id = wpisy.id
 ORDER BY wpisy.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OfertyRow::from_row).collect()
 }
 
@@ -1126,7 +1132,7 @@ WHERE numer_oferty = :numer_oferty"#,
             ("numer_oferty", xmeta_room::ToSqlValue::to_sql_value(&params.numer_oferty)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(OfertaPoNumerzeRow::from_row).transpose()
 }
 
@@ -1161,6 +1167,7 @@ pub fn wpisz_oferte(
     params: &WpiszOferteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO katalog_ofert_oferty_wpisy (id, numer_oferty, teczka_odnosnik, rodzaj_oferty,

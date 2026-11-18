@@ -1,12 +1,13 @@
 //! The kind `wykonawcy-spis` of the room `registers/wykonawcy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "wykonawcy-spis";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Wykonawcy, którym biuro zleca pracę w lokalach krótkoterminowych: sprzątanie, gospodarze na
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "wykonawcy-spis",
+    requires: &[],
+    migrations: &[
+        r#"-- Wykonawcy, którym biuro zleca pracę w lokalach krótkoterminowych: sprzątanie, gospodarze na
 -- miejscu oraz naprawy i serwis. Rejestr trzyma ich dane do umowy, osoby, kanały zleceń, obszary,
 -- stan i podpisane decyzje człowieka. Pokój jest jeden na biuro.
 --
@@ -618,7 +619,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `decyzje.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -897,7 +899,7 @@ ORDER BY id DESC"#,
             ("wykonawca_id", xmeta_room::ToSqlValue::to_sql_value(&params.wykonawca_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DaneWykonawcyRow::from_row).collect()
 }
 
@@ -930,6 +932,7 @@ pub fn wpisz_dane_wykonawcy(
     params: &WpiszDaneWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_spis_dane (wykonawca_id, aktualne, firma, nip, krs, ceidg, adres, zakres_uslug,
@@ -1034,7 +1037,7 @@ FROM wykonawcy_spis_decyzje
 ORDER BY podpisano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DecyzjeWykonawcowRow::from_row).collect()
 }
 
@@ -1059,6 +1062,7 @@ pub fn wpisz_decyzje_o_wykonawcy(
     params: &WpiszDecyzjeOWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_spis_decyzje (id, rodzaj, decyduje, tresc, dotyczy_skrot, podpis, podpisano,
@@ -1126,7 +1130,7 @@ WHERE do IS NULL
 ORDER BY wykonawca_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KanalyWykonawcowRow::from_row).collect()
 }
 
@@ -1146,6 +1150,7 @@ pub fn wpisz_kanal_wykonawcy(
     params: &WpiszKanalWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_spis_kanaly (wykonawca_id, rodzaj, adres, od, decyzja_id)
@@ -1182,6 +1187,7 @@ pub fn zakoncz_kanal_wykonawcy(
     params: &ZakonczKanalWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE wykonawcy_spis_kanaly
@@ -1245,7 +1251,7 @@ WHERE do IS NULL
 ORDER BY obszar, wykonawca_id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ObszaryWykonawcowRow::from_row).collect()
 }
 
@@ -1266,6 +1272,7 @@ pub fn wpisz_obszar_wykonawcy(
     params: &WpiszObszarWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_spis_obszary (wykonawca_id, obszar, dostepnosc, czas_dojazdu_do_usterki, od,
@@ -1312,6 +1319,7 @@ pub fn zakoncz_obszar_wykonawcy(
     params: &ZakonczObszarWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE wykonawcy_spis_obszary
@@ -1378,7 +1386,7 @@ WHERE do IS NULL
 ORDER BY wykonawca_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OsobyWykonawcowRow::from_row).collect()
 }
 
@@ -1435,7 +1443,7 @@ ORDER BY id DESC"#,
             ("wykonawca_id", xmeta_room::ToSqlValue::to_sql_value(&params.wykonawca_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OsobyWykonawcyRow::from_row).collect()
 }
 
@@ -1457,6 +1465,7 @@ pub fn wpisz_osobe_wykonawcy(
     params: &WpiszOsobeWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_spis_osoby (wykonawca_id, imiona, nazwisko, telefon, kody_do_zamkow, od,
@@ -1499,6 +1508,7 @@ pub fn zakoncz_osobe_wykonawcy(
     params: &ZakonczOsobeWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE wykonawcy_spis_osoby
@@ -1565,7 +1575,7 @@ ORDER BY id"#,
             ("wykonawca_id", xmeta_room::ToSqlValue::to_sql_value(&params.wykonawca_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StanyWykonawcyRow::from_row).collect()
 }
 
@@ -1585,6 +1595,7 @@ pub fn zmien_stan_wykonawcy(
     params: &ZmienStanWykonawcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_spis_stany (wykonawca_id, stan, od, powod, decyzja_id)
@@ -1665,7 +1676,7 @@ JOIN wykonawcy_spis_stany AS stany ON stany.wykonawca_id = wpisy.id
 ORDER BY wpisy.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WykonawcyRow::from_row).collect()
 }
 
@@ -1702,6 +1713,7 @@ pub fn wpisz_wykonawce(
     params: &WpiszWykonawceParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_spis_wpisy (id, nazwa, rodzaj, specjalnosc, decyzja_id, wpisano)

@@ -1,12 +1,17 @@
 //! The kind `sprawa-zgody` of the room `cases/poszukiwanie`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-zgody";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Zgody i oświadczenia klientów i innych osób spoza biura, np. zatwierdzenie ceny oferty albo
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-zgody",
+    requires: &[
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_uczestnicy::KIND,
+    ],
+    migrations: &[
+        r#"-- Zgody i oświadczenia klientów i innych osób spoza biura, np. zatwierdzenie ceny oferty albo
 -- żądanie konsumenta, żeby biuro zaczęło pracę przed upływem terminu na odstąpienie. Dowodem jest
 -- dokument albo wiadomość w teczce, a nie klucz. Zgody ustnej się nie wpisuje: jest ustaleniem
 -- w pamięci agenta, dopóki klient jej nie potwierdzi.
@@ -93,7 +98,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// A row of `zgody`.
 #[derive(Debug, Clone, PartialEq)]
@@ -140,7 +146,7 @@ FROM sprawa_zgody_wpisy
 ORDER BY zlozono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZgodyRow::from_row).collect()
 }
 
@@ -194,7 +200,7 @@ WHERE NOT EXISTS (
 ORDER BY zgoda.zlozono DESC, zgoda.id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZgodyBiezaceRow::from_row).collect()
 }
 
@@ -221,6 +227,7 @@ pub fn wpisz_zgode(
     params: &WpiszZgodeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_zgody_wpisy (id, uczestnik_id, rodzaj, tresc, zlozono, dokument_id, wplyw_id,

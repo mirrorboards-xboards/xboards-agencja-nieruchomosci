@@ -1,12 +1,13 @@
 //! The kind `lokal-krotkoterminowy-umowa` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "lokal-krotkoterminowy-umowa";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Warunki umowy o zarządzanie lokalem, z których korzystają agenci i program: największa liczba
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "lokal-krotkoterminowy-umowa",
+    requires: &[&super::sprawa_umowy::KIND],
+    migrations: &[
+        r#"-- Warunki umowy o zarządzanie lokalem, z których korzystają agenci i program: największa liczba
 -- gości, prowizja, sprzątanie, kwota napraw, koszty właściciela, terminy właściciela, wypłaty,
 -- rezerwa i rezerwacje po końcu umowy, a do tego kanały sprzedaży i widełki cen. Datę zawarcia,
 -- koniec, okres wypowiedzenia i polisę trzyma rdzeń (sprawa-umowy). Pisze Zarządca obiektu.
@@ -322,7 +323,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `kanaly.konto`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -529,7 +531,7 @@ FROM lokal_krotkoterminowy_umowa_kanaly
 ORDER BY warunki_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KanalyWarunkowRow::from_row).collect()
 }
 
@@ -547,6 +549,7 @@ pub fn dopisz_kanal_warunkow(
     params: &DopiszKanalWarunkowParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_umowa_kanaly (warunki_id, kanal, konto)
@@ -621,7 +624,7 @@ FROM lokal_krotkoterminowy_umowa_warunki
 ORDER BY od, rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WarunkiUmowyLokaluRow::from_row).collect()
 }
 
@@ -681,7 +684,7 @@ pub fn biezace_warunki_umowy_lokalu(
 FROM lokal_krotkoterminowy_umowa_warunki_biezace"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(BiezaceWarunkiUmowyLokaluRow::from_row).transpose()
 }
 
@@ -715,7 +718,7 @@ pub fn umowa_lokalu(
 FROM lokal_krotkoterminowy_umowa_lokalu"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(UmowaLokaluRow::from_row).transpose()
 }
 
@@ -747,6 +750,7 @@ pub fn wpisz_warunki_umowy_lokalu(
     params: &WpiszWarunkiUmowyLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_umowa_warunki (id, umowa_id, max_gosci, prowizja_rodzaj, prowizja,
@@ -827,6 +831,7 @@ pub fn ustal_warunki_umowy_lokalu(
     params: &UstalWarunkiUmowyLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_umowa_warunki
@@ -879,7 +884,7 @@ FROM lokal_krotkoterminowy_umowa_widelki
 ORDER BY warunki_id, od_dnia"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WidelkiWarunkowRow::from_row).collect()
 }
 
@@ -901,6 +906,7 @@ pub fn dopisz_widelki_warunkow(
     params: &DopiszWidelkiWarunkowParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_umowa_widelki (warunki_id, sezon, od_dnia, do_dnia, cena_min,

@@ -1,12 +1,17 @@
 //! The kind `poszukiwanie-profile` of the room `cases/poszukiwanie`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "poszukiwanie-profile";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Profile poszukiwania: czego klient szuka, ile zapłaci i skąd weźmie pieniądze, w wersjach
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "poszukiwanie-profile",
+    requires: &[
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Profile poszukiwania: czego klient szuka, ile zapłaci i skąd weźmie pieniądze, w wersjach
 -- z potwierdzeniem klienta. Pisze Opiekun poszukującego. Kwoty w groszach; budżet przy najmie to
 -- najwyższy czynsz miesięczny.
 --
@@ -352,7 +357,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `cechy.waga`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -566,7 +572,7 @@ FROM poszukiwanie_profile_wersje
 ORDER BY profil_id, od"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WersjeProfiliRow::from_row).collect()
 }
 
@@ -649,7 +655,7 @@ FROM poszukiwanie_profile_biezace
 ORDER BY profil_id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ProfileBiezaceRow::from_row).collect()
 }
 
@@ -684,7 +690,7 @@ FROM poszukiwanie_profile_cechy
 ORDER BY wersja_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(CechyProfiliRow::from_row).collect()
 }
 
@@ -719,7 +725,7 @@ FROM poszukiwanie_profile_finansowanie
 ORDER BY wersja_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(FinansowanieProfiliRow::from_row).collect()
 }
 
@@ -762,6 +768,7 @@ pub fn wpisz_wersje_profilu(
     params: &WpiszWersjeProfiluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_profile_wersje (id, profil_id, cel, na_wynajem, rodzaj_nieruchomosci,
@@ -866,6 +873,7 @@ pub fn dopisz_ceche_profilu(
     params: &DopiszCecheProfiluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_profile_cechy (wersja_id, cecha, waga)
@@ -897,6 +905,7 @@ pub fn dopisz_finansowanie_profilu(
     params: &DopiszFinansowanieProfiluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_profile_finansowanie (wersja_id, zrodlo, kwota)
@@ -928,6 +937,7 @@ pub fn potwierdz_wersje_profilu(
     params: &PotwierdzWersjeProfiluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_profile_wersje
@@ -969,7 +979,7 @@ FROM poszukiwanie_profile_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ProfilePoszukiwaniaRow::from_row).collect()
 }
 
@@ -987,6 +997,7 @@ pub fn zaloz_profil_poszukiwania(
     params: &ZalozProfilPoszukiwaniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_profile_wpisy (id, nazwa)

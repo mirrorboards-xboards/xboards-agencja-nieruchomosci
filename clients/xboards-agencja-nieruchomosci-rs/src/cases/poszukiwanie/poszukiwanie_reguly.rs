@@ -1,12 +1,20 @@
 //! The kind `poszukiwanie-reguly` of the room `cases/poszukiwanie`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "poszukiwanie-reguly";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Reguły teczki poszukiwania na tabelach rdzenia: typ pokoju, etapy z przejściami, role, rodzaje
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "poszukiwanie-reguly",
+    requires: &[
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_rachunki::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umowy::KIND,
+        &super::sprawa_wyplaty::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Reguły teczki poszukiwania na tabelach rdzenia: typ pokoju, etapy z przejściami, role, rodzaje
 -- zgód, rodzaj umowy z biurem i zakaz pieniędzy. Rodzaj nie ma własnych tabel; wskazuje tylko
 -- rdzeń, więc jest pierwszym rodzajem typu.
 --
@@ -135,4 +143,5 @@ BEGIN
   SELECT RAISE(ABORT, 'teczka poszukiwania nie przyjmuje pieniędzy: nie ma rachunków ani wypłat');
 END;
 "#,
-];
+    ],
+};

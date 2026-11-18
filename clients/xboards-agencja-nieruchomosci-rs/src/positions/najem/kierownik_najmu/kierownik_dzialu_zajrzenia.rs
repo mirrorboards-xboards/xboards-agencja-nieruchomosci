@@ -1,12 +1,13 @@
 //! The kind `kierownik-dzialu-zajrzenia` of the room `positions/najem/kierownik_najmu`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-dzialu-zajrzenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Zajrzenia: każde zajrzenie kierownika do teczki, z powodem. Kierownik działu zagląda do teczki
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-dzialu-zajrzenia",
+    requires: &[&super::kierownik_dzialu_raporty::KIND],
+    migrations: &[
+        r#"-- Zajrzenia: każde zajrzenie kierownika do teczki, z powodem. Kierownik działu zagląda do teczki
 -- tylko z powodem, a zajrzenia są śladem dla właściciela i dla kontroli, więc się ich nie zmienia.
 --
 -- Wpis nie ma terminu przechowania: dopóki obowiązuje rozstrzygnięcie biura R9, biuro niczego nie
@@ -53,7 +54,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.powod`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -143,7 +145,7 @@ FROM kierownik_dzialu_zajrzenia_wpisy
 ORDER BY zajrzano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZajrzeniaRow::from_row).collect()
 }
 
@@ -192,7 +194,7 @@ ORDER BY zajrzano, id"#,
             ("zajrzano", xmeta_room::ToSqlValue::to_sql_value(&params.zajrzano)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZajrzeniaOdRow::from_row).collect()
 }
 
@@ -212,6 +214,7 @@ pub fn zapisz_zajrzenie(
     params: &ZapiszZajrzenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_zajrzenia_wpisy (teczka_odnosnik, zajrzano, powod, opis, raport_id)

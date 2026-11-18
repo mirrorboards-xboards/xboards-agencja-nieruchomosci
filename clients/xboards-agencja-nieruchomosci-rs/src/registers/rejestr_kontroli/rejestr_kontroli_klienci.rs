@@ -1,12 +1,13 @@
 //! The kind `rejestr-kontroli-klienci` of the room `registers/rejestr_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "rejestr-kontroli-klienci";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Klienci biura z Kontrolerem, ich stosunki gospodarcze i kwalifikacja każdej sprawy: czy jest
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "rejestr-kontroli-klienci",
+    requires: &[],
+    migrations: &[
+        r#"-- Klienci biura z Kontrolerem, ich stosunki gospodarcze i kwalifikacja każdej sprawy: czy jest
 -- objęta ustawą o przeciwdziałaniu praniu pieniędzy. Wpis stosunków powstaje przy weryfikacji
 -- przed pierwszą umową; klient, który wraca po zakończeniu stosunków, dostaje nowy wpis, a stary
 -- zostaje razem z jego terminem przechowywania.
@@ -164,7 +165,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `sprawy.rodzaj_sprawy`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -315,7 +317,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawyKlientaKontroliRow::from_row).collect()
 }
 
@@ -341,6 +343,7 @@ pub fn zakwalifikuj_sprawe(
     params: &ZakwalifikujSpraweParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_klienci_sprawy (klient_id, teczka_odnosnik, rodzaj_sprawy, objeta,
@@ -423,7 +426,7 @@ FROM rejestr_kontroli_klienci_wpisy
 ORDER BY wpisano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KlienciKontroliRow::from_row).collect()
 }
 
@@ -482,7 +485,7 @@ ORDER BY wpisano, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StosunkiKlientaZKartotekiRow::from_row).collect()
 }
 
@@ -507,6 +510,7 @@ pub fn wpisz_klienta_kontroli(
     params: &WpiszKlientaKontroliParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_klienci_wpisy (id, klient, kartoteka_odnosnik, kontroler, stosunki_od,
@@ -554,6 +558,7 @@ pub fn wpisz_odnosnik_do_kartoteki(
     params: &WpiszOdnosnikDoKartotekiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_klienci_wpisy
@@ -584,6 +589,7 @@ pub fn wpisz_nawiazanie_stosunkow(
     params: &WpiszNawiazanieStosunkowParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_klienci_wpisy
@@ -615,6 +621,7 @@ pub fn wpisz_zakonczenie_stosunkow(
     params: &WpiszZakonczenieStosunkowParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_klienci_wpisy

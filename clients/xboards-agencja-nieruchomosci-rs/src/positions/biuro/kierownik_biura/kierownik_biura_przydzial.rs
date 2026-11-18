@@ -1,12 +1,13 @@
 //! The kind `kierownik-biura-przydzial` of the room `positions/biuro/kierownik_biura`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-biura-przydzial";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Przydział nowych spraw: reguły, który rodzaj zgłoszenia trafia do którego działu, i przydziały
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-biura-przydzial",
+    requires: &[],
+    migrations: &[
+        r#"-- Przydział nowych spraw: reguły, który rodzaj zgłoszenia trafia do którego działu, i przydziały
 -- kart Recepcji z wynikiem sprawdzenia w kartotece klientów.
 --
 -- Regułę zatwierdza właściciel biura podpisem w wiadomości; kierownik przenosi podpis do wiersza,
@@ -223,7 +224,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `karty.rodzaj_karty`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -532,7 +534,7 @@ WHERE stan IN ('czeka', 'u_czlowieka')
 ORDER BY wplynela, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KartyDoRozstrzygnieciaRow::from_row).collect()
 }
 
@@ -608,7 +610,7 @@ WHERE stan IN ('przydzielona', 'odrzucona')
 ORDER BY rozstrzygnieto, id"#,
         parameters: Vec::from([("od", xmeta_room::ToSqlValue::to_sql_value(&params.od))]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KartyRozstrzygnieteOdRow::from_row).collect()
 }
 
@@ -631,6 +633,7 @@ pub fn przyjmij_karte(
     params: &PrzyjmijKarteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_biura_przydzial_karty (karta_odnosnik, wplynela, rodzaj_karty, rodzaj_sprawy,
@@ -684,6 +687,7 @@ pub fn odnotuj_sprawdzenie_kartoteki(
     params: &OdnotujSprawdzenieKartotekiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_przydzial_karty
@@ -725,6 +729,7 @@ pub fn przekaz_karte_czlowiekowi(
     params: &PrzekazKarteCzlowiekowiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_przydzial_karty
@@ -757,6 +762,7 @@ pub fn przydziel_karte(
     params: &PrzydzielKarteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_przydzial_karty
@@ -812,6 +818,7 @@ pub fn odrzuc_karte(
     params: &OdrzucKarteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_przydzial_karty
@@ -883,7 +890,7 @@ WHERE zastapiona_od IS NULL
 ORDER BY rodzaj_zgloszenia, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RegulyPrzydzialuRow::from_row).collect()
 }
 
@@ -925,7 +932,7 @@ FROM kierownik_biura_przydzial_reguly
 ORDER BY od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(HistoriaRegulRow::from_row).collect()
 }
 
@@ -946,6 +953,7 @@ pub fn zapisz_regule_przydzialu(
     params: &ZapiszRegulePrzydzialuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_biura_przydzial_reguly (rodzaj_zgloszenia, dzial, od, podpisal, podpis)
@@ -978,6 +986,7 @@ pub fn zastap_regule_przydzialu(
     params: &ZastapRegulePrzydzialuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_przydzial_reguly

@@ -1,12 +1,22 @@
 //! The kind `najem-czynsz` of the room `cases/najem`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "najem-czynsz";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Pieniądze i media najmu: należności z harmonogramu, wpłaty, ich rozliczenie na należności, zmiany
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "najem-czynsz",
+    requires: &[
+        &super::najem_umowy::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_nieruchomosci::KIND,
+        &super::sprawa_rachunki::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umowy::KIND,
+        &super::sprawa_wyplaty::KIND,
+    ],
+    migrations: &[
+        r#"-- Pieniądze i media najmu: należności z harmonogramu, wpłaty, ich rozliczenie na należności, zmiany
 -- czynszu, zaległości, odczyty liczników i dane o czynszu dla gminy. Kwoty, terminy, saldo
 -- i zaległości liczy program; Opiekun najmu wpisuje dane z umowy i wpłaty. Kwoty w groszach.
 --
@@ -622,7 +632,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `naleznosci.tytul`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -954,7 +965,7 @@ FROM najem_czynsz_dla_gminy
 ORDER BY okres, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DaneDlaGminyRow::from_row).collect()
 }
 
@@ -977,6 +988,7 @@ pub fn przygotuj_dane_dla_gminy(
     params: &PrzygotujDaneDlaGminyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_czynsz_dla_gminy (najem_id, okres, czynsz, gmina, rok_budowy, stan_techniczny,
@@ -1024,6 +1036,7 @@ pub fn popraw_dane_dla_gminy(
     params: &PoprawDaneDlaGminyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_czynsz_dla_gminy
@@ -1068,6 +1081,7 @@ pub fn odnotuj_oddanie_danych_dla_gminy(
     params: &OdnotujOddanieDanychDlaGminyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_czynsz_dla_gminy
@@ -1096,6 +1110,7 @@ pub fn odnotuj_wyslanie_danych_dla_gminy(
     params: &OdnotujWyslanieDanychDlaGminyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_czynsz_dla_gminy
@@ -1147,7 +1162,7 @@ FROM najem_czynsz_naleznosci
 ORDER BY termin, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NaleznosciNajmuRow::from_row).collect()
 }
 
@@ -1200,7 +1215,7 @@ GROUP BY naleznosc.id
 ORDER BY naleznosc.termin, naleznosc.id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SaldoNaleznosciRow::from_row).collect()
 }
 
@@ -1221,6 +1236,7 @@ pub fn wpisz_naleznosc(
     params: &WpiszNaleznoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_czynsz_naleznosci (id, najem_id, tytul, okres, kwota, termin)
@@ -1254,6 +1270,7 @@ pub fn popraw_naleznosc(
     params: &PoprawNaleznoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_czynsz_naleznosci
@@ -1313,7 +1330,7 @@ FROM najem_czynsz_odczyty
 ORDER BY licznik, chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OdczytyLicznikowRow::from_row).collect()
 }
 
@@ -1335,6 +1352,7 @@ pub fn wpisz_odczyt_licznika(
     params: &WpiszOdczytLicznikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_czynsz_odczyty (najem_id, licznik, numer, chwila, stan, zdjecie_sciezka,
@@ -1391,7 +1409,7 @@ FROM najem_czynsz_rozliczenia
 ORDER BY wplata_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RozliczeniaWplatRow::from_row).collect()
 }
 
@@ -1409,6 +1427,7 @@ pub fn rozlicz_wplate(
     params: &RozliczWplateParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_czynsz_rozliczenia (wplata_id, naleznosc_id, kwota)
@@ -1470,7 +1489,7 @@ FROM najem_czynsz_wplaty
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WplatyCzynszuRow::from_row).collect()
 }
 
@@ -1495,6 +1514,7 @@ pub fn wpisz_wplate_czynszu(
     params: &WpiszWplateCzynszuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_czynsz_wplaty (id, najem_id, chwila, kwota, placacy_uczestnik_id, na_rachunek,
@@ -1569,7 +1589,7 @@ FROM najem_czynsz_zaleglosci
 ORDER BY trzy_okresy_od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZaleglosciRow::from_row).collect()
 }
 
@@ -1587,6 +1607,7 @@ pub fn wpisz_zaleglosc(
     params: &WpiszZalegloscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_czynsz_zaleglosci (id, najem_id, trzy_okresy_od, wynik)
@@ -1617,6 +1638,7 @@ pub fn wskaz_uprzedzenie_o_zaleglosci(
     params: &WskazUprzedzenieOZaleglosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_czynsz_zaleglosci
@@ -1649,6 +1671,7 @@ pub fn ustal_dodatkowy_termin_zaleglosci(
     params: &UstalDodatkowyTerminZaleglosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_czynsz_zaleglosci
@@ -1679,6 +1702,7 @@ pub fn odnotuj_wynik_zaleglosci(
     params: &OdnotujWynikZaleglosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_czynsz_zaleglosci
@@ -1734,7 +1758,7 @@ FROM najem_czynsz_zmiany
 ORDER BY najem_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZmianyCzynszuRow::from_row).collect()
 }
 
@@ -1757,6 +1781,7 @@ pub fn wpisz_zmiane_czynszu(
     params: &WpiszZmianeCzynszuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_czynsz_zmiany (najem_id, stara, nowa, pismo_wysylka_id, doreczono, obowiazuje_od,

@@ -1,12 +1,13 @@
 //! The kind `sprawa-powiazania` of the room `cases/sprawa`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-powiazania";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Odnośniki do innych teczek i pokoi, np. z teczki transakcji do teczki oferty sprzedającego albo
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-powiazania",
+    requires: &[],
+    migrations: &[
+        r#"-- Odnośniki do innych teczek i pokoi, np. z teczki transakcji do teczki oferty sprzedającego albo
 -- do pokoju wymiany z kancelarią. Inny pokój wskazuje się tekstem, bo klucz obcy działa tylko
 -- w obrębie jednej bazy. Odnośnik nie daje dostępu do tamtej teczki (R1).
 --
@@ -52,7 +53,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -152,7 +154,7 @@ FROM sprawa_powiazania_wpisy
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PowiazaniaRow::from_row).collect()
 }
 
@@ -173,6 +175,7 @@ pub fn wpisz_powiazanie(
     params: &WpiszPowiazanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_powiazania_wpisy (rodzaj, typ_teczki, oznaczenie, odnosnik, wpisal, wpisano)

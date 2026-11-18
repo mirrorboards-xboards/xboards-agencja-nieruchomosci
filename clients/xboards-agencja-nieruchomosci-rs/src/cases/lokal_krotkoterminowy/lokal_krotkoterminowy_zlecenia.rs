@@ -1,12 +1,18 @@
 //! The kind `lokal-krotkoterminowy-zlecenia` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "lokal-krotkoterminowy-zlecenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Zlecenia dla wykonawców (sprzątanie, pranie, serwis, naprawy, przeglądy, zapasy, klucze,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "lokal-krotkoterminowy-zlecenia",
+    requires: &[
+        &super::lokal_krotkoterminowy_pobyty::KIND,
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Zlecenia dla wykonawców (sprzątanie, pranie, serwis, naprawy, przeglądy, zapasy, klucze,
 -- przyjęcie gości, wymiana zamka) i dostępy do lokalu: kody do zamków i klucze. Pisze Koordynator
 -- operacji obszaru. Wykonawcy i cenniki leżą w rejestrze wykonawców, więc zlecenie wskazuje je
 -- tekstem; wykonawcom płaci człowiek poza teczką. Wykonawca nie dostaje danych gości: pilnuje tego
@@ -375,7 +381,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `dostepy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -745,7 +752,7 @@ FROM lokal_krotkoterminowy_zlecenia_dostepy
 ORDER BY wazny_od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DostepyDoLokaluRow::from_row).collect()
 }
 
@@ -770,6 +777,7 @@ pub fn ustaw_dostep(
     params: &UstawDostepParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_zlecenia_dostepy (pobyt_id, zlecenie_id, rodzaj, kod, klucze_liczba,
@@ -818,6 +826,7 @@ pub fn odnotuj_wydanie_dostepu(
     params: &OdnotujWydanieDostepuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zlecenia_dostepy
@@ -845,6 +854,7 @@ pub fn odnotuj_odebranie_dostepu(
     params: &OdnotujOdebranieDostepuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zlecenia_dostepy
@@ -930,7 +940,7 @@ FROM lokal_krotkoterminowy_zlecenia_wpisy
 ORDER BY okno_od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZleceniaRow::from_row).collect()
 }
 
@@ -1006,7 +1016,7 @@ WHERE stan IN ('zlecone', 'wstrzymane')
 ORDER BY okno_od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZleceniaOtwarteRow::from_row).collect()
 }
 
@@ -1040,6 +1050,7 @@ pub fn zlec_prace(
     params: &ZlecPraceParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_zlecenia_wpisy (id, rodzaj, przyczyna, pobyt_id, zgloszenie_id,
@@ -1111,6 +1122,7 @@ pub fn zmien_stan_zlecenia(
     params: &ZmienStanZleceniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zlecenia_wpisy
@@ -1141,6 +1153,7 @@ pub fn potwierdz_wykonanie_zlecenia(
     params: &PotwierdzWykonanieZleceniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zlecenia_wpisy
@@ -1188,6 +1201,7 @@ pub fn wpisz_koszt_zlecenia(
     params: &WpiszKosztZleceniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zlecenia_wpisy

@@ -1,12 +1,13 @@
 //! The kind `rejestr-kontroli-organizacja` of the room `registers/rejestr_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "rejestr-kontroli-organizacja";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Organizacja Kontroli w biurze: kolejne wersje procedury wewnętrznej z akceptacją właściciela
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "rejestr-kontroli-organizacja",
+    requires: &[&super::rejestr_kontroli_decyzje::KIND],
+    migrations: &[
+        r#"-- Organizacja Kontroli w biurze: kolejne wersje procedury wewnętrznej z akceptacją właściciela
 -- biura (art. 50 AML), wyznaczenia osób z art. 6 i 8 AML i szkolenia (art. 52 AML). Biuro robi to
 -- raz dla całej działalności, więc rejestr jest jeden na biuro.
 --
@@ -202,7 +203,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wyznaczenia.funkcja`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -286,7 +288,7 @@ FROM rejestr_kontroli_organizacja_procedury
 ORDER BY wersja DESC"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ProceduryRow::from_row).collect()
 }
 
@@ -310,6 +312,7 @@ pub fn wpisz_procedure(
     params: &WpiszProcedureParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_organizacja_procedury (id, wersja, dokument_sciezka, dokument_skrot,
@@ -382,7 +385,7 @@ FROM rejestr_kontroli_organizacja_szkolenia
 ORDER BY odbyto DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SzkoleniaRow::from_row).collect()
 }
 
@@ -403,6 +406,7 @@ pub fn wpisz_szkolenie(
     params: &WpiszSzkolenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_organizacja_szkolenia (uczestnik, odbyto, temat, potwierdzil, wpisal,
@@ -466,7 +470,7 @@ FROM rejestr_kontroli_organizacja_wyznaczenia
 ORDER BY funkcja, od DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WyznaczeniaRow::from_row).collect()
 }
 
@@ -487,6 +491,7 @@ pub fn wpisz_wyznaczenie(
     params: &WpiszWyznaczenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_organizacja_wyznaczenia (funkcja, osoba, od, podstawa, wpisal, wpisano)
@@ -517,6 +522,7 @@ pub fn zakoncz_wyznaczenie(
     params: &ZakonczWyznaczenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_organizacja_wyznaczenia

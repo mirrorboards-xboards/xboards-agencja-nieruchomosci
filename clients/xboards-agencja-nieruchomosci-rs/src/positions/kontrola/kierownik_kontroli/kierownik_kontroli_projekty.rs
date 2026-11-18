@@ -1,12 +1,13 @@
 //! The kind `kierownik-kontroli-projekty` of the room `positions/kontrola/kierownik_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-kontroli-projekty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Projekty zawiadomień do Generalnego Inspektora Informacji Finansowej (art. 74, 86 i 90 AML)
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-kontroli-projekty",
+    requires: &[],
+    migrations: &[
+        r#"-- Projekty zawiadomień do Generalnego Inspektora Informacji Finansowej (art. 74, 86 i 90 AML)
 -- i do prokuratora (art. 89 AML), z terminem, stanem i odwołaniem do wpisów w rejestrze kontroli,
 -- na których stoją.
 --
@@ -149,7 +150,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -292,7 +294,7 @@ ORDER BY id"#,
             ("projekt_id", xmeta_room::ToSqlValue::to_sql_value(&params.projekt_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PodstawyProjektuRow::from_row).collect()
 }
 
@@ -309,6 +311,7 @@ pub fn dopisz_podstawe(
     params: &DopiszPodstaweParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_kontroli_projekty_podstawy (projekt_id, rejestr_odnosnik)
@@ -380,7 +383,7 @@ WHERE stan IN ('projekt', 'u_wlasciciela')
 ORDER BY termin, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ProjektyWTokuRow::from_row).collect()
 }
 
@@ -435,7 +438,7 @@ FROM kierownik_kontroli_projekty_wpisy
 ORDER BY utworzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ProjektyRow::from_row).collect()
 }
 
@@ -456,6 +459,7 @@ pub fn utworz_projekt(
     params: &UtworzProjektParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_kontroli_projekty_wpisy (rodzaj, teczka_odnosnik, termin, utworzono, stan,
@@ -495,6 +499,7 @@ pub fn zmien_projekt(
     params: &ZmienProjektParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_projekty_wpisy
@@ -526,6 +531,7 @@ pub fn daj_projekt_wlascicielowi(
     params: &DajProjektWlascicielowiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_projekty_wpisy
@@ -556,6 +562,7 @@ pub fn cofnij_projekt_do_poprawy(
     params: &CofnijProjektDoPoprawyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_projekty_wpisy
@@ -584,6 +591,7 @@ pub fn odnotuj_przekazanie_zawiadomienia(
     params: &OdnotujPrzekazanieZawiadomieniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_projekty_wpisy
@@ -624,6 +632,7 @@ pub fn odnotuj_odstapienie(
     params: &OdnotujOdstapienieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_projekty_wpisy

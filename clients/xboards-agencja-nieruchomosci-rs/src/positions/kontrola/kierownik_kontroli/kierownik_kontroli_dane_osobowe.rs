@@ -1,12 +1,13 @@
 //! The kind `kierownik-kontroli-dane-osobowe` of the room `positions/kontrola/kierownik_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-kontroli-dane-osobowe";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Dane osobowe: prośby osób o ich dane (art. 15–18, 20 i 21 RODO) i zgłoszone naruszenia ochrony
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-kontroli-dane-osobowe",
+    requires: &[],
+    migrations: &[
+        r#"-- Dane osobowe: prośby osób o ich dane (art. 15–18, 20 i 21 RODO) i zgłoszone naruszenia ochrony
 -- danych, z datą, terminem, stanem i odwołaniem do odpowiedzi właściciela. Kierownik przygotowuje
 -- odpowiedź albo opis naruszenia, a załatwia sprawę właściciel.
 --
@@ -77,7 +78,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -228,7 +230,7 @@ FROM kierownik_kontroli_dane_osobowe_wpisy
 ORDER BY stan = 'zalatwiona', CASE WHEN stan <> 'zalatwiona' THEN termin END, wplynelo DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawyDanychOsobowychRow::from_row).collect()
 }
 
@@ -247,6 +249,7 @@ pub fn zapisz_sprawe_danych_osobowych(
     params: &ZapiszSpraweDanychOsobowychParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_kontroli_dane_osobowe_wpisy (rodzaj, wplynelo, wplyw_odnosnik, termin, stan)
@@ -277,6 +280,7 @@ pub fn daj_sprawe_wlascicielowi(
     params: &DajSpraweWlascicielowiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_dane_osobowe_wpisy
@@ -304,6 +308,7 @@ pub fn odnotuj_zalatwienie(
     params: &OdnotujZalatwienieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_dane_osobowe_wpisy

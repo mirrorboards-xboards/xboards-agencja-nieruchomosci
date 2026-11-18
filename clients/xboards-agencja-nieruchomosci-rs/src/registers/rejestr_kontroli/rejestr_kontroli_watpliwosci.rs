@@ -1,12 +1,16 @@
 //! The kind `rejestr-kontroli-watpliwosci` of the room `registers/rejestr_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "rejestr-kontroli-watpliwosci";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Wątpliwości Kontrolerów z powodem, którego nie ma w teczce, i decyzja człowieka, która wątpliwość
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "rejestr-kontroli-watpliwosci",
+    requires: &[
+        &super::rejestr_kontroli_decyzje::KIND,
+        &super::rejestr_kontroli_klienci::KIND,
+    ],
+    migrations: &[
+        r#"-- Wątpliwości Kontrolerów z powodem, którego nie ma w teczce, i decyzja człowieka, która wątpliwość
 -- zdjęła, oraz niemożność zastosowania środka bezpieczeństwa finansowego. Teczka ma tylko znacznik
 -- (art. 54 ust. 1 AML); powód i uzasadnienie zdjęcia są wyłącznie tutaj.
 --
@@ -156,7 +160,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `niemoznosci.srodek`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -264,7 +269,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NiemoznosciKlientaRow::from_row).collect()
 }
 
@@ -288,6 +293,7 @@ pub fn wpisz_niemoznosc(
     params: &WpiszNiemoznoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_watpliwosci_niemoznosci (klient_id, srodek, opis, decyzja_id,
@@ -366,7 +372,7 @@ FROM rejestr_kontroli_watpliwosci_wpisy
 ORDER BY zgloszono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WatpliwosciRow::from_row).collect()
 }
 
@@ -392,6 +398,7 @@ pub fn wpisz_watpliwosc(
     params: &WpiszWatpliwoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_watpliwosci_wpisy (id, teczka_odnosnik, znacznik_odnosnik, klient_id,
@@ -443,6 +450,7 @@ pub fn wpisz_zdjecie_watpliwosci(
     params: &WpiszZdjecieWatpliwosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_watpliwosci_wpisy

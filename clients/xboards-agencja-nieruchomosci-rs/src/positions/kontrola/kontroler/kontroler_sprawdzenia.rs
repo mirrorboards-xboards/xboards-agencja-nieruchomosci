@@ -1,12 +1,13 @@
 //! The kind `kontroler-sprawdzenia` of the room `positions/kontrola/kontroler`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kontroler-sprawdzenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Sprawdzenia: każde sprawdzenie Kontrolera z przeciwdziałania praniu pieniędzy osobno, np. tożsamość
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kontroler-sprawdzenia",
+    requires: &[&super::stanowisko_zrodla::KIND],
+    migrations: &[
+        r#"-- Sprawdzenia: każde sprawdzenie Kontrolera z przeciwdziałania praniu pieniędzy osobno, np. tożsamość
 -- klientki przed umową pośrednictwa, beneficjenci spółki kupującej albo lista sankcyjna. Leżą
 -- w pamięci, a nie w teczce, bo teczkę czytają agenci, którzy rozmawiają z klientami. Sprawdzenia
 -- spoza przeciwdziałania praniu pieniędzy (rachunek, tytuł, pełnomocnictwo) leżą w teczce.
@@ -158,7 +159,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -389,7 +391,7 @@ WHERE zastapione_przez_id IS NULL
 ORDER BY sprawdzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaRow::from_row).collect()
 }
 
@@ -464,7 +466,7 @@ ORDER BY sprawdzono, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaTeczkiRow::from_row).collect()
 }
 
@@ -527,7 +529,7 @@ WHERE przekazano IS NULL
 ORDER BY sprawdzono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaDoPrzekazaniaRow::from_row).collect()
 }
 
@@ -557,6 +559,7 @@ pub fn zapisz_sprawdzenie(
     params: &ZapiszSprawdzenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kontroler_sprawdzenia_wpisy (id, rodzaj, teczka_odnosnik, dotyczy_tabela,
@@ -622,6 +625,7 @@ pub fn odnotuj_przekazanie_sprawdzenia(
     params: &OdnotujPrzekazanieSprawdzeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kontroler_sprawdzenia_wpisy
@@ -653,6 +657,7 @@ pub fn odnotuj_wpis_sprawdzenia_w_rejestrze(
     params: &OdnotujWpisSprawdzeniaWRejestrzeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kontroler_sprawdzenia_wpisy
@@ -686,6 +691,7 @@ pub fn zastap_sprawdzenie(
     params: &ZastapSprawdzenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kontroler_sprawdzenia_wpisy

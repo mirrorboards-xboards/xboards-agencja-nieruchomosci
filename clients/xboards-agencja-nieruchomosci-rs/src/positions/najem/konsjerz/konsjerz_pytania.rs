@@ -1,12 +1,13 @@
 //! The kind `konsjerz-pytania` of the room `positions/najem/konsjerz`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "konsjerz-pytania";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Pytania gości: o co goście tego lokalu pytają i jaka odpowiedź im pomogła, np. że wjazd do garażu
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "konsjerz-pytania",
+    requires: &[],
+    migrations: &[
+        r#"-- Pytania gości: o co goście tego lokalu pytają i jaka odpowiedź im pomogła, np. że wjazd do garażu
 -- jest od ul. Bocznej. Z tych wpisów Konsjerż proponuje Zarządcy zmiany w opisie lokalu; propozycja
 -- idzie notatką w teczce lokalu, a wprowadza ją Zarządca.
 --
@@ -151,7 +152,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// A row of `pytania_gosci`.
 #[derive(Debug, Clone, PartialEq)]
@@ -200,7 +202,7 @@ GROUP BY pytanie.id
 ORDER BY wystapienia DESC, pytanie.temat, pytanie.id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PytaniaGosciRow::from_row).collect()
 }
 
@@ -218,6 +220,7 @@ pub fn zapisz_pytanie(
     params: &ZapiszPytanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO konsjerz_pytania_wpisy (temat, odpowiedz, zapisano)
@@ -248,6 +251,7 @@ pub fn zastap_odpowiedz(
     params: &ZastapOdpowiedzParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE konsjerz_pytania_wpisy
@@ -279,6 +283,7 @@ pub fn odnotuj_propozycje_opisu(
     params: &OdnotujPropozycjeOpisuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE konsjerz_pytania_wpisy
@@ -316,6 +321,7 @@ pub fn dopisz_wystapienie_pytania(
     params: &DopiszWystapieniePytaniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO konsjerz_pytania_wystapienia (pytanie_id, zadano)
@@ -345,6 +351,7 @@ pub fn odnotuj_czy_odpowiedz_pomogla(
     params: &OdnotujCzyOdpowiedzPomoglaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE konsjerz_pytania_wystapienia

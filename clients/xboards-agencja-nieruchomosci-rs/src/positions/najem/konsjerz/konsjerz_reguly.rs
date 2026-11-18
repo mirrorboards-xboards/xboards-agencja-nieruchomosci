@@ -1,12 +1,13 @@
 //! The kind `konsjerz-reguly` of the room `positions/najem/konsjerz`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "konsjerz-reguly";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Reguły Konsjerża na tabelach pamięci wspólnej. Rodzaj nie ma własnych tabel.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "konsjerz-reguly",
+    requires: &[&super::stanowisko_zrodla::KIND],
+    migrations: &[
+        r#"-- Reguły Konsjerża na tabelach pamięci wspólnej. Rodzaj nie ma własnych tabel.
 --
 -- Konsjerż ocenia rzetelność rodzaju zgłoszenia, np. „brak ciepłej wody”, a nie konkretnego gościa
 -- (D14). Lokal ma wielu gości, więc źródło o rodzaju osoba zrobiłoby z pamięci kartotekę gości.
@@ -19,4 +20,5 @@ BEGIN
   SELECT RAISE(ABORT, 'Konsjerż ocenia rodzaj zgłoszenia, a nie gościa; źródło nie jest osobą');
 END;
 "#,
-];
+    ],
+};

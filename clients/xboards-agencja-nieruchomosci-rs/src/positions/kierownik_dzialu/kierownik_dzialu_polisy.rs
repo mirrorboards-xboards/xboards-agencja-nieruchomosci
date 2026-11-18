@@ -1,12 +1,13 @@
 //! The kind `kierownik-dzialu-polisy` of the room `positions/kierownik_dzialu`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-dzialu-polisy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Rozesłanie polisy: które umowy pośrednictwa albo o zarządzanie dostały kopię nowej polisy i kiedy.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-dzialu-polisy",
+    requires: &[&super::kierownik_dzialu_raporty::KIND],
+    migrations: &[
+        r#"-- Rozesłanie polisy: które umowy pośrednictwa albo o zarządzanie dostały kopię nowej polisy i kiedy.
 -- Biuro niezwłocznie przekazuje klientowi kopię nowej polisy (art. 181 ust. 3a i art. 186 ust. 3a
 -- ugn), a kierownik działu poleca to każdemu agentowi z otwartą umową. Wiersz powstaje z raportu
 -- agenta, który kopię wysłał.
@@ -58,7 +59,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The parameters of `rozeslania_polisy`.
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -105,7 +107,7 @@ ORDER BY rozeslano, id"#,
             ("polisa_numer", xmeta_room::ToSqlValue::to_sql_value(&params.polisa_numer)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RozeslaniaPolisyRow::from_row).collect()
 }
 
@@ -125,6 +127,7 @@ pub fn odnotuj_rozeslanie_polisy(
     params: &OdnotujRozeslaniePolisyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_polisy_rozeslania (polisa_numer, polisa_odnosnik, umowa_odnosnik, raport_id,

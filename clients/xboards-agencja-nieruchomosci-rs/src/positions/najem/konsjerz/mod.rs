@@ -6,17 +6,16 @@ pub mod stanowisko_ustalenia;
 pub mod konsjerz_pytania;
 pub mod konsjerz_reguly;
 
-/// The kinds of the room with their migrations, a kind after the kinds it requires.
-pub const KINDS: &[(&str, &[&str])] = &[
-    (stanowisko_polecenia::KIND, stanowisko_polecenia::MIGRATIONS),
-    (stanowisko_zrodla::KIND, stanowisko_zrodla::MIGRATIONS),
-    (stanowisko_ustalenia::KIND, stanowisko_ustalenia::MIGRATIONS),
-    (konsjerz_pytania::KIND, konsjerz_pytania::MIGRATIONS),
-    (konsjerz_reguly::KIND, konsjerz_reguly::MIGRATIONS),
+/// The kinds of the room, a kind after the kinds it requires.
+pub const KINDS: &[&xmeta_room::Kind] = &[
+    &stanowisko_polecenia::KIND,
+    &stanowisko_zrodla::KIND,
+    &stanowisko_ustalenia::KIND,
+    &konsjerz_pytania::KIND,
+    &konsjerz_reguly::KIND,
 ];
 
 /// A new room on SQLite in memory with every migration of its kinds, for scenarios.
 pub fn open_in_memory() -> Result<xmeta_room::MemoryRoom, xmeta_room::RoomError> {
-    let migrations = KINDS.iter().flat_map(|(_, migrations)| migrations.iter().copied());
-    xmeta_room::MemoryRoom::open(migrations)
+    xmeta_room::MemoryRoom::open(KINDS)
 }

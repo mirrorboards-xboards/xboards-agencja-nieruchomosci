@@ -10,7 +10,7 @@
 use std::path::Path;
 
 use xboards_agencja_nieruchomosci::positions::{najem, posrednictwo, transakcje};
-use xboards_agencja_nieruchomosci::xmeta_room::{FromSqlValue, MemoryRoom};
+use xboards_agencja_nieruchomosci::xmeta_room::{FromSqlValue, Kind, MemoryRoom};
 
 use crate::stanowisko::full_memory;
 
@@ -48,8 +48,8 @@ fn tables_of(room: &MemoryRoom) -> Vec<String> {
 /// Checks that the position has no kinds of its own, that its room holds exactly the declared
 /// kinds and their tables, and that full memory puts one row in every table.
 #[track_caller]
-fn room_has_declared_kinds(position: &str, room: &MemoryRoom, kinds: &[(&str, &[&str])]) {
-    let mut declared: Vec<&str> = kinds.iter().map(|(kind, _)| *kind).collect();
+fn room_has_declared_kinds(position: &str, room: &MemoryRoom, kinds: &[&Kind]) {
+    let mut declared: Vec<&str> = kinds.iter().map(|kind| kind.name).collect();
     declared.sort();
     assert_eq!(declared, DECLARED_KINDS, "{position}");
 

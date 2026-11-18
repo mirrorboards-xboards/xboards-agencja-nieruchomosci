@@ -1,12 +1,13 @@
 //! The kind `oferta-zainteresowani` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "oferta-zainteresowani";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Zainteresowani ofertą: osoby, które pytają i oglądają, ich zapytania i prezentacje. Pisze
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "oferta-zainteresowani",
+    requires: &[&super::sprawa_korespondencja::KIND, &super::sprawa_umowy::KIND],
+    migrations: &[
+        r#"-- Zainteresowani ofertą: osoby, które pytają i oglądają, ich zapytania i prezentacje. Pisze
 -- Opiekun oferty.
 --
 -- Zainteresowany nie jest uczestnikiem rdzenia: rdzeń wymaga nazwiska i danych osoby, a profil
@@ -299,7 +300,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `osoby.dziala_jako`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -440,7 +442,7 @@ FROM oferta_zainteresowani_osoby
 ORDER BY dane_pozyskano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZainteresowaniRow::from_row).collect()
 }
 
@@ -468,6 +470,7 @@ pub fn wpisz_zainteresowanego(
     params: &WpiszZainteresowanegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_zainteresowani_osoby (id, imie, nazwisko, telefon, email, dziala_jako, biuro,
@@ -522,6 +525,7 @@ pub fn zmien_kontakt_zainteresowanego(
     params: &ZmienKontaktZainteresowanegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_zainteresowani_osoby
@@ -553,6 +557,7 @@ pub fn odnotuj_informacje_dla_zainteresowanego(
     params: &OdnotujInformacjeDlaZainteresowanegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_zainteresowani_osoby
@@ -620,7 +625,7 @@ FROM oferta_zainteresowani_prezentacje
 ORDER BY termin, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PrezentacjeRow::from_row).collect()
 }
 
@@ -657,7 +662,7 @@ FROM oferta_zainteresowani_prezentacje_uczestnicy
 ORDER BY prezentacja_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UczestnicyPrezentacjiRow::from_row).collect()
 }
 
@@ -678,6 +683,7 @@ pub fn umow_prezentacje(
     params: &UmowPrezentacjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_zainteresowani_prezentacje (id, termin, posrednik, kalendarz_odnosnik, otwiera)
@@ -714,6 +720,7 @@ pub fn dopisz_uczestnika_prezentacji(
     params: &DopiszUczestnikaPrezentacjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_zainteresowani_prezentacje_uczestnicy (prezentacja_id, osoba_id, adres_podano)
@@ -747,6 +754,7 @@ pub fn odnotuj_podanie_adresu(
     params: &OdnotujPodanieAdresuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_zainteresowani_prezentacje_uczestnicy
@@ -777,6 +785,7 @@ pub fn odnotuj_obecnosc_na_prezentacji(
     params: &OdnotujObecnoscNaPrezentacjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_zainteresowani_prezentacje_uczestnicy
@@ -807,6 +816,7 @@ pub fn odnotuj_przebieg_prezentacji(
     params: &OdnotujPrzebiegPrezentacjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_zainteresowani_prezentacje
@@ -836,6 +846,7 @@ pub fn odwolaj_prezentacje(
     params: &OdwolajPrezentacjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_zainteresowani_prezentacje
@@ -890,7 +901,7 @@ FROM oferta_zainteresowani_zapytania
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZapytaniaRow::from_row).collect()
 }
 
@@ -907,6 +918,7 @@ pub fn wpisz_zapytanie(
     params: &WpiszZapytanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_zainteresowani_zapytania (osoba_id, wplyw_id)
@@ -933,6 +945,7 @@ pub fn odnotuj_odpowiedz_na_zapytanie(
     params: &OdnotujOdpowiedzNaZapytanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_zainteresowani_zapytania
@@ -965,6 +978,7 @@ pub fn odnotuj_wynik_zapytania(
     params: &OdnotujWynikZapytaniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_zainteresowani_zapytania

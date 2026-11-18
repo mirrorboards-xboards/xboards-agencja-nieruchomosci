@@ -1,12 +1,13 @@
 //! The kind `sprawa-terminy` of the room `cases/najem`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-terminy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Terminy sprawy: ustawowe z podstawą prawną, z umów i wewnętrzne biura. Liczy je program,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-terminy",
+    requires: &[&super::sprawa_decyzje::KIND],
+    migrations: &[
+        r#"-- Terminy sprawy: ustawowe z podstawą prawną, z umów i wewnętrzne biura. Liczy je program,
 -- a wpisuje i pilnuje agent sprawy, który ma termin w swoim profilu. Umówiony termin, np. akt,
 -- ma wydarzenie w kalendarzu biura, a gdy profil wymaga zgody, wskazuje decyzję
 -- potwierdzenie_terminu. Znacznik wątpliwości blokuje tę zgodę (trigger w sprawa-metryka).
@@ -102,7 +103,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -362,7 +364,7 @@ FROM sprawa_terminy_wpisy
 ORDER BY koniec, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(TerminyRow::from_row).collect()
 }
 
@@ -414,7 +416,7 @@ WHERE stan = 'biegnie'
 ORDER BY koniec, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(TerminyBiegnaceRow::from_row).collect()
 }
 
@@ -439,6 +441,7 @@ pub fn wpisz_termin(
     params: &WpiszTerminParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_terminy_wpisy (id, rodzaj, co, zdarzenie_tabela, zdarzenie_id, zdarzenie_chwila,
@@ -495,6 +498,7 @@ pub fn przelicz_termin(
     params: &PrzeliczTerminParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_terminy_wpisy
@@ -542,6 +546,7 @@ pub fn zmien_stan_terminu(
     params: &ZmienStanTerminuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_terminy_wpisy
@@ -569,6 +574,7 @@ pub fn odnotuj_potwierdzenie_terminu(
     params: &OdnotujPotwierdzenieTerminuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_terminy_wpisy

@@ -1,12 +1,13 @@
 //! The kind `sprawa-metryka` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-metryka";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Metryka teczki: jeden wiersz na teczkę, dziennik etapów i znaczniki wątpliwości Kontrolerów.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-metryka",
+    requires: &[&super::sprawa_decyzje::KIND],
+    migrations: &[
+        r#"-- Metryka teczki: jeden wiersz na teczkę, dziennik etapów i znaczniki wątpliwości Kontrolerów.
 -- Metrykę zakłada człowiek, który przyjmuje sprawę i jest właścicielem teczki. Etap zmienia agent
 -- sprawy, a znacznik stawia Kontroler. Dział nie ma kolumny, bo wynika z typu teczki.
 --
@@ -295,7 +296,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// A row of `etapy`.
 #[derive(Debug, Clone, PartialEq)]
@@ -330,7 +332,7 @@ FROM sprawa_metryka_etapy
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(EtapyRow::from_row).collect()
 }
 
@@ -368,7 +370,7 @@ ORDER BY id DESC
 LIMIT 1"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(BiezacyEtapRow::from_row).transpose()
 }
 
@@ -389,6 +391,7 @@ pub fn zmien_etap_sprawy(
     params: &ZmienEtapSprawyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_metryka_etapy (etap, od, zmienil, decyzja_id)
@@ -438,7 +441,7 @@ FROM sprawa_metryka_watpliwosci
 ORDER BY postawiono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WatpliwosciRow::from_row).collect()
 }
 
@@ -474,7 +477,7 @@ WHERE zdjecie_decyzja_id IS NULL
 ORDER BY postawiono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WatpliwosciStojaceRow::from_row).collect()
 }
 
@@ -492,6 +495,7 @@ pub fn postaw_watpliwosc(
     params: &PostawWatpliwoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_metryka_watpliwosci (id, postawil, postawiono)
@@ -522,6 +526,7 @@ pub fn zdejmij_watpliwosc(
     params: &ZdejmijWatpliwoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_metryka_watpliwosci
@@ -572,7 +577,7 @@ FROM sprawa_metryka_wpis
 WHERE id = 1"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(MetrykaRow::from_row).transpose()
 }
 
@@ -591,6 +596,7 @@ pub fn zaloz_metryke(
     params: &ZalozMetrykeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_metryka_wpis (id, oznaczenie, typ_pokoju, przyjal, przyjeto)

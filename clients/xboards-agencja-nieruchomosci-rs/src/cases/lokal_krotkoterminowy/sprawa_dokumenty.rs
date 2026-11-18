@@ -1,12 +1,13 @@
 //! The kind `sprawa-dokumenty` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-dokumenty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Dokumenty teczki, od wymaganego do sprawdzonego, i źródła danych. Typ sprawy mówi, jakie
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-dokumenty",
+    requires: &[&super::sprawa_nieruchomosci::KIND, &super::sprawa_uczestnicy::KIND],
+    migrations: &[
+        r#"-- Dokumenty teczki, od wymaganego do sprawdzonego, i źródła danych. Typ sprawy mówi, jakie
 -- dokumenty są w nim potrzebne. Plik leży w repozytorium XGit pokoju, a tabela trzyma jego ścieżkę
 -- i skrót treści, który obejmuje podpis decyzji. Dokumenty prowadzi agent sprawy.
 --
@@ -145,7 +146,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -602,7 +604,7 @@ FROM sprawa_dokumenty_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DokumentyRow::from_row).collect()
 }
 
@@ -664,7 +666,7 @@ WHERE stan IN ('wymagany', 'zamowiony')
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DokumentyDoZebraniaRow::from_row).collect()
 }
 
@@ -685,6 +687,7 @@ pub fn wpisz_wymagany_dokument(
     params: &WpiszWymaganyDokumentParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_dokumenty_wpisy (id, rodzaj, nazwa, dotyczy_uczestnik_id,
@@ -725,6 +728,7 @@ pub fn odnotuj_zamowienie_dokumentu(
     params: &OdnotujZamowienieDokumentuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_dokumenty_wpisy
@@ -764,6 +768,7 @@ pub fn wpisz_otrzymany_dokument(
     params: &WpiszOtrzymanyDokumentParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_dokumenty_wpisy (id, rodzaj, nazwa, dotyczy_uczestnik_id,
@@ -837,6 +842,7 @@ pub fn odnotuj_otrzymanie_dokumentu(
     params: &OdnotujOtrzymanieDokumentuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_dokumenty_wpisy
@@ -892,6 +898,7 @@ pub fn oznacz_dokument_jako_sprawdzony(
     params: &OznaczDokumentJakoSprawdzonyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_dokumenty_wpisy
@@ -918,6 +925,7 @@ pub fn odrzuc_dokument(
     params: &OdrzucDokumentParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_dokumenty_wpisy
@@ -948,6 +956,7 @@ pub fn uznaj_dokument_za_zbedny(
     params: &UznajDokumentZaZbednyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_dokumenty_wpisy
@@ -1002,7 +1011,7 @@ FROM sprawa_dokumenty_zrodla
 ORDER BY dotyczy_tabela, dotyczy_id, pole, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZrodlaRow::from_row).collect()
 }
 
@@ -1063,7 +1072,7 @@ ORDER BY pole, id DESC"#,
             ("dotyczy_id", xmeta_room::ToSqlValue::to_sql_value(&params.dotyczy_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZrodlaWierszaRow::from_row).collect()
 }
 
@@ -1086,6 +1095,7 @@ pub fn wpisz_zrodlo(
     params: &WpiszZrodloParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_dokumenty_zrodla (dotyczy_tabela, dotyczy_id, pole, dokument_id, od_uczestnik_id,
@@ -1134,6 +1144,7 @@ pub fn potwierdz_zrodlo(
     params: &PotwierdzZrodloParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_dokumenty_zrodla

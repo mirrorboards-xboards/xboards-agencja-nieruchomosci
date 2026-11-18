@@ -1,12 +1,20 @@
 //! The kind `najem-usterki` of the room `cases/najem`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "najem-usterki";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Usterki i przeglądy lokalu w czasie najmu. Zgłoszenie przychodzi do Opiekuna najmu wprost albo
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "najem-usterki",
+    requires: &[
+        &super::najem_umowy::KIND,
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Usterki i przeglądy lokalu w czasie najmu. Zgłoszenie przychodzi do Opiekuna najmu wprost albo
 -- przez Recepcję. Opiekun proponuje, kogo obciąża naprawa, według umowy i przepisów (art. 662,
 -- 663 i 681 KC, art. 6a i 6b UOPL); gdy strony się spierają, rozstrzyga człowiek. Naprawę zleca
 -- człowiek z biura: do kwoty napraw z bieżących warunków zarządzania bez pytania wynajmującego,
@@ -222,7 +230,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `zgloszenia.obciaza`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -302,7 +311,7 @@ FROM najem_usterki_przeglady
 ORDER BY data, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PrzegladyRow::from_row).collect()
 }
 
@@ -320,6 +329,7 @@ pub fn wpisz_przeglad(
     params: &WpiszPrzegladParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_usterki_przeglady (data, wynik, dokument_id)
@@ -396,7 +406,7 @@ FROM najem_usterki_zgloszenia
 ORDER BY chwila DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UsterkiRow::from_row).collect()
 }
 
@@ -421,6 +431,7 @@ pub fn zglos_usterke(
     params: &ZglosUsterkeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_usterki_zgloszenia (id, chwila, zglosil_uczestnik_id, wplyw_id, opis,
@@ -471,6 +482,7 @@ pub fn ustal_kogo_obciaza_usterka(
     params: &UstalKogoObciazaUsterkaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_usterki_zgloszenia
@@ -509,6 +521,7 @@ pub fn zlec_naprawe_usterki(
     params: &ZlecNapraweUsterkiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_usterki_zgloszenia
@@ -558,6 +571,7 @@ pub fn odnotuj_usuniecie_usterki(
     params: &OdnotujUsuniecieUsterkiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_usterki_zgloszenia

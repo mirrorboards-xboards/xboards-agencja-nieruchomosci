@@ -1,12 +1,13 @@
 //! The kind `kierownik-biura-nieobecnosci` of the room `positions/biuro/kierownik_biura`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-biura-nieobecnosci";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Nieobecności i zastępcy: kto jest nieobecny, od kiedy do kiedy i kto dostaje w tym czasie jego
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-biura-nieobecnosci",
+    requires: &[],
+    migrations: &[
+        r#"-- Nieobecności i zastępcy: kto jest nieobecny, od kiedy do kiedy i kto dostaje w tym czasie jego
 -- listę decyzji, z odwołaniem do wiadomości, którą to zgłoszono.
 --
 -- Kierownik przyjmuje nieobecność tylko z podpisem człowieka, którego dotyczy, albo właściciela
@@ -100,7 +101,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.podpisal_jako`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -206,7 +208,7 @@ ORDER BY czlowiek, id"#,
             ("dzien", xmeta_room::ToSqlValue::to_sql_value(&params.dzien)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NieobecnosciWDniuRow::from_row).collect()
 }
 
@@ -267,7 +269,7 @@ WHERE do_dnia >= :od
 ORDER BY od_dnia, id"#,
         parameters: Vec::from([("od", xmeta_room::ToSqlValue::to_sql_value(&params.od))]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NieobecnosciOdRow::from_row).collect()
 }
 
@@ -291,6 +293,7 @@ pub fn zapisz_nieobecnosc(
     params: &ZapiszNieobecnoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_biura_nieobecnosci_wpisy (czlowiek, od_dnia, do_dnia, zastepca, podpisal,
@@ -334,6 +337,7 @@ pub fn odwolaj_nieobecnosc(
     params: &OdwolajNieobecnoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_nieobecnosci_wpisy

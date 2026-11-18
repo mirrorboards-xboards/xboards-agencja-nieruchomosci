@@ -1,12 +1,21 @@
 //! The kind `poszukiwanie-oferty` of the room `cases/poszukiwanie`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "poszukiwanie-oferty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Oferty klienta i odpowiedzi drugiej strony jako łańcuch wpisów (art. 66 i 68 KC), na wzór
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "poszukiwanie-oferty",
+    requires: &[
+        &super::poszukiwanie_profile::KIND,
+        &super::poszukiwanie_propozycje::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umowy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Oferty klienta i odpowiedzi drugiej strony jako łańcuch wpisów (art. 66 i 68 KC), na wzór
 -- oferta-oferty ze stroną odwrotną. Pisze Opiekun poszukującego. Kwoty w groszach. Żadnego wpisu
 -- się nie zmienia; odpowiedź ze zmianą warunków jest nowym wpisem, który wskazuje ofertę, na którą
 -- odpowiada.
@@ -290,7 +299,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.dotyczy`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -540,7 +550,7 @@ FROM poszukiwanie_oferty_wpisy
 ORDER BY wpisano, rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OfertyKlientaRow::from_row).collect()
 }
 
@@ -571,6 +581,7 @@ pub fn przygotuj_oferte_klienta(
     params: &PrzygotujOferteKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_oferty_wpisy (id, dotyczy, kierunek, propozycja_id, adresat,
@@ -639,6 +650,7 @@ pub fn potwierdz_oferte_klienta(
     params: &PotwierdzOferteKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_oferty_wpisy
@@ -667,6 +679,7 @@ pub fn wskaz_wysylke_oferty_klienta(
     params: &WskazWysylkeOfertyKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_oferty_wpisy
@@ -700,6 +713,7 @@ pub fn odnotuj_odpowiedz_drugiej_strony(
     params: &OdnotujOdpowiedzDrugiejStronyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_oferty_wpisy
@@ -757,6 +771,7 @@ pub fn wpisz_kontroferte_drugiej_strony(
     params: &WpiszKontroferteDrugiejStronyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_oferty_wpisy (id, dotyczy, kierunek, propozycja_id, adresat,
@@ -826,6 +841,7 @@ pub fn odnotuj_przedstawienie_kontroferty(
     params: &OdnotujPrzedstawienieKontrofertyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_oferty_wpisy
@@ -858,6 +874,7 @@ pub fn odnotuj_decyzje_klienta_o_kontrofercie(
     params: &OdnotujDecyzjeKlientaOKontrofercieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_oferty_wpisy
@@ -891,6 +908,7 @@ pub fn wskaz_odpowiedz_na_kontroferte(
     params: &WskazOdpowiedzNaKontroferteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_oferty_wpisy

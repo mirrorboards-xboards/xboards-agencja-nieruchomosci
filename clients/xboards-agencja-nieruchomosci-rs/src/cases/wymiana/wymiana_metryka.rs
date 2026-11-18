@@ -1,12 +1,13 @@
 //! The kind `wymiana-metryka` of the room `cases/wymiana`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "wymiana-metryka";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Metryka pokoju wymiany: jeden wiersz na pokój, strony aktu i dziennik zamknięć.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "wymiana-metryka",
+    requires: &[],
+    migrations: &[
+        r#"-- Metryka pokoju wymiany: jeden wiersz na pokój, strony aktu i dziennik zamknięć.
 -- Pokój wymiany jest wspólny dla biura na XEstates i kancelarii notarialnej na XNotariuszu,
 -- jeden na transakcję i kancelarię. Metrykę zakłada biuro, gdy człowiek, który przyjął
 -- transakcję, zgodzi się na otwarcie pokoju z kancelarią wybraną przez strony. Pokój nie ma
@@ -207,7 +208,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pokoju wymiany się nie usuwa (R9)');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `strony.rola`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -488,7 +490,7 @@ FROM wymiana_metryka_wpis
 WHERE id = 1"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(MetrykaRow::from_row).transpose()
 }
 
@@ -512,6 +514,7 @@ pub fn otworz_pokoj_wymiany(
     params: &OtworzPokojWymianyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_metryka_wpis (id, oznaczenie, transakcja_odnosnik, czynnosc, kancelaria_nazwa,
@@ -564,6 +567,7 @@ pub fn podaj_sygnature_kancelarii(
     params: &PodajSygnatureKancelariiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE wymiana_metryka_wpis
@@ -613,7 +617,7 @@ FROM wymiana_metryka_strony
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StronyAktuRow::from_row).collect()
 }
 
@@ -632,6 +636,7 @@ pub fn wpisz_strone_aktu(
     params: &WpiszStroneAktuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_metryka_strony (id, nazwa, rola, reprezentowana_przez_biuro)
@@ -676,7 +681,7 @@ pub fn stan_pokoju(
 FROM wymiana_metryka_stan"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(StanPokojuRow::from_row).transpose()
 }
 
@@ -711,7 +716,7 @@ FROM wymiana_metryka_zamkniecia
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZamknieciaRow::from_row).collect()
 }
 
@@ -728,6 +733,7 @@ pub fn zamknij_pokoj_wymiany(
     params: &ZamknijPokojWymianyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_metryka_zamkniecia (strona_pokoju, rodzaj, chwila)
@@ -757,6 +763,7 @@ pub fn otworz_ponownie_pokoj_wymiany(
     params: &OtworzPonowniePokojWymianyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_metryka_zamkniecia (strona_pokoju, rodzaj, chwila)

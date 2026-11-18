@@ -1,12 +1,13 @@
 //! The kind `sprawa-nieruchomosci` of the room `cases/poszukiwanie`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-nieruchomosci";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Oznaczenie nieruchomości teczki: lokal, dom albo działka, z księgą wieczystą i działkami.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-nieruchomosci",
+    requires: &[],
+    migrations: &[
+        r#"-- Oznaczenie nieruchomości teczki: lokal, dom albo działka, z księgą wieczystą i działkami.
 -- Korzystają z niego typy oferty, transakcji, najmu i lokalu, pokój wymiany i dokumenty („czego
 -- dotyczy”). Poszukiwanie go nie używa: obejrzane nieruchomości to jego propozycje.
 --
@@ -110,7 +111,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -273,7 +275,7 @@ FROM sprawa_nieruchomosci_dzialki
 ORDER BY nieruchomosc_id, obreb, numer_dzialki"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DzialkiRow::from_row).collect()
 }
 
@@ -292,6 +294,7 @@ pub fn wpisz_dzialke(
     params: &WpiszDzialkeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_nieruchomosci_dzialki (nieruchomosc_id, obreb, numer_dzialki, powierzchnia)
@@ -331,6 +334,7 @@ pub fn zmien_dzialke(
     params: &ZmienDzialkeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_nieruchomosci_dzialki
@@ -367,6 +371,7 @@ pub fn wykresl_dzialke(
     params: &WykreslDzialkeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"DELETE FROM sprawa_nieruchomosci_dzialki
@@ -432,7 +437,7 @@ FROM sprawa_nieruchomosci_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NieruchomosciRow::from_row).collect()
 }
 
@@ -463,6 +468,7 @@ pub fn wpisz_nieruchomosc(
     params: &WpiszNieruchomoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_nieruchomosci_wpisy (id, rodzaj, prawo, miejscowosc, gmina, ulica, numer_budynku,
@@ -541,6 +547,7 @@ pub fn zmien_dane_nieruchomosci(
     params: &ZmienDaneNieruchomosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_nieruchomosci_wpisy

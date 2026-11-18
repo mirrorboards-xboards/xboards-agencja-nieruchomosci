@@ -1,12 +1,13 @@
 //! The kind `stanowisko-kontakty` of the room `positions/najem/koordynator_operacji`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "stanowisko-kontakty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Kontakty: kto poza teczką zajmuje się sprawą, którym kanałem i o jakiej porze odpowiada, np.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "stanowisko-kontakty",
+    requires: &[],
+    migrations: &[
+        r#"-- Kontakty: kto poza teczką zajmuje się sprawą, którym kanałem i o jakiej porze odpowiada, np.
 -- administrator wspólnoty, kancelaria, bank, spółdzielnia albo wykonawca.
 --
 -- Uczestnika teczki albo wpis rejestru (np. wykonawcę z rejestru wykonawców) wskazuje odnośnik, bez
@@ -86,7 +87,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.kanal`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -201,7 +203,7 @@ WHERE nieaktualny_od IS NULL
 ORDER BY dotyczy_odnosnik, rola, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KontaktyRow::from_row).collect()
 }
 
@@ -264,7 +266,7 @@ ORDER BY rola, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KontaktySprawyRow::from_row).collect()
 }
 
@@ -288,6 +290,7 @@ pub fn zapisz_kontakt(
     params: &ZapiszKontaktParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO stanowisko_kontakty_wpisy (dotyczy_odnosnik, instytucja, rola, wpis_odnosnik, nazwa, adres,
@@ -333,6 +336,7 @@ pub fn uniewaznij_kontakt(
     params: &UniewaznijKontaktParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE stanowisko_kontakty_wpisy

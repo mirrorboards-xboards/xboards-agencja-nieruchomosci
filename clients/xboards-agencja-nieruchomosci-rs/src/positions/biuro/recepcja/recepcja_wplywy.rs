@@ -1,12 +1,13 @@
 //! The kind `recepcja-wplywy` of the room `positions/biuro/recepcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "recepcja-wplywy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Dziennik wpływów: kiedy wiadomość wpłynęła, którym kanałem, od kogo, jakiego jest rodzaju, do
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "recepcja-wplywy",
+    requires: &[&super::recepcja_sprawy::KIND],
+    migrations: &[
+        r#"-- Dziennik wpływów: kiedy wiadomość wpłynęła, którym kanałem, od kogo, jakiego jest rodzaju, do
 -- której sprawy należy, po jakim znaku ją przypisano i komu ją oddano. Treści wiadomości tu nie ma:
 -- plik czeka w skrzynce, z której przyszedł, a wiersz wskazuje tylko wiadomość.
 --
@@ -109,7 +110,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); dziennik wpływów tylko się dopisuje');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `dziennik.kanal`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -276,7 +278,7 @@ ORDER BY wplynelo, id"#,
             ("dzien", xmeta_room::ToSqlValue::to_sql_value(&params.dzien)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DziennikDniaRow::from_row).collect()
 }
 
@@ -339,7 +341,7 @@ ORDER BY wplynelo, id"#,
             ("sprawa_id", xmeta_room::ToSqlValue::to_sql_value(&params.sprawa_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WplywySprawyRow::from_row).collect()
 }
 
@@ -402,7 +404,7 @@ ORDER BY wplynelo, id"#,
             ("nadawca", xmeta_room::ToSqlValue::to_sql_value(&params.nadawca)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WplywyOdNadawcyRow::from_row).collect()
 }
 
@@ -445,7 +447,7 @@ ORDER BY kanal"#,
             ("dzien", xmeta_room::ToSqlValue::to_sql_value(&params.dzien)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WplywyWedlugKanalowRow::from_row).collect()
 }
 
@@ -472,6 +474,7 @@ pub fn odnotuj_wplyw(
     params: &OdnotujWplywParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO recepcja_wplywy_dziennik (wplynelo, kanal, nadawca, rodzaj_pisma, wiadomosc_odnosnik,

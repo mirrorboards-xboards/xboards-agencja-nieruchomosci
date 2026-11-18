@@ -1,12 +1,13 @@
 //! The kind `stanowisko-polecenia` of the room `positions/transakcje/kierownik_transakcji`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "stanowisko-polecenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Polecenia: co agentowi polecił właściciel albo ktoś, komu właściciel na to pozwolił (np. wspólnik
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "stanowisko-polecenia",
+    requires: &[],
+    migrations: &[
+        r#"-- Polecenia: co agentowi polecił właściciel albo ktoś, komu właściciel na to pozwolił (np. wspólnik
 -- u Kierownika biura), zapisane osobno od ustaleń.
 --
 -- Agent przyjmuje tylko polecenie podpisane kluczem wydającego, bo niepodpisana wiadomość może
@@ -77,7 +78,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.wydal_jako`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -210,7 +212,7 @@ FROM stanowisko_polecenia_wpisy
 ORDER BY otrzymano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PoleceniaRow::from_row).collect()
 }
 
@@ -256,7 +258,7 @@ WHERE stan = 'przyjete'
 ORDER BY otrzymano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PoleceniaOtwarteRow::from_row).collect()
 }
 
@@ -277,6 +279,7 @@ pub fn przyjmij_polecenie(
     params: &PrzyjmijPolecenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO stanowisko_polecenia_wpisy (wydal, wydal_jako, otrzymano, tresc, podpis, stan)
@@ -313,6 +316,7 @@ pub fn odnotuj_wykonanie_polecenia(
     params: &OdnotujWykonaniePoleceniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE stanowisko_polecenia_wpisy
@@ -347,6 +351,7 @@ pub fn odmow_polecenia(
     params: &OdmowPoleceniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE stanowisko_polecenia_wpisy

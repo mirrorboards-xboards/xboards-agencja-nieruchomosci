@@ -1,12 +1,13 @@
 //! The kind `sprawa-umocowania` of the room `cases/sprawa`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-umocowania";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Pełnomocnictwa i reprezentacja podmiotów w jednej tabeli: kto, komu, do czego i w jakiej formie.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-umocowania",
+    requires: &[&super::sprawa_dokumenty::KIND, &super::sprawa_uczestnicy::KIND],
+    migrations: &[
+        r#"-- Pełnomocnictwa i reprezentacja podmiotów w jednej tabeli: kto, komu, do czego i w jakiej formie.
 -- Agent występuje w imieniu klienta tylko w granicach pełnomocnictwa, które klient dał biuru
 -- (zasada „W imieniu klienta tylko z pełnomocnictwem”). Role „pełnomocnik” i „reprezentant”
 -- wynikają z tej tabeli, więc nie ma ich w sprawa_uczestnicy_role.
@@ -189,7 +190,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -426,7 +428,7 @@ FROM sprawa_umocowania_czynnosci
 ORDER BY umocowanie_id, czynnosc"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(CzynnosciUmocowanRow::from_row).collect()
 }
 
@@ -443,6 +445,7 @@ pub fn dopisz_czynnosc_umocowania(
     params: &DopiszCzynnoscUmocowaniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_umocowania_czynnosci (umocowanie_id, czynnosc)
@@ -512,7 +515,7 @@ FROM sprawa_umocowania_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UmocowaniaRow::from_row).collect()
 }
 
@@ -538,6 +541,7 @@ pub fn wpisz_umocowanie(
     params: &WpiszUmocowanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_umocowania_wpisy (id, rodzaj, mocodawca_uczestnik_id, umocowany_uczestnik_id,
@@ -608,6 +612,7 @@ pub fn zmien_dane_umocowania(
     params: &ZmienDaneUmocowaniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umocowania_wpisy
@@ -674,6 +679,7 @@ pub fn odnotuj_wygasniecie_umocowania(
     params: &OdnotujWygasniecieUmocowaniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umocowania_wpisy

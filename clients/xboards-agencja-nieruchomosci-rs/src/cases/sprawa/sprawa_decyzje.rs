@@ -1,12 +1,13 @@
 //! The kind `sprawa-decyzje` of the room `cases/sprawa`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-decyzje";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Prośby agentów o decyzję człowieka i rozstrzygnięcia z podpisem. Inne wiersze teczki (i typy
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-decyzje",
+    requires: &[],
+    migrations: &[
+        r#"-- Prośby agentów o decyzję człowieka i rozstrzygnięcia z podpisem. Inne wiersze teczki (i typy
 -- spraw) powołują się na decyzję, więc decyzja jest pierwszym rodzajem rdzenia: wskazują na nią
 -- wszystkie późniejsze.
 --
@@ -208,7 +209,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -551,7 +553,7 @@ FROM sprawa_decyzje_wpisy
 ORDER BY zlozono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DecyzjeRow::from_row).collect()
 }
 
@@ -622,7 +624,7 @@ WHERE stan = 'czeka'
 ORDER BY zlozono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DecyzjeCzekajaceRow::from_row).collect()
 }
 
@@ -691,7 +693,7 @@ FROM sprawa_decyzje_zatwierdzone
 ORDER BY podpisano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DecyzjeZatwierdzoneRow::from_row).collect()
 }
 
@@ -776,7 +778,7 @@ ORDER BY zlozono DESC, id"#,
             ("dotyczy_id", xmeta_room::ToSqlValue::to_sql_value(&params.dotyczy_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DecyzjeWierszaRow::from_row).collect()
 }
 
@@ -804,6 +806,7 @@ pub fn popros_o_decyzje(
     params: &PoprosODecyzjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_decyzje_wpisy (id, rodzaj, prosi, prosi_stanowisko, decyduje, do_kiedy, zlozono,
@@ -865,6 +868,7 @@ pub fn rozstrzygnij_decyzje(
     params: &RozstrzygnijDecyzjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_decyzje_wpisy
@@ -914,6 +918,7 @@ pub fn uznaj_prosbe_za_zbedna(
     params: &UznajProsbeZaZbednaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_decyzje_wpisy

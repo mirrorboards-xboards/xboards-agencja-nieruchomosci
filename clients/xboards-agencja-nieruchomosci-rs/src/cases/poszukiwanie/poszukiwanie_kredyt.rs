@@ -1,12 +1,17 @@
 //! The kind `poszukiwanie-kredyt` of the room `cases/poszukiwanie`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "poszukiwanie-kredyt";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Analiza kredytowa klienta: dane wejściowe, wyniki programu, bank wybrany przez klienta
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "poszukiwanie-kredyt",
+    requires: &[
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+    ],
+    migrations: &[
+        r#"-- Analiza kredytowa klienta: dane wejściowe, wyniki programu, bank wybrany przez klienta
 -- i harmonogram do wypłaty kredytu. Pisze Analityk kredytowy. Kwoty w groszach.
 --
 -- Analiza jest orientacyjna: nie jest ofertą ani rekomendacją kredytu i mówi to wprost (R2).
@@ -327,7 +332,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `dane.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -498,7 +504,7 @@ FROM poszukiwanie_kredyt_analizy
 ORDER BY utworzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AnalizyKredytoweRow::from_row).collect()
 }
 
@@ -557,7 +563,7 @@ FROM poszukiwanie_kredyt_analizy
 WHERE aktualna = 1"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(AnalizaAktualnaRow::from_row).transpose()
 }
 
@@ -590,7 +596,7 @@ FROM poszukiwanie_kredyt_analizy_dane
 ORDER BY analiza_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DaneAnalizRow::from_row).collect()
 }
 
@@ -621,6 +627,7 @@ pub fn wpisz_analize_kredytowa(
     params: &WpiszAnalizeKredytowaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_kredyt_analizy (id, wersja_parametrow, okres_lat, poza_standardem,
@@ -696,6 +703,7 @@ pub fn dopisz_dana_do_analizy(
     params: &DopiszDanaDoAnalizyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_kredyt_analizy_dane (analiza_id, dana_id)
@@ -747,7 +755,7 @@ FROM poszukiwanie_kredyt_banki
 ORDER BY wybrano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(BankiKlientaRow::from_row).collect()
 }
 
@@ -765,6 +773,7 @@ pub fn wpisz_bank_klienta(
     params: &WpiszBankKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_kredyt_banki (bank, wybrano, zrodlo_wplyw_id)
@@ -796,6 +805,7 @@ pub fn odnotuj_wymagania_banku(
     params: &OdnotujWymaganiaBankuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_kredyt_banki
@@ -857,7 +867,7 @@ FROM poszukiwanie_kredyt_dane
 ORDER BY wpisano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DaneKredytoweRow::from_row).collect()
 }
 
@@ -881,6 +891,7 @@ pub fn wpisz_dana_kredytowa(
     params: &WpiszDanaKredytowaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_kredyt_dane (id, rodzaj, opis, wartosc, okres_zrodla, dokument_id,
@@ -941,7 +952,7 @@ FROM poszukiwanie_kredyt_harmonogram
 ORDER BY przewidywana, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(HarmonogramKredytuRow::from_row).collect()
 }
 
@@ -958,6 +969,7 @@ pub fn wpisz_krok_harmonogramu(
     params: &WpiszKrokHarmonogramuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_kredyt_harmonogram (krok, przewidywana)
@@ -987,6 +999,7 @@ pub fn przelicz_krok_harmonogramu(
     params: &PrzeliczKrokHarmonogramuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_kredyt_harmonogram
@@ -1017,6 +1030,7 @@ pub fn odnotuj_krok_harmonogramu(
     params: &OdnotujKrokHarmonogramuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_kredyt_harmonogram

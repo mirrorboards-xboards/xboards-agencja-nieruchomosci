@@ -1,12 +1,13 @@
 //! The kind `oferta-ceny` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "oferta-ceny";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Ceny oferty: propozycja biura z porównanymi transakcjami, cena ofertowa zatwierdzona przez
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "oferta-ceny",
+    requires: &[&super::sprawa_uczestnicy::KIND, &super::sprawa_zgody::KIND],
+    migrations: &[
+        r#"-- Ceny oferty: propozycja biura z porównanymi transakcjami, cena ofertowa zatwierdzona przez
 -- klienta z historią zmian i granice negocjacji, osobno dla sprzedaży i dla najmu (dotyczy).
 -- Przy najmie kwota to miesięczny czynsz. Kwoty w groszach. Pisze Opiekun oferty.
 --
@@ -298,7 +299,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `granice.dotyczy`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -378,7 +380,7 @@ FROM oferta_ceny_granice
 ORDER BY dotyczy, rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(GraniceNegocjacjiRow::from_row).collect()
 }
 
@@ -422,7 +424,7 @@ WHERE NOT EXISTS (
 ORDER BY granice.dotyczy"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(GraniceNegocjacjiBiezaceRow::from_row).collect()
 }
 
@@ -444,6 +446,7 @@ pub fn wpisz_granice_negocjacji(
     params: &WpiszGraniceNegocjacjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_ceny_granice (id, dotyczy, najnizsza_kwota, warunki, zgoda_id, zastepuje_id)
@@ -506,7 +509,7 @@ FROM oferta_ceny_ofertowe
 ORDER BY dotyczy, obowiazuje_od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(CenyOfertoweRow::from_row).collect()
 }
 
@@ -549,7 +552,7 @@ FROM oferta_ceny_biezace
 ORDER BY dotyczy"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(CenyOfertoweBiezaceRow::from_row).collect()
 }
 
@@ -572,6 +575,7 @@ pub fn wpisz_cene_ofertowa(
     params: &WpiszCeneOfertowaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_ceny_ofertowe (id, dotyczy, kwota, zgoda_id, obowiazuje_od, poprzednia_id, powod)
@@ -609,6 +613,7 @@ pub fn odnotuj_cene_w_ogloszeniach(
     params: &OdnotujCeneWOgloszeniachParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_ceny_ofertowe
@@ -663,7 +668,7 @@ FROM oferta_ceny_propozycje
 ORDER BY utworzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PropozycjeCenRow::from_row).collect()
 }
 
@@ -704,7 +709,7 @@ FROM oferta_ceny_porownania
 ORDER BY propozycja_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PorownaniaTransakcjiRow::from_row).collect()
 }
 
@@ -727,6 +732,7 @@ pub fn wpisz_propozycje_ceny(
     params: &WpiszPropozycjeCenyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_ceny_propozycje (id, dotyczy, kwota, uzasadnienie, utworzono, wyliczenie_sciezka,
@@ -775,6 +781,7 @@ pub fn dopisz_porownanie_transakcji(
     params: &DopiszPorownanieTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_ceny_porownania (propozycja_id, data_transakcji, cena, powierzchnia, roznice,

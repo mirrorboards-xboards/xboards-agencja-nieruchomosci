@@ -1,12 +1,13 @@
 //! The kind `rejestr-kontroli-decyzje` of the room `registers/rejestr_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "rejestr-kontroli-decyzje";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Prośby Kierownika kontroli o rozstrzygnięcie człowieka i rozstrzygnięcia podpisane jego kluczem:
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "rejestr-kontroli-decyzje",
+    requires: &[],
+    migrations: &[
+        r#"-- Prośby Kierownika kontroli o rozstrzygnięcie człowieka i rozstrzygnięcia podpisane jego kluczem:
 -- zatwierdzenie oceny ryzyka klienta, zdjęcie wątpliwości, potwierdzenie podejrzenia, przekazanie
 -- zawiadomienia, akceptacje właściciela biura i decyzja o nienawiązaniu stosunków. Inne rodzaje
 -- rejestru wskazują decyzję kluczem obcym, więc decyzje są pierwszym rodzajem rejestru.
@@ -142,7 +143,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -407,7 +409,7 @@ FROM rejestr_kontroli_decyzje_wpisy
 ORDER BY zlozono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DecyzjeKontroliRow::from_row).collect()
 }
 
@@ -471,7 +473,7 @@ WHERE stan = 'czeka'
 ORDER BY zlozono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DecyzjeKontroliCzekajaceRow::from_row).collect()
 }
 
@@ -497,6 +499,7 @@ pub fn popros_o_decyzje_kontroli(
     params: &PoprosODecyzjeKontroliParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_decyzje_wpisy (id, rodzaj, prosi, decyduje, decyduje_funkcja, zlozono,
@@ -550,6 +553,7 @@ pub fn rozstrzygnij_decyzje_kontroli(
     params: &RozstrzygnijDecyzjeKontroliParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_decyzje_wpisy
@@ -602,6 +606,7 @@ pub fn uznaj_prosbe_kontroli_za_zbedna(
     params: &UznajProsbeKontroliZaZbednaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_decyzje_wpisy

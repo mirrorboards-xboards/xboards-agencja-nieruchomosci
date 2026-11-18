@@ -1,12 +1,21 @@
 //! The kind `sprawa-umowy` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-umowy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Umowy klienta z biurem: pośrednictwa i o zarządzanie nieruchomością, ze stronami, zakresem
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-umowy",
+    requires: &[
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_nieruchomosci::KIND,
+        &super::sprawa_sprawdzenia::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Umowy klienta z biurem: pośrednictwa i o zarządzanie nieruchomością, ze stronami, zakresem
 -- czynności i zdarzeniami (aneks, polisa, żądanie, odstąpienie, wypowiedzenie, wynagrodzenie).
 -- Umowę przygotowuje agent sprawy, a podpisuje człowiek. Typ sprawy dodaje tylko swoje warunki,
 -- np. widoczność oferty albo widełki cen najmu (D12).
@@ -658,7 +667,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -941,7 +951,7 @@ FROM sprawa_umowy_strony
 ORDER BY umowa_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StronyUmowRow::from_row).collect()
 }
 
@@ -958,6 +968,7 @@ pub fn dopisz_strone_umowy(
     params: &DopiszStroneUmowyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_umowy_strony (umowa_id, uczestnik_id)
@@ -1040,7 +1051,7 @@ FROM sprawa_umowy_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UmowyRow::from_row).collect()
 }
 
@@ -1073,7 +1084,7 @@ FROM sprawa_umowy_praca_od
 ORDER BY umowa_id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PracaOdUmowRow::from_row).collect()
 }
 
@@ -1099,6 +1110,7 @@ pub fn przygotuj_umowe(
     params: &PrzygotujUmoweParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_umowy_wpisy (id, rodzaj, nieruchomosc_id, poczatek, koniec, okres_wypowiedzenia,
@@ -1162,6 +1174,7 @@ pub fn zmien_warunki_umowy(
     params: &ZmienWarunkiUmowyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1222,6 +1235,7 @@ pub fn przekaz_umowe_do_podpisu(
     params: &PrzekazUmoweDoPodpisuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1247,6 +1261,7 @@ pub fn cofnij_umowe_do_projektu(
     params: &CofnijUmoweDoProjektuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1281,6 +1296,7 @@ pub fn odnotuj_zawarcie_umowy(
     params: &OdnotujZawarcieUmowyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1343,6 +1359,7 @@ pub fn odnotuj_aneks_umowy(
     params: &OdnotujAneksUmowyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1398,6 +1415,7 @@ pub fn odnotuj_koniec_po_wypowiedzeniu(
     params: &OdnotujKoniecPoWypowiedzeniuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1425,6 +1443,7 @@ pub fn odnotuj_nowa_polise_umowy(
     params: &OdnotujNowaPoliseUmowyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1456,6 +1475,7 @@ pub fn odnotuj_informacje_o_odstapieniu(
     params: &OdnotujInformacjeOOdstapieniuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1488,6 +1508,7 @@ pub fn zakoncz_umowe(
     params: &ZakonczUmoweParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_umowy_wpisy
@@ -1535,7 +1556,7 @@ FROM sprawa_umowy_zakres
 ORDER BY umowa_id, czynnosc"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZakresUmowRow::from_row).collect()
 }
 
@@ -1552,6 +1573,7 @@ pub fn dopisz_czynnosc_umowy(
     params: &DopiszCzynnoscUmowyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_umowy_zakres (umowa_id, czynnosc)
@@ -1606,7 +1628,7 @@ FROM sprawa_umowy_zdarzenia
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZdarzeniaUmowRow::from_row).collect()
 }
 
@@ -1632,6 +1654,7 @@ pub fn wpisz_zdarzenie_umowy(
     params: &WpiszZdarzenieUmowyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_umowy_zdarzenia (id, umowa_id, rodzaj, chwila, opis, dokument_id, wysylka_id,

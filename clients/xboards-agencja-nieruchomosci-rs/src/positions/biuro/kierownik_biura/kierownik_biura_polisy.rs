@@ -1,12 +1,13 @@
 //! The kind `kierownik-biura-polisy` of the room `positions/biuro/kierownik_biura`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-biura-polisy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Polisy ubezpieczenia odpowiedzialności cywilnej biura: pośrednika i zarządcy. Kopia polisy
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-biura-polisy",
+    requires: &[],
+    migrations: &[
+        r#"-- Polisy ubezpieczenia odpowiedzialności cywilnej biura: pośrednika i zarządcy. Kopia polisy
 -- aktualnej na dzień zawarcia umowy jest załącznikiem do każdej umowy pośrednictwa i każdej umowy
 -- o zarządzanie (art. 181 ust. 3a i art. 186 ust. 3a ugn, rozstrzygnięcie biura R6).
 --
@@ -93,7 +94,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -225,7 +227,7 @@ FROM kierownik_biura_polisy_wpisy
 ORDER BY okres_do DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PolisyRow::from_row).collect()
 }
 
@@ -288,7 +290,7 @@ ORDER BY okres_od, id"#,
             ("dzien", xmeta_room::ToSqlValue::to_sql_value(&params.dzien)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PolisaWDniuRow::from_row).collect()
 }
 
@@ -348,7 +350,7 @@ ORDER BY okres_do, id"#,
             ("do_dnia", xmeta_room::ToSqlValue::to_sql_value(&params.do_dnia)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PolisyDoPrzypomnieniaRow::from_row).collect()
 }
 
@@ -370,6 +372,7 @@ pub fn zapisz_polise(
     params: &ZapiszPoliseParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_biura_polisy_wpisy (rodzaj, numer, ubezpieczyciel, okres_od, okres_do,
@@ -408,6 +411,7 @@ pub fn odnotuj_przypomnienie_o_polisie(
     params: &OdnotujPrzypomnienieOPolisieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_polisy_wpisy
@@ -439,6 +443,7 @@ pub fn odnotuj_zawiadomienie_o_polisie(
     params: &OdnotujZawiadomienieOPolisieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_polisy_wpisy

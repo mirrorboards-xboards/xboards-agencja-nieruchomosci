@@ -1,12 +1,13 @@
 //! The kind `analityk-stanu-prawnego-ksiega` of the room `positions/transakcje/analityk_stanu_prawnego`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "analityk-stanu-prawnego-ksiega";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Stan księgi: data i godzina każdego odpisu albo przeglądania księgi wieczystej, na którym stoi
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "analityk-stanu-prawnego-ksiega",
+    requires: &[],
+    migrations: &[
+        r#"-- Stan księgi: data i godzina każdego odpisu albo przeglądania księgi wieczystej, na którym stoi
 -- analiza, i lista wpisów, wzmianek i ostrzeżeń z tej chwili. Dzięki temu Analityk widzi, co się
 -- zmieniło przed aktem (operacja zmiany_ksiegi).
 --
@@ -126,7 +127,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `stany.sposob`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -353,7 +355,7 @@ ORDER BY chwila DESC, id"#,
             ("numer_kw", xmeta_room::ToSqlValue::to_sql_value(&params.numer_kw)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StanyKsiegiRow::from_row).collect()
 }
 
@@ -372,6 +374,7 @@ pub fn zapisz_stan_ksiegi(
     params: &ZapiszStanKsiegiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO analityk_stanu_prawnego_ksiega_stany (numer_kw, chwila, sposob, dokument_odnosnik)
@@ -435,7 +438,7 @@ ORDER BY dzial, numer, rodzaj, id"#,
             ("stan_id", xmeta_room::ToSqlValue::to_sql_value(&params.stan_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WpisyStanuKsiegiRow::from_row).collect()
 }
 
@@ -455,6 +458,7 @@ pub fn zapisz_wpis_ksiegi(
     params: &ZapiszWpisKsiegiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO analityk_stanu_prawnego_ksiega_wpisy (stan_id, dzial, numer, rodzaj, przedmiot)
@@ -570,6 +574,6 @@ ORDER BY dzial, numer, zmiana"#,
             ("numer_kw", xmeta_room::ToSqlValue::to_sql_value(&params.numer_kw)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZmianyKsiegiRow::from_row).collect()
 }

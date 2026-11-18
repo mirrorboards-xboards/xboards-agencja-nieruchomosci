@@ -1,12 +1,13 @@
 //! The kind `kierownik-dzialu-raporty` of the room `positions/transakcje/kierownik_transakcji`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-dzialu-raporty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Raporty agentów działu o stałych polach i prośby o decyzje, które kierownik przekazał dalej.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-dzialu-raporty",
+    requires: &[&super::kierownik_dzialu_agenci::KIND],
+    migrations: &[
+        r#"-- Raporty agentów działu o stałych polach i prośby o decyzje, które kierownik przekazał dalej.
 --
 -- Raport nie powtarza treści prośby: wskazuje jej wiersz w teczce. Kierownik kontroli przekazuje
 -- prośby właścicielowi sam, z pominięciem listy decyzji Kierownika biura, bo ich treść, a nawet to,
@@ -129,7 +130,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `prosby.przekazano_do`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -306,7 +308,7 @@ WHERE zgloszono_zdjecie IS NULL
 ORDER BY przekazano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ProsbyNaLiscieRow::from_row).collect()
 }
 
@@ -325,6 +327,7 @@ pub fn przekaz_prosbe(
     params: &PrzekazProsbeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_raporty_prosby (decyzja_odnosnik, raport_id, przekazano_do, przekazano)
@@ -367,6 +370,7 @@ pub fn zglos_zdjecie_prosby(
     params: &ZglosZdjecieProsbyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_raporty_prosby
@@ -430,7 +434,7 @@ FROM kierownik_dzialu_raporty_wpisy
 ORDER BY otrzymano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RaportyRow::from_row).collect()
 }
 
@@ -485,7 +489,7 @@ ORDER BY otrzymano, id"#,
             ("agent_id", xmeta_room::ToSqlValue::to_sql_value(&params.agent_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RaportyAgentaRow::from_row).collect()
 }
 
@@ -510,6 +514,7 @@ pub fn przyjmij_raport(
     params: &PrzyjmijRaportParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_raporty_wpisy (id, agent_id, otrzymano, rodzaj, etap_albo_okres, blokada,

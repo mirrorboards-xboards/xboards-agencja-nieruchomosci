@@ -1,12 +1,17 @@
 //! The kind `oferta-ogloszenia` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "oferta-ogloszenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Ogłoszenia oferty na portalach i na stronie biura, z wersjami treści i statystykami. Pisze
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "oferta-ogloszenia",
+    requires: &[
+        &super::oferta_nieruchomosc::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_umowy::KIND,
+    ],
+    migrations: &[
+        r#"-- Ogłoszenia oferty na portalach i na stronie biura, z wersjami treści i statystykami. Pisze
 -- Opiekun oferty według standardu działu. Ogłoszenie jest zaproszeniem do składania ofert, a nie
 -- ofertą (art. 71 KC).
 --
@@ -510,7 +515,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.dotyczy`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -625,7 +631,7 @@ FROM oferta_ogloszenia_statystyki
 ORDER BY odczytano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StatystykiOgloszenRow::from_row).collect()
 }
 
@@ -644,6 +650,7 @@ pub fn wpisz_statystyki_ogloszenia(
     params: &WpiszStatystykiOgloszeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_ogloszenia_statystyki (ogloszenie_id, odczytano, wyswietlenia, zapytania)
@@ -714,7 +721,7 @@ FROM oferta_ogloszenia_wersje
 ORDER BY ogloszenie_id, numer"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WersjeOgloszenRow::from_row).collect()
 }
 
@@ -761,7 +768,7 @@ FROM oferta_ogloszenia_wersje_najnowsze
 ORDER BY ogloszenie_id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NajnowszeWersjeOgloszenRow::from_row).collect()
 }
 
@@ -786,6 +793,7 @@ pub fn dopisz_wersje_ogloszenia(
     params: &DopiszWersjeOgloszeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_ogloszenia_wersje (ogloszenie_id, numer, od, tytul, cena, lokalizacja,
@@ -864,7 +872,7 @@ FROM oferta_ogloszenia_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OgloszeniaRow::from_row).collect()
 }
 
@@ -884,6 +892,7 @@ pub fn przygotuj_ogloszenie(
     params: &PrzygotujOgloszenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_ogloszenia_wpisy (id, dotyczy, kanal, portal)
@@ -913,6 +922,7 @@ pub fn odnotuj_publikacje_ogloszenia(
     params: &OdnotujPublikacjeOgloszeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_ogloszenia_wpisy
@@ -943,6 +953,7 @@ pub fn odnotuj_numer_ogloszenia(
     params: &OdnotujNumerOgloszeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_ogloszenia_wpisy
@@ -975,6 +986,7 @@ pub fn zdejmij_ogloszenie(
     params: &ZdejmijOgloszenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_ogloszenia_wpisy

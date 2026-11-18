@@ -1,12 +1,13 @@
 //! The kind `oferta-nieruchomosc` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "oferta-nieruchomosc";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Opis nieruchomości oferty ponad oznaczenie z rdzenia (sprawa_nieruchomosci_wpisy) i wyniki
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "oferta-nieruchomosc",
+    requires: &[&super::sprawa_dokumenty::KIND, &super::sprawa_nieruchomosci::KIND],
+    migrations: &[
+        r#"-- Opis nieruchomości oferty ponad oznaczenie z rdzenia (sprawa_nieruchomosci_wpisy) i wyniki
 -- przeglądania księgi wieczystej. Pisze Opiekun oferty. Źródło każdej danej (dokument, rejestr
 -- z datą, oględziny pośrednika albo słowa klienta) wpisuje się w sprawa_dokumenty_zrodla rdzenia.
 --
@@ -185,7 +186,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `opis.swiadectwo`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -299,7 +301,7 @@ FROM oferta_nieruchomosc_opis
 ORDER BY nieruchomosc_id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OpisyNieruchomosciRow::from_row).collect()
 }
 
@@ -335,6 +337,7 @@ pub fn wpisz_opis_nieruchomosci(
     params: &WpiszOpisNieruchomosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_nieruchomosc_opis (nieruchomosc_id, liczba_pieter, winda, rok_budowy, material,
@@ -461,6 +464,7 @@ pub fn zmien_opis_nieruchomosci(
     params: &ZmienOpisNieruchomosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_nieruchomosc_opis
@@ -614,7 +618,7 @@ FROM oferta_nieruchomosc_przegladania
 ORDER BY przegladano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PrzegladaniaKsiagRow::from_row).collect()
 }
 
@@ -642,6 +646,7 @@ pub fn wpisz_przegladanie_ksiegi(
     params: &WpiszPrzegladanieKsiegiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_nieruchomosc_przegladania (id, nieruchomosc_id, numer_kw, przegladano,

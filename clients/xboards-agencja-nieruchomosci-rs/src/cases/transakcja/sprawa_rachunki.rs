@@ -1,12 +1,17 @@
 //! The kind `sprawa-rachunki` of the room `cases/transakcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-rachunki";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Rachunki bankowe uczestników, które mają trafić do umowy albo przyjąć wypłatę. Podmiana rachunku
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-rachunki",
+    requires: &[
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_uczestnicy::KIND,
+    ],
+    migrations: &[
+        r#"-- Rachunki bankowe uczestników, które mają trafić do umowy albo przyjąć wypłatę. Podmiana rachunku
 -- to częste oszustwo (R4), więc nowy numer nigdy nie zmienia istniejącego wiersza: powstaje nowy
 -- wiersz, a stary zostaje z oznaczeniem, kto i kiedy go zastąpił.
 --
@@ -149,7 +154,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.cel`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -277,7 +283,7 @@ FROM sprawa_rachunki_wpisy
 ORDER BY wpisano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RachunkiRow::from_row).collect()
 }
 
@@ -333,7 +339,7 @@ WHERE zastapiony_przez_id IS NULL
 ORDER BY wpisano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RachunkiBiezaceRow::from_row).collect()
 }
 
@@ -388,7 +394,7 @@ FROM sprawa_rachunki_dopuszczone
 ORDER BY wpisano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RachunkiDopuszczoneRow::from_row).collect()
 }
 
@@ -411,6 +417,7 @@ pub fn wpisz_rachunek(
     params: &WpiszRachunekParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_rachunki_wpisy (id, uczestnik_id, numer, posiadacz, cel, zrodlo_dokument_id,
@@ -459,6 +466,7 @@ pub fn odnotuj_potwierdzenie_rachunku(
     params: &OdnotujPotwierdzenieRachunkuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_rachunki_wpisy
@@ -503,6 +511,7 @@ pub fn zastap_rachunek(
     params: &ZastapRachunekParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_rachunki_wpisy

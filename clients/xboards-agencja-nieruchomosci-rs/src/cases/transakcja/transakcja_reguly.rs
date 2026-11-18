@@ -1,12 +1,19 @@
 //! The kind `transakcja-reguly` of the room `cases/transakcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "transakcja-reguly";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Reguły teczki transakcji na tabelach rdzenia: typ pokoju, etapy z przejściami, role uczestników,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "transakcja-reguly",
+    requires: &[
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_protokoly::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umowy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Reguły teczki transakcji na tabelach rdzenia: typ pokoju, etapy z przejściami, role uczestników,
 -- rodzaje zgód i zakaz umów z biurem. Rodzaj nie ma własnych tabel i wskazuje tylko rdzeń, więc
 -- jest pierwszym rodzajem typu. Każdy trigger tylko odmawia; rdzenia nie zmienia.
 --
@@ -105,4 +112,5 @@ BEGIN
   SELECT RAISE(ABORT, 'w teczce transakcji nie ma umów z biurem; leżą w teczkach oferty i poszukiwania');
 END;
 "#,
-];
+    ],
+};

@@ -1,12 +1,18 @@
 //! The kind `lokal-krotkoterminowy-lokal` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "lokal-krotkoterminowy-lokal";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Dane lokalu ponad oznaczenie nieruchomości z rdzenia: rejestracja, łóżka, czas sprzątania,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "lokal-krotkoterminowy-lokal",
+    requires: &[
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_nieruchomosci::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Dane lokalu ponad oznaczenie nieruchomości z rdzenia: rejestracja, łóżka, czas sprzątania,
 -- standard i instrukcja wejścia, a do tego regulaminy lokalu, wyposażenie biura, przeglądy
 -- i uchwały wspólnoty. Spis wyposażenia przy przejęciu i zwrocie trzyma rdzeń (sprawa-protokoly).
 -- Pisze Zarządca obiektu; wyposażenie i przeglądy także Koordynator operacji.
@@ -254,7 +260,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// A row of `dane_lokalu`.
 #[derive(Debug, Clone, PartialEq)]
@@ -296,7 +303,7 @@ pub fn dane_lokalu(
 FROM lokal_krotkoterminowy_lokal_dane"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(DaneLokaluRow::from_row).transpose()
 }
 
@@ -319,6 +326,7 @@ pub fn wpisz_dane_lokalu(
     params: &WpiszDaneLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_lokal_dane (id, nieruchomosc_id, rejestracja_numer,
@@ -384,6 +392,7 @@ pub fn zmien_dane_lokalu(
     params: &ZmienDaneLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_lokal_dane
@@ -464,7 +473,7 @@ FROM lokal_krotkoterminowy_lokal_przeglady
 ORDER BY data, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PrzegladyLokaluRow::from_row).collect()
 }
 
@@ -483,6 +492,7 @@ pub fn wpisz_przeglad_lokalu(
     params: &WpiszPrzegladLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_lokal_przeglady (rodzaj, data, nastepny, dokument_id)
@@ -532,7 +542,7 @@ FROM lokal_krotkoterminowy_lokal_regulaminy
 ORDER BY od, rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RegulaminyLokaluRow::from_row).collect()
 }
 
@@ -552,6 +562,7 @@ pub fn wpisz_regulamin_lokalu(
     params: &WpiszRegulaminLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_lokal_regulaminy (id, dokument_id, od, decyzja_id)
@@ -606,7 +617,7 @@ FROM lokal_krotkoterminowy_lokal_uchwaly
 ORDER BY data, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UchwalyWspolnotyRow::from_row).collect()
 }
 
@@ -625,6 +636,7 @@ pub fn wpisz_uchwale_wspolnoty(
     params: &WpiszUchwaleWspolnotyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_lokal_uchwaly (data, tresc, dokument_id, dowiedziano)
@@ -683,7 +695,7 @@ FROM lokal_krotkoterminowy_lokal_wyposazenie
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WyposazenieLokaluRow::from_row).collect()
 }
 
@@ -702,6 +714,7 @@ pub fn wpisz_wyposazenie_lokalu(
     params: &WpiszWyposazenieLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_lokal_wyposazenie (rzecz, od, koszt, zgoda_id)
@@ -731,6 +744,7 @@ pub fn wycofaj_wyposazenie_lokalu(
     params: &WycofajWyposazenieLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_lokal_wyposazenie

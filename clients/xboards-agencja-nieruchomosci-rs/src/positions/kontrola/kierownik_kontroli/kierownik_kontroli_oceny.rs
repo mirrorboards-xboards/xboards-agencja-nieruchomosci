@@ -1,12 +1,13 @@
 //! The kind `kierownik-kontroli-oceny` of the room `positions/kontrola/kierownik_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-kontroli-oceny";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Projekt oceny ryzyka biura (art. 27 ust. 1 AML): ocena robocza z czynnikami ryzyka dotyczącymi
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-kontroli-oceny",
+    requires: &[],
+    migrations: &[
+        r#"-- Projekt oceny ryzyka biura (art. 27 ust. 1 AML): ocena robocza z czynnikami ryzyka dotyczącymi
 -- klientów, państw i obszarów geograficznych, produktów, usług, transakcji i kanałów dostaw, każdy
 -- z poziomem, środkami ograniczającymi i źródłem.
 --
@@ -128,7 +129,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `czynniki.obszar`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -283,7 +285,7 @@ ORDER BY obszar, id"#,
             ("ocena_id", xmeta_room::ToSqlValue::to_sql_value(&params.ocena_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(CzynnikiOcenyRow::from_row).collect()
 }
 
@@ -304,6 +306,7 @@ pub fn dopisz_czynnik(
     params: &DopiszCzynnikParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_kontroli_oceny_czynniki (ocena_id, obszar, czynnik, poziom, srodki, zrodlo)
@@ -338,6 +341,7 @@ pub fn zmien_czynnik(
     params: &ZmienCzynnikParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_oceny_czynniki
@@ -393,7 +397,7 @@ FROM kierownik_kontroli_oceny_wpisy
 ORDER BY rozpoczeto DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ProjektyOcenRow::from_row).collect()
 }
 
@@ -409,6 +413,7 @@ pub fn rozpocznij_projekt_oceny(
     params: &RozpocznijProjektOcenyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_kontroli_oceny_wpisy (rozpoczeto)
@@ -437,6 +442,7 @@ pub fn odnotuj_przeglad_oceny(
     params: &OdnotujPrzegladOcenyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_oceny_wpisy
@@ -467,6 +473,7 @@ pub fn przekaz_ocene_do_zatwierdzenia(
     params: &PrzekazOceneDoZatwierdzeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_oceny_wpisy
@@ -499,6 +506,7 @@ pub fn odnotuj_zatwierdzenie_oceny(
     params: &OdnotujZatwierdzenieOcenyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_kontroli_oceny_wpisy

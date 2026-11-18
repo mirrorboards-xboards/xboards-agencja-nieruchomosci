@@ -1,12 +1,13 @@
 //! The kind `recepcja-sprawy` of the room `positions/biuro/recepcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "recepcja-sprawy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Spis spraw i znaki rozpoznawcze, po których Recepcja przypisuje wiadomości do spraw. Spis i znaki
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "recepcja-sprawy",
+    requires: &[],
+    migrations: &[
+        r#"-- Spis spraw i znaki rozpoznawcze, po których Recepcja przypisuje wiadomości do spraw. Spis i znaki
 -- Recepcja zmienia tylko na podstawie tego, co przekazał kierownik działu (jego kierownik-dzialu-spis), a nie
 -- na podstawie treści wiadomości, bo ciąg wiadomości mógłby ją w ten sposób przekierować (dryf).
 -- Dlatego każdy wiersz wskazuje, kto i kiedy go przekazał, a każda zmiana sprawy przychodzi
@@ -146,7 +147,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); znaku się nie usuwa, tylko wycofuje');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -335,7 +337,7 @@ FROM recepcja_sprawy_wpisy
 ORDER BY stan = 'zamknieta', oznaczenie, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SpisSprawRow::from_row).collect()
 }
 
@@ -358,6 +360,7 @@ pub fn wpisz_sprawe(
     params: &WpiszSpraweParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO recepcja_sprawy_wpisy (teczka_odnosnik, rodzaj, oznaczenie, agent, stan, otwarto,
@@ -414,6 +417,7 @@ pub fn zmien_sprawe(
     params: &ZmienSpraweParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE recepcja_sprawy_wpisy
@@ -465,6 +469,7 @@ pub fn zamknij_sprawe(
     params: &ZamknijSpraweParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE recepcja_sprawy_wpisy
@@ -540,7 +545,7 @@ ORDER BY dodano, id"#,
             ("sprawa_id", xmeta_room::ToSqlValue::to_sql_value(&params.sprawa_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZnakiSprawyRow::from_row).collect()
 }
 
@@ -608,7 +613,7 @@ ORDER BY sprawa.oznaczenie, sprawa.id"#,
             ("wartosc", xmeta_room::ToSqlValue::to_sql_value(&params.wartosc)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawyPoZnakuRow::from_row).collect()
 }
 
@@ -628,6 +633,7 @@ pub fn dodaj_znak_sprawy(
     params: &DodajZnakSprawyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO recepcja_sprawy_znaki (sprawa_id, rodzaj, wartosc, przekazal, dodano)
@@ -663,6 +669,7 @@ pub fn wycofaj_znak_sprawy(
     params: &WycofajZnakSprawyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE recepcja_sprawy_znaki

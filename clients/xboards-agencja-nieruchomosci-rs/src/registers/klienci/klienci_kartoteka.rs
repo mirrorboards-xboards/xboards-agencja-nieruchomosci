@@ -1,12 +1,13 @@
 //! The kind `klienci-kartoteka` of the room `registers/klienci`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "klienci-kartoteka";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Kartoteka klientów biura: osoby i podmioty, które zawarły z biurem umowę pośrednictwa albo
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "klienci-kartoteka",
+    requires: &[],
+    migrations: &[
+        r#"-- Kartoteka klientów biura: osoby i podmioty, które zawarły z biurem umowę pośrednictwa albo
 -- o zarządzanie, z historią ich danych i listą umów z biurem. Służy do rozpoznania klienta, który
 -- wraca, i do ciągłości danych między sprawami. Pokój jest jeden na biuro.
 --
@@ -643,7 +644,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy kartoteki się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `adresy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -1139,7 +1141,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AdresyKlientaRow::from_row).collect()
 }
 
@@ -1160,6 +1162,7 @@ pub fn wpisz_adres_klienta(
     params: &WpiszAdresKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE klienci_kartoteka_adresy
@@ -1211,6 +1214,7 @@ pub fn zakoncz_adres_klienta(
     params: &ZakonczAdresKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE klienci_kartoteka_adresy
@@ -1292,7 +1296,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DaneKlientaRow::from_row).collect()
 }
 
@@ -1323,6 +1327,7 @@ pub fn wpisz_dane_klienta(
     params: &WpiszDaneKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO klienci_kartoteka_dane (klient_id, od, aktualne, imiona, nazwisko, pesel, nazwa,
@@ -1406,7 +1411,7 @@ ORDER BY poinformowano, id"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(InformacjeKlientaRow::from_row).collect()
 }
 
@@ -1425,6 +1430,7 @@ pub fn wpisz_informacje_klienta(
     params: &WpiszInformacjeKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO klienci_kartoteka_informacje (klient_id, poinformowano, sposob, wysylka_odnosnik)
@@ -1498,7 +1504,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KontaktyKlientaRow::from_row).collect()
 }
 
@@ -1552,7 +1558,7 @@ ORDER BY klient_id, id"#,
             ("wartosc", xmeta_room::ToSqlValue::to_sql_value(&params.wartosc)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KlienciPoKontakcieRow::from_row).collect()
 }
 
@@ -1574,6 +1580,7 @@ pub fn wpisz_kontakt_klienta(
     params: &WpiszKontaktKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO klienci_kartoteka_kontakty (klient_id, rodzaj, wartosc, preferowany, od, zrodlo_odnosnik)
@@ -1613,6 +1620,7 @@ pub fn zakoncz_kontakt_klienta(
     params: &ZakonczKontaktKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE klienci_kartoteka_kontakty
@@ -1680,7 +1688,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OsobyKlientaRow::from_row).collect()
 }
 
@@ -1703,6 +1711,7 @@ pub fn wpisz_osobe_klienta(
     params: &WpiszOsobeKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO klienci_kartoteka_osoby (klient_id, funkcja, imiona, nazwisko, kontakt,
@@ -1746,6 +1755,7 @@ pub fn zakoncz_osobe_klienta(
     params: &ZakonczOsobeKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE klienci_kartoteka_osoby
@@ -1841,7 +1851,7 @@ ORDER BY umowy.zawarto DESC, umowy.rowid DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UmowyKlientaRow::from_row).collect()
 }
 
@@ -1890,7 +1900,7 @@ ORDER BY id"#,
             ("umowa_id", xmeta_room::ToSqlValue::to_sql_value(&params.umowa_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StanyUmowyKlientaRow::from_row).collect()
 }
 
@@ -1939,7 +1949,7 @@ WHERE umowy.klient_id = :klient_id"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(KoniecOstatniejUmowyKlientaRow::from_row).transpose()
 }
 
@@ -1972,6 +1982,7 @@ pub fn wpisz_umowe_klienta(
     params: &WpiszUmoweKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO klienci_kartoteka_umowy (id, klient_id, rodzaj, dzial, nieruchomosc_adres, numer_kw,
@@ -2061,6 +2072,7 @@ pub fn zmien_stan_umowy_klienta(
     params: &ZmienStanUmowyKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO klienci_kartoteka_umowy_stany (umowa_id, stan, od, zrodlo_odnosnik, wpisal)
@@ -2126,7 +2138,7 @@ JOIN klienci_kartoteka_dane AS dane ON dane.klient_id = wpisy.id
 ORDER BY wpisy.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KlienciRow::from_row).collect()
 }
 
@@ -2183,7 +2195,7 @@ ORDER BY dane.klient_id, dane.id"#,
             ("szukane", xmeta_room::ToSqlValue::to_sql_value(&params.szukane)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KlienciPoNazwiskuAlboNazwieRow::from_row).collect()
 }
 
@@ -2216,6 +2228,7 @@ pub fn wpisz_klienta(
     params: &WpiszKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO klienci_kartoteka_wpisy (id, rodzaj_podmiotu, wpisal, wpisano)

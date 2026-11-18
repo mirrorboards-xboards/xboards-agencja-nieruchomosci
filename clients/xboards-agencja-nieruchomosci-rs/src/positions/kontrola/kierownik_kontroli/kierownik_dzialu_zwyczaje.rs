@@ -1,12 +1,13 @@
 //! The kind `kierownik-dzialu-zwyczaje` of the room `positions/kontrola/kierownik_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-dzialu-zwyczaje";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Zwyczaje kontrahentów: jak portal, kanał sprzedaży, kancelaria, bank, spółdzielnia, wspólnota,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-dzialu-zwyczaje",
+    requires: &[&super::stanowisko_zrodla::KIND],
+    migrations: &[
+        r#"-- Zwyczaje kontrahentów: jak portal, kanał sprzedaży, kancelaria, bank, spółdzielnia, wspólnota,
 -- urząd, wykonawca albo deweloper zwykle postępuje, z tematem, opisem, źródłem, pewnością i datą.
 -- To ustalenia kierownika o kontrahentach; polecenia leżą w stanowisko-polecenia.
 --
@@ -109,7 +110,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.kontrahent_rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -382,7 +384,7 @@ ORDER BY pewnosc = 'niepewny', pewnosc = 'prawdopodobny', temat, id"#,
             ("kontrahent", xmeta_room::ToSqlValue::to_sql_value(&params.kontrahent)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZwyczajeKontrahentaRow::from_row).collect()
 }
 
@@ -441,7 +443,7 @@ FROM kierownik_dzialu_zwyczaje_wpisy
 ORDER BY kontrahent_rodzaj, kontrahent, temat, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZwyczajeRow::from_row).collect()
 }
 
@@ -511,7 +513,7 @@ ORDER BY ustalono, id"#,
             ("zrodlo_id", xmeta_room::ToSqlValue::to_sql_value(&params.zrodlo_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZwyczajeOdZrodlaRow::from_row).collect()
 }
 
@@ -534,6 +536,7 @@ pub fn wpisz_zwyczaj(
     params: &WpiszZwyczajParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_zwyczaje_wpisy (kontrahent_rodzaj, kontrahent, temat, opis, zrodlo_id,
@@ -585,6 +588,7 @@ pub fn potwierdz_zwyczaj(
     params: &PotwierdzZwyczajParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_zwyczaje_wpisy
@@ -636,6 +640,7 @@ pub fn zakwestionuj_zwyczaj(
     params: &ZakwestionujZwyczajParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_zwyczaje_wpisy
@@ -669,6 +674,7 @@ pub fn wykresl_zwyczaj(
     params: &WykreslZwyczajParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_zwyczaje_wpisy

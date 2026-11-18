@@ -1,12 +1,13 @@
 //! The kind `oferta-najem` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "oferta-najem";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Warunki, na jakich klient wynajmie nieruchomość, w wersjach. Czynsz leży w oferta-ceny
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "oferta-najem",
+    requires: &[&super::sprawa_uczestnicy::KIND, &super::sprawa_zgody::KIND],
+    migrations: &[
+        r#"-- Warunki, na jakich klient wynajmie nieruchomość, w wersjach. Czynsz leży w oferta-ceny
 -- (dotyczy = 'najem'). Pisze Opiekun oferty; każdą wersję zatwierdza klient zgodą warunki_najmu.
 -- Kwoty w groszach.
 --
@@ -111,7 +112,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// A row of `warunki_najmu`.
 #[derive(Debug, Clone, PartialEq)]
@@ -170,7 +172,7 @@ FROM oferta_najem_warunki
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WarunkiNajmuRow::from_row).collect()
 }
 
@@ -235,7 +237,7 @@ WHERE NOT EXISTS (
 )"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(WarunkiNajmuBiezaceRow::from_row).transpose()
 }
 
@@ -268,6 +270,7 @@ pub fn wpisz_warunki_najmu(
     params: &WpiszWarunkiNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_najem_warunki (id, oplaty_obok_czynszu, rozliczenie_mediow, kaucja,

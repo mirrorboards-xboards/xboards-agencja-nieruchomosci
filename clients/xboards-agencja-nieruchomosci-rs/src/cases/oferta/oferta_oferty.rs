@@ -1,12 +1,22 @@
 //! The kind `oferta-oferty` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "oferta-oferty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Oferty zainteresowanych i kontroferty klienta jako łańcuch wpisów (art. 66 i 68 KC). Pisze
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "oferta-oferty",
+    requires: &[
+        &super::oferta_zainteresowani::KIND,
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umowy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Oferty zainteresowanych i kontroferty klienta jako łańcuch wpisów (art. 66 i 68 KC). Pisze
 -- Opiekun oferty. Żadnego wpisu się nie zmienia; odpowiedź ze zmianą warunków jest nowym wpisem,
 -- który wskazuje ofertę, na którą odpowiada.
 --
@@ -280,7 +290,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.dotyczy`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -524,7 +535,7 @@ FROM oferta_oferty_wpisy
 ORDER BY wpisano, rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OfertyRow::from_row).collect()
 }
 
@@ -599,7 +610,7 @@ WHERE kierunek = 'od_zainteresowanego'
 ORDER BY wpisano, rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OfertyDoPrzedstawieniaRow::from_row).collect()
 }
 
@@ -631,6 +642,7 @@ pub fn wpisz_oferte_zainteresowanego(
     params: &WpiszOferteZainteresowanegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_oferty_wpisy (id, dotyczy, kierunek, osoba_id, odpowiada_na_id, wplyw_id,
@@ -700,6 +712,7 @@ pub fn odnotuj_przedstawienie_oferty(
     params: &OdnotujPrzedstawienieOfertyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_oferty_wpisy
@@ -738,6 +751,7 @@ pub fn odnotuj_decyzje_klienta_o_ofercie(
     params: &OdnotujDecyzjeKlientaOOfercieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_oferty_wpisy
@@ -782,6 +796,7 @@ pub fn wpisz_kontroferte_klienta(
     params: &WpiszKontroferteKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_oferty_wpisy (id, dotyczy, kierunek, osoba_id, odpowiada_na_id, wpisano, kwota,
@@ -842,6 +857,7 @@ pub fn wskaz_odpowiedz_na_oferte(
     params: &WskazOdpowiedzNaOferteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_oferty_wpisy
@@ -875,6 +891,7 @@ pub fn odnotuj_odpowiedz_zainteresowanego(
     params: &OdnotujOdpowiedzZainteresowanegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE oferta_oferty_wpisy

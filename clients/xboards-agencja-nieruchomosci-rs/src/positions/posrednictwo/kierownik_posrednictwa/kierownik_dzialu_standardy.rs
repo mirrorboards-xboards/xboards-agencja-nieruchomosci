@@ -1,12 +1,13 @@
 //! The kind `kierownik-dzialu-standardy` of the room `positions/posrednictwo/kierownik_posrednictwa`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-dzialu-standardy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Standardy działu: kolejne wersje standardów, wzorów i parametrów programu, które zaproponował
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-dzialu-standardy",
+    requires: &[],
+    migrations: &[
+        r#"-- Standardy działu: kolejne wersje standardów, wzorów i parametrów programu, które zaproponował
 -- kierownik, i rozstrzygnięcie człowieka. Dział ma kilka standardów, np. wzór umowy pośrednictwa
 -- i standard ogłoszenia; z każdego obowiązuje najnowsza zatwierdzona wersja.
 --
@@ -93,7 +94,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wersje.rozstrzygniecie`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -238,7 +240,7 @@ ORDER BY numer DESC"#,
             ("standard", xmeta_room::ToSqlValue::to_sql_value(&params.standard)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WersjeStandarduRow::from_row).collect()
 }
 
@@ -297,7 +299,7 @@ WHERE wersja.rozstrzygniecie = 'zatwierdzona'
 ORDER BY wersja.standard"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ObowiazujaceStandardyRow::from_row).collect()
 }
 
@@ -318,6 +320,7 @@ pub fn zaproponuj_standard(
     params: &ZaproponujStandardParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_standardy_wersje (standard, numer, sciezka, skrot, opis_zmian, zaproponowano)
@@ -359,6 +362,7 @@ pub fn rozstrzygnij_standard(
     params: &RozstrzygnijStandardParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_standardy_wersje

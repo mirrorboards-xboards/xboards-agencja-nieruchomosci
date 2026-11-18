@@ -1,12 +1,16 @@
 //! The kind `rejestr-kontroli-sprawdzenia` of the room `registers/rejestr_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "rejestr-kontroli-sprawdzenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Środki bezpieczeństwa finansowego i sprawdzenia spoza ustawy, przeniesione przez Kierownika
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "rejestr-kontroli-sprawdzenia",
+    requires: &[
+        &super::rejestr_kontroli_decyzje::KIND,
+        &super::rejestr_kontroli_klienci::KIND,
+    ],
+    migrations: &[
+        r#"-- Środki bezpieczeństwa finansowego i sprawdzenia spoza ustawy, przeniesione przez Kierownika
 -- kontroli z raportów Kontrolerów w dniu raportu: identyfikacja i weryfikacja, kopie dokumentów,
 -- Centralny Rejestr Beneficjentów Rzeczywistych, eksponowane stanowiska polityczne, listy
 -- sankcyjne, cel stosunków, źródło środków, bieżąca analiza i informacja dla klienta.
@@ -1142,7 +1146,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `identyfikacje.kogo`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -1692,7 +1697,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(CeleStosunkowKlientaRow::from_row).collect()
 }
 
@@ -1717,6 +1722,7 @@ pub fn wpisz_cel_stosunkow(
     params: &WpiszCelStosunkowParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_cele (klient_id, cel, charakter, zrodlo, raport_odnosnik,
@@ -1821,7 +1827,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OdpisyCrbrKlientaRow::from_row).collect()
 }
 
@@ -1849,6 +1855,7 @@ pub fn wpisz_odpis_crbr(
     params: &WpiszOdpisCrbrParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_crbr (klient_id, odpis_sciezka, odpis_skrot, rozbieznosc,
@@ -2003,7 +2010,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(IdentyfikacjeKlientaRow::from_row).collect()
 }
 
@@ -2048,6 +2055,7 @@ pub fn wpisz_identyfikacje(
     params: &WpiszIdentyfikacjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_identyfikacje (klient_id, kogo, rodzaj_podmiotu, imiona,
@@ -2207,7 +2215,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(InformacjeAmlKlientaRow::from_row).collect()
 }
 
@@ -2229,6 +2237,7 @@ pub fn wpisz_informacje_aml(
     params: &WpiszInformacjeAmlParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_informacje (klient_id, poinformowano, sposob, zrodlo,
@@ -2313,7 +2322,7 @@ ORDER BY id DESC"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KopieIdentyfikacjiRow::from_row).collect()
 }
 
@@ -2337,6 +2346,7 @@ pub fn wpisz_kopie_dokumentu(
     params: &WpiszKopieDokumentuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_kopie (identyfikacja_id, plik_sciezka, plik_skrot, zrodlo,
@@ -2434,7 +2444,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AnalizyKlientaRow::from_row).collect()
 }
 
@@ -2460,6 +2470,7 @@ pub fn wpisz_analize(
     params: &WpiszAnalizeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_monitorowanie (klient_id, teczka_odnosnik, analiza, wynik,
@@ -2572,7 +2583,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaPepKlientaRow::from_row).collect()
 }
 
@@ -2604,6 +2615,7 @@ pub fn wpisz_sprawdzenie_pep(
     params: &WpiszSprawdzeniePepParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_pep (klient_id, dotyczy, osoba, oswiadczenie_sciezka,
@@ -2688,6 +2700,7 @@ pub fn wpisz_akceptacje_pep(
     params: &WpiszAkceptacjePepParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_sprawdzenia_pep
@@ -2781,7 +2794,7 @@ ORDER BY id DESC"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaPozaUstawaTeczkiRow::from_row).collect()
 }
 
@@ -2814,6 +2827,7 @@ pub fn wpisz_sprawdzenie_poza_ustawa(
     params: &WpiszSprawdzeniePozaUstawaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_poza_ustawa (klient_id, rodzaj, teczka_odnosnik,
@@ -2942,7 +2956,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaSankcjiKlientaRow::from_row).collect()
 }
 
@@ -2967,6 +2981,7 @@ pub fn wpisz_sprawdzenie_sankcji(
     params: &WpiszSprawdzenieSankcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_sankcje (klient_id, listy, wynik, zrodlo, raport_odnosnik,
@@ -3018,6 +3033,7 @@ pub fn wpisz_zamrozenie(
     params: &WpiszZamrozenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_sprawdzenia_sankcje
@@ -3048,6 +3064,7 @@ pub fn wpisz_informacje_o_zamrozeniu(
     params: &WpiszInformacjeOZamrozeniuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_sprawdzenia_sankcje
@@ -3129,7 +3146,7 @@ ORDER BY id DESC"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WeryfikacjeIdentyfikacjiRow::from_row).collect()
 }
 
@@ -3155,6 +3172,7 @@ pub fn wpisz_weryfikacje(
     params: &WpiszWeryfikacjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_weryfikacje (identyfikacja_id, podstawa, wynik, opis,
@@ -3253,7 +3271,7 @@ ORDER BY id DESC"#,
             ("klient_id", xmeta_room::ToSqlValue::to_sql_value(&params.klient_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZrodlaSrodkowKlientaRow::from_row).collect()
 }
 
@@ -3279,6 +3297,7 @@ pub fn wpisz_zrodlo_srodkow(
     params: &WpiszZrodloSrodkowParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_sprawdzenia_zrodla_srodkow (klient_id, pochodzenie_srodkow,

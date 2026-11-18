@@ -1,12 +1,13 @@
 //! The kind `wykonawcy-cenniki` of the room `registers/wykonawcy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "wykonawcy-cenniki";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Cenniki wykonawców w wersjach i ich przypisanie do wykonawców. Jeden cennik może obowiązywać
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "wykonawcy-cenniki",
+    requires: &[&super::wykonawcy_spis::KIND],
+    migrations: &[
+        r#"-- Cenniki wykonawców w wersjach i ich przypisanie do wykonawców. Jeden cennik może obowiązywać
 -- kilku wykonawców; wtedy wszyscy pracują na tych samych warunkach. Zlecenie w teczce lokalu
 -- wskazuje wersję cennika tekstem, więc koszt w starym zestawieniu nie zmienia się po nowej
 -- wersji.
@@ -329,7 +330,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wersje.stan`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -420,7 +422,7 @@ ORDER BY id"#,
             ("wersja_id", xmeta_room::ToSqlValue::to_sql_value(&params.wersja_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PozycjeCennikaRow::from_row).collect()
 }
 
@@ -442,6 +444,7 @@ pub fn dopisz_pozycje_cennika(
     params: &DopiszPozycjeCennikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_cenniki_pozycje (wersja_id, usluga, doplata, jednostka, cena, z_vat, warunki)
@@ -484,6 +487,7 @@ pub fn popraw_pozycje_cennika(
     params: &PoprawPozycjeCennikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE wykonawcy_cenniki_pozycje
@@ -549,7 +553,7 @@ WHERE do IS NULL
 ORDER BY wykonawca_id, cennik_id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PrzypisaniaCennikowRow::from_row).collect()
 }
 
@@ -568,6 +572,7 @@ pub fn przypisz_cennik(
     params: &PrzypiszCennikParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_cenniki_przypisania (cennik_id, wykonawca_id, od, decyzja_id)
@@ -606,6 +611,7 @@ pub fn zakoncz_przypisanie_cennika(
     params: &ZakonczPrzypisanieCennikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE wykonawcy_cenniki_przypisania
@@ -674,7 +680,7 @@ ORDER BY numer DESC"#,
             ("cennik_id", xmeta_room::ToSqlValue::to_sql_value(&params.cennik_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WersjeCennikaRow::from_row).collect()
 }
 
@@ -730,7 +736,7 @@ LIMIT 1"#,
             ("dzien", xmeta_room::ToSqlValue::to_sql_value(&params.dzien)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(ObowiazujacaWersjaCennikaRow::from_row).transpose()
 }
 
@@ -753,6 +759,7 @@ pub fn wpisz_wersje_cennika(
     params: &WpiszWersjeCennikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_cenniki_wersje (id, cennik_id, numer, obowiazuje_od, wpisano, stan, decyzja_id)
@@ -791,6 +798,7 @@ pub fn zamknij_wersje_cennika(
     params: &ZamknijWersjeCennikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE wykonawcy_cenniki_wersje
@@ -833,7 +841,7 @@ FROM wykonawcy_cenniki_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(CennikiRow::from_row).collect()
 }
 
@@ -851,6 +859,7 @@ pub fn wpisz_cennik(
     params: &WpiszCennikParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wykonawcy_cenniki_wpisy (id, nazwa, wpisano)

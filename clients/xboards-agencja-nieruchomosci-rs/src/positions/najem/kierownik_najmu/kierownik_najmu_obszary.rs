@@ -1,12 +1,13 @@
 //! The kind `kierownik-najmu-obszary` of the room `positions/najem/kierownik_najmu`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-najmu-obszary";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Obszary lokali krótkoterminowych: granice każdego obszaru, zatwierdzone przez człowieka, jego
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-najmu-obszary",
+    requires: &[&super::kierownik_dzialu_agenci::KIND],
+    migrations: &[
+        r#"-- Obszary lokali krótkoterminowych: granice każdego obszaru, zatwierdzone przez człowieka, jego
 -- Koordynator operacji i lokale, które do niego należą.
 --
 -- Granice proponuje kierownik, a zatwierdza człowiek podpisem w wiadomości; kierownik przenosi
@@ -198,7 +199,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The parameters of `lokale_obszaru`.
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -244,7 +246,7 @@ ORDER BY od, id"#,
             ("obszar_id", xmeta_room::ToSqlValue::to_sql_value(&params.obszar_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(LokaleObszaruRow::from_row).collect()
 }
 
@@ -303,7 +305,7 @@ WHERE lokal.teczka_odnosnik = :teczka_odnosnik
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ObszarLokaluRow::from_row).collect()
 }
 
@@ -343,7 +345,7 @@ WHERE lokal.do_dnia IS NULL
 ORDER BY lokal.od, lokal.id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(LokaleBezKoordynatoraRow::from_row).collect()
 }
 
@@ -361,6 +363,7 @@ pub fn przypisz_lokal_do_obszaru(
     params: &PrzypiszLokalDoObszaruParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_najmu_obszary_lokale (obszar_id, teczka_odnosnik, od)
@@ -394,6 +397,7 @@ pub fn zakoncz_przynaleznosc_lokalu(
     params: &ZakonczPrzynaleznoscLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_najmu_obszary_lokale
@@ -449,7 +453,7 @@ FROM kierownik_najmu_obszary_wpisy
 ORDER BY zniesiono IS NOT NULL, nazwa, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ObszaryRow::from_row).collect()
 }
 
@@ -508,7 +512,7 @@ ORDER BY nazwa, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ObszaryKoordynatoraRow::from_row).collect()
 }
 
@@ -526,6 +530,7 @@ pub fn zaproponuj_obszar(
     params: &ZaproponujObszarParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_najmu_obszary_wpisy (nazwa, granice, zaproponowano)
@@ -557,6 +562,7 @@ pub fn zmien_propozycje_obszaru(
     params: &ZmienPropozycjeObszaruParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_najmu_obszary_wpisy
@@ -588,6 +594,7 @@ pub fn zatwierdz_obszar(
     params: &ZatwierdzObszarParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_najmu_obszary_wpisy
@@ -625,6 +632,7 @@ pub fn wskaz_koordynatora_obszaru(
     params: &WskazKoordynatoraObszaruParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_najmu_obszary_wpisy
@@ -655,6 +663,7 @@ pub fn znies_obszar(
     params: &ZniesObszarParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_najmu_obszary_wpisy

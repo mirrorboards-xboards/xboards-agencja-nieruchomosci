@@ -1,12 +1,23 @@
 //! The kind `najem-kaucja` of the room `cases/najem`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "najem-kaucja";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Kaucja najmu: pobranie, wykorzystanie na zaległość przy najmie instytucjonalnym i rozliczenie
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "najem-kaucja",
+    requires: &[
+        &super::najem_czynsz::KIND,
+        &super::najem_umowy::KIND,
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_rachunki::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_wyplaty::KIND,
+    ],
+    migrations: &[
+        r#"-- Kaucja najmu: pobranie, wykorzystanie na zaległość przy najmie instytucjonalnym i rozliczenie
 -- po opróżnieniu lokalu z potrąceniami. Kwotę do zwrotu liczy program, a każde potrącenie
 -- zatwierdza człowiek. Kwoty w groszach.
 --
@@ -427,7 +438,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `pobrania.lezy`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -558,7 +570,7 @@ FROM najem_kaucja_pobrania
 ORDER BY wplacono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PobraniaKaucjiRow::from_row).collect()
 }
 
@@ -581,6 +593,7 @@ pub fn wpisz_pobranie_kaucji(
     params: &WpiszPobranieKaucjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_kaucja_pobrania (id, najem_id, kwota, krotnosc, czynsz_przy_zawarciu, wplacono,
@@ -644,7 +657,7 @@ FROM najem_kaucja_potracenia
 ORDER BY rozliczenie_id, rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PotraceniaZKaucjiRow::from_row).collect()
 }
 
@@ -665,6 +678,7 @@ pub fn dopisz_potracenie_z_kaucji(
     params: &DopiszPotracenieZKaucjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_kaucja_potracenia (id, rozliczenie_id, tytul, kwota, dokument_id)
@@ -700,6 +714,7 @@ pub fn wskaz_zgode_na_potracenie(
     params: &WskazZgodeNaPotracenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_kaucja_potracenia
@@ -758,7 +773,7 @@ FROM najem_kaucja_rozliczenia
 ORDER BY oproznienie, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RozliczeniaKaucjiRow::from_row).collect()
 }
 
@@ -781,6 +796,7 @@ pub fn przygotuj_rozliczenie_kaucji(
     params: &PrzygotujRozliczenieKaucjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_kaucja_rozliczenia (id, pobranie_id, oproznienie, czynsz_w_dniu_zwrotu,
@@ -833,6 +849,7 @@ pub fn zatwierdz_rozliczenie_kaucji(
     params: &ZatwierdzRozliczenieKaucjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_kaucja_rozliczenia
@@ -859,6 +876,7 @@ pub fn odnotuj_wyslanie_rozliczenia_kaucji(
     params: &OdnotujWyslanieRozliczeniaKaucjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_kaucja_rozliczenia
@@ -914,7 +932,7 @@ FROM najem_kaucja_wykorzystania
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WykorzystaniaKaucjiRow::from_row).collect()
 }
 
@@ -934,6 +952,7 @@ pub fn wpisz_wykorzystanie_kaucji(
     params: &WpiszWykorzystanieKaucjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_kaucja_wykorzystania (pobranie_id, kwota, chwila, zaleglosc_id, uzupelnic_do)
@@ -972,6 +991,7 @@ pub fn odnotuj_uzupelnienie_kaucji(
     params: &OdnotujUzupelnienieKaucjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_kaucja_wykorzystania

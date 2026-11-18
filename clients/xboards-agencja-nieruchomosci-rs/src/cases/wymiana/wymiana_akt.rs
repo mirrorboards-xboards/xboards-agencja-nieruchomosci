@@ -1,12 +1,13 @@
 //! The kind `wymiana-akt` of the room `cases/wymiana`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "wymiana-akt";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Akt w pokoju wymiany: terminy aktu ze stanami obu stron, pierwokup i informacja po akcie.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "wymiana-akt",
+    requires: &[&super::wymiana_wpisy::KIND],
+    migrations: &[
+        r#"-- Akt w pokoju wymiany: terminy aktu ze stanami obu stron, pierwokup i informacja po akcie.
 -- Każdy wiersz jest szczegółem jednego wpisu z wymiana_wpisy_wpisy, dopisuje się razem z nim
 -- i potem się nie zmienia.
 --
@@ -318,7 +319,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pokoju wymiany się nie usuwa (R9)');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `pierwokupy.wynik`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -604,7 +606,7 @@ JOIN wymiana_wpisy_wpisy AS wpis ON wpis.id = pierwokup.wpis_id
 ORDER BY wpis.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PierwokupyRow::from_row).collect()
 }
 
@@ -630,6 +632,7 @@ pub fn podaj_pierwokup(
     params: &PodajPierwokupParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, poprawia_id, tresc)
@@ -705,7 +708,7 @@ JOIN wymiana_wpisy_wpisy AS wpis ON wpis.id = po_akcie.wpis_id
 ORDER BY wpis.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(InformacjePoAkcieRow::from_row).collect()
 }
 
@@ -728,6 +731,7 @@ pub fn podaj_informacje_po_akcie(
     params: &PodajInformacjePoAkcieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, poprawia_id, tresc)
@@ -804,7 +808,7 @@ FROM wymiana_akt_terminy_biezace
 ORDER BY dzien, godzina"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(TerminyAktuRow::from_row).collect()
 }
 
@@ -848,7 +852,7 @@ JOIN wymiana_wpisy_wpisy AS wpis ON wpis.id = stan.wpis_id
 ORDER BY wpis.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StanyTerminowRow::from_row).collect()
 }
 
@@ -874,6 +878,7 @@ pub fn zaproponuj_termin_aktu(
     params: &ZaproponujTerminAktuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, odpowiada_na_id, tresc)
@@ -927,6 +932,7 @@ pub fn oglos_stan_terminu(
     params: &OglosStanTerminuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, odpowiada_na_id, tresc)

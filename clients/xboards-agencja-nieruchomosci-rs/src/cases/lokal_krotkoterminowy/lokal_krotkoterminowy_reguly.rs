@@ -1,12 +1,20 @@
 //! The kind `lokal-krotkoterminowy-reguly` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "lokal-krotkoterminowy-reguly";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Reguły teczki lokalu krótkoterminowego na tabelach rdzenia: typ pokoju, etapy lokalu z ich
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "lokal-krotkoterminowy-reguly",
+    requires: &[
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_protokoly::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umowy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Reguły teczki lokalu krótkoterminowego na tabelach rdzenia: typ pokoju, etapy lokalu z ich
 -- przejściami, role, rodzaje zgód, jedna umowa o zarządzanie i pisma, które zawsze wychodzą za
 -- zgodą człowieka. Rodzaj nie ma własnych tabel i wskazuje tylko rdzeń, więc jest pierwszym
 -- rodzajem typu. Reguły, które zależą od tabel typu, leżą w migracjach tamtych rodzajów, np.
@@ -246,4 +254,5 @@ BEGIN
   SELECT RAISE(ABORT, 'pismo do wspólnoty, spółdzielni albo zarządcy budynku przed wysłaniem czeka na zgodę');
 END;
 "#,
-];
+    ],
+};

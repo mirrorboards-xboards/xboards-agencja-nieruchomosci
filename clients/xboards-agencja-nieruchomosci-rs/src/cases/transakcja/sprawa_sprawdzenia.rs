@@ -1,12 +1,20 @@
 //! The kind `sprawa-sprawdzenia` of the room `cases/transakcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-sprawdzenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Wyniki sprawdzeń Kontrolera, które nie należą do przeciwdziałania praniu pieniędzy: tożsamość,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-sprawdzenia",
+    requires: &[
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_nieruchomosci::KIND,
+        &super::sprawa_rachunki::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umocowania::KIND,
+    ],
+    migrations: &[
+        r#"-- Wyniki sprawdzeń Kontrolera, które nie należą do przeciwdziałania praniu pieniędzy: tożsamość,
 -- tytuł do nieruchomości, umocowanie i rachunek. Typ sprawy mówi, co Kontroler w nim sprawdza.
 -- Wpisuje je tylko Kontroler klienta (R7), a wynik ma tylko trzy słowa; ustalenia ze środków
 -- bezpieczeństwa finansowego leżą w rejestrze kontroli.
@@ -188,7 +196,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -341,7 +350,7 @@ FROM sprawa_sprawdzenia_wpisy
 ORDER BY sprawdzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaRow::from_row).collect()
 }
 
@@ -399,7 +408,7 @@ WHERE aktualne = 1
 ORDER BY sprawdzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaAktualneRow::from_row).collect()
 }
 
@@ -429,6 +438,7 @@ pub fn wpisz_sprawdzenie(
     params: &WpiszSprawdzenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_sprawdzenia_wpisy (id, rodzaj, uczestnik_id, nieruchomosc_id, dokument_id,

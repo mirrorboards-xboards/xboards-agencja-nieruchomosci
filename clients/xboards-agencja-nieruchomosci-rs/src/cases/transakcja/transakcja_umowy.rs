@@ -1,12 +1,21 @@
 //! The kind `transakcja-umowy` of the room `cases/transakcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "transakcja-umowy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Umowy stron transakcji: kancelaria notarialna, umowy rezerwacyjna, przedwstępna, warunkowa
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "transakcja-umowy",
+    requires: &[
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_rachunki::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umocowania::KIND,
+    ],
+    migrations: &[
+        r#"-- Umowy stron transakcji: kancelaria notarialna, umowy rezerwacyjna, przedwstępna, warunkowa
 -- i przenosząca własność, ich strony, płatności i prawa pierwokupu. Biuro nie jest stroną tych
 -- umów: projekty pisemne przygotowuje według wzorów, projekt aktu przygotowuje kancelaria,
 -- a podpisują strony. Pisze Koordynator transakcji.
@@ -633,7 +642,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `pierwokupy.wynik`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -1059,7 +1069,7 @@ FROM transakcja_umowy_kancelarie
 ORDER BY od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KancelarieRow::from_row).collect()
 }
 
@@ -1081,6 +1091,7 @@ pub fn wpisz_kancelarie(
     params: &WpiszKancelarieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO transakcja_umowy_kancelarie (id, nazwa, adres, notariusz, xnotariusz, od)
@@ -1119,6 +1130,7 @@ pub fn otworz_pokoj_wymiany(
     params: &OtworzPokojWymianyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_kancelarie
@@ -1155,6 +1167,7 @@ pub fn zakoncz_kancelarie(
     params: &ZakonczKancelarieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_kancelarie
@@ -1209,7 +1222,7 @@ FROM transakcja_umowy_pierwokupy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PierwokupyRow::from_row).collect()
 }
 
@@ -1228,6 +1241,7 @@ pub fn wpisz_pierwokup(
     params: &WpiszPierwokupParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO transakcja_umowy_pierwokupy (id, uprawniony, podstawa, zawiadomiono, wynik)
@@ -1262,6 +1276,7 @@ pub fn odnotuj_zawiadomienie_o_pierwokupie(
     params: &OdnotujZawiadomienieOPierwokupieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_pierwokupy
@@ -1293,6 +1308,7 @@ pub fn odnotuj_wynik_pierwokupu(
     params: &OdnotujWynikPierwokupuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_pierwokupy
@@ -1359,7 +1375,7 @@ FROM transakcja_umowy_platnosci
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PlatnosciTransakcjiRow::from_row).collect()
 }
 
@@ -1385,6 +1401,7 @@ pub fn wpisz_platnosc_transakcji(
     params: &WpiszPlatnoscTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO transakcja_umowy_platnosci (id, umowa_id, rodzaj, charakter, kwota, termin, zrodlo,
@@ -1435,6 +1452,7 @@ pub fn zmien_platnosc_transakcji(
     params: &ZmienPlatnoscTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_platnosci
@@ -1478,6 +1496,7 @@ pub fn wskaz_rachunek_platnosci(
     params: &WskazRachunekPlatnosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_platnosci
@@ -1509,6 +1528,7 @@ pub fn odnotuj_wplate_platnosci(
     params: &OdnotujWplatePlatnosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_platnosci
@@ -1563,7 +1583,7 @@ FROM transakcja_umowy_strony
 ORDER BY umowa_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(StronyUmowTransakcjiRow::from_row).collect()
 }
 
@@ -1582,6 +1602,7 @@ pub fn dopisz_strone_umowy_transakcji(
     params: &DopiszStroneUmowyTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO transakcja_umowy_strony (umowa_id, uczestnik_id, strona, umocowanie_id)
@@ -1662,7 +1683,7 @@ FROM transakcja_umowy_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UmowyTransakcjiRow::from_row).collect()
 }
 
@@ -1689,6 +1710,7 @@ pub fn przygotuj_umowe_transakcji(
     params: &PrzygotujUmoweTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO transakcja_umowy_wpisy (id, rodzaj, forma, oparta_na_id, kancelaria_id,
@@ -1753,6 +1775,7 @@ pub fn zmien_projekt_umowy_transakcji(
     params: &ZmienProjektUmowyTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_wpisy
@@ -1812,6 +1835,7 @@ pub fn odnotuj_zawarcie_umowy_transakcji(
     params: &OdnotujZawarcieUmowyTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_wpisy
@@ -1850,6 +1874,7 @@ pub fn odnotuj_ze_umowa_transakcji_nie_doszla(
     params: &OdnotujZeUmowaTransakcjiNieDoszlaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_wpisy
@@ -1881,6 +1906,7 @@ pub fn rozwiaz_umowe_transakcji(
     params: &RozwiazUmoweTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_wpisy
@@ -1912,6 +1938,7 @@ pub fn odnotuj_wniosek_do_ksiegi(
     params: &OdnotujWniosekDoKsiegiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_wpisy
@@ -1942,6 +1969,7 @@ pub fn odnotuj_wpis_do_ksiegi(
     params: &OdnotujWpisDoKsiegiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE transakcja_umowy_wpisy

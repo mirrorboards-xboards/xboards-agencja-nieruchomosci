@@ -1,12 +1,13 @@
 //! The kind `rejestr-kontroli-zawiadomienia` of the room `registers/rejestr_kontroli`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "rejestr-kontroli-zawiadomienia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Ślad zawiadomień, żądania organów i kontrole. Projekt zawiadomienia leży w pamięci Kierownika
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "rejestr-kontroli-zawiadomienia",
+    requires: &[&super::rejestr_kontroli_decyzje::KIND],
+    migrations: &[
+        r#"-- Ślad zawiadomień, żądania organów i kontrole. Projekt zawiadomienia leży w pamięci Kierownika
 -- kontroli, dopóki człowiek go nie przekaże; do rejestru trafia ślad w dniu przekazania. Żaden
 -- agent nie przekazuje niczego organowi; robi to osoba wyznaczona do obowiązków z ustawy.
 --
@@ -214,7 +215,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy rejestru się nie usuwa (R9); błąd poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -308,7 +310,7 @@ FROM rejestr_kontroli_zawiadomienia_kontrole
 ORDER BY od DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KontroleOrganowRow::from_row).collect()
 }
 
@@ -331,6 +333,7 @@ pub fn wpisz_kontrole_organu(
     params: &WpiszKontroleOrganuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_zawiadomienia_kontrole (organ, od, do, protokol_sciezka, protokol_skrot,
@@ -405,7 +408,7 @@ FROM rejestr_kontroli_zawiadomienia_wpisy
 ORDER BY przekazano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZawiadomieniaRow::from_row).collect()
 }
 
@@ -430,6 +433,7 @@ pub fn wpisz_zawiadomienie(
     params: &WpiszZawiadomienieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_zawiadomienia_wpisy (id, rodzaj, potwierdzenie_decyzja_id,
@@ -481,6 +485,7 @@ pub fn wpisz_potwierdzenie_przyjecia(
     params: &WpiszPotwierdzeniePrzyjeciaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_zawiadomienia_wpisy
@@ -513,6 +518,7 @@ pub fn wpisz_odpowiedz_organu(
     params: &WpiszOdpowiedzOrganuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_zawiadomienia_wpisy
@@ -571,7 +577,7 @@ FROM rejestr_kontroli_zawiadomienia_zadania
 ORDER BY zadano DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZadaniaOrganowRow::from_row).collect()
 }
 
@@ -592,6 +598,7 @@ pub fn wpisz_zadanie_organu(
     params: &WpiszZadanieOrganuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO rejestr_kontroli_zawiadomienia_zadania (organ, zadano, tresc, odebral, wpisal, wpisano)
@@ -623,6 +630,7 @@ pub fn wpisz_odpowiedz_na_zadanie(
     params: &WpiszOdpowiedzNaZadanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE rejestr_kontroli_zawiadomienia_zadania

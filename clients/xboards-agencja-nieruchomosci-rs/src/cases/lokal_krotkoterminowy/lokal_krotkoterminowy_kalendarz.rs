@@ -1,12 +1,22 @@
 //! The kind `lokal-krotkoterminowy-kalendarz` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "lokal-krotkoterminowy-kalendarz";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Jeden kalendarz lokalu dla wszystkich kanałów, ceny nocy z wyliczeniami i oferty w kanałach
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "lokal-krotkoterminowy-kalendarz",
+    requires: &[
+        &super::lokal_krotkoterminowy_pobyty::KIND,
+        &super::lokal_krotkoterminowy_umowa::KIND,
+        &super::lokal_krotkoterminowy_zlecenia::KIND,
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_rachunki::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_zgody::KIND,
+    ],
+    migrations: &[
+        r#"-- Jeden kalendarz lokalu dla wszystkich kanałów, ceny nocy z wyliczeniami i oferty w kanałach
 -- sprzedaży z rachunkiem, na który kanał wypłaca przychód. Prowadzi je Zarządca obiektu; blokady
 -- na prace wpisuje Koordynator operacji. Rodzaj wskazuje pobyty i zlecenia, więc jest po nich.
 --
@@ -550,7 +560,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `kanaly.konto`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -778,7 +789,7 @@ FROM lokal_krotkoterminowy_kalendarz_ceny_biezace
 ORDER BY data, kanal"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(CenyNocyRow::from_row).collect()
 }
 
@@ -819,7 +830,7 @@ FROM lokal_krotkoterminowy_kalendarz_ceny
 ORDER BY ustawiono, rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(HistoriaCenNocyRow::from_row).collect()
 }
 
@@ -842,6 +853,7 @@ pub fn ustaw_cene_nocy(
     params: &UstawCeneNocyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_kalendarz_ceny (id, data, kanal, cena, ustawiono, wyliczenie_id,
@@ -913,7 +925,7 @@ FROM lokal_krotkoterminowy_kalendarz_kanaly
 ORDER BY kanal, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OfertyWKanalachRow::from_row).collect()
 }
 
@@ -935,6 +947,7 @@ pub fn przygotuj_oferte_w_kanale(
     params: &PrzygotujOferteWKanaleParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_kalendarz_kanaly (id, kanal, konto, nazwa_konta, rachunek_id,
@@ -974,6 +987,7 @@ pub fn opublikuj_oferte_w_kanale(
     params: &OpublikujOferteWKanaleParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_kalendarz_kanaly
@@ -1017,6 +1031,7 @@ pub fn zmien_stan_oferty_w_kanale(
     params: &ZmienStanOfertyWKanaleParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_kalendarz_kanaly
@@ -1044,6 +1059,7 @@ pub fn wskaz_rachunek_oferty_w_kanale(
     params: &WskazRachunekOfertyWKanaleParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_kalendarz_kanaly
@@ -1096,7 +1112,7 @@ FROM lokal_krotkoterminowy_kalendarz_noce
 ORDER BY data"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(NoceRow::from_row).collect()
 }
 
@@ -1118,6 +1134,7 @@ pub fn wpisz_noc(
     params: &WpiszNocParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_kalendarz_noce (data, stan, pobyt_id, zlecenie_id, zgoda_id,
@@ -1159,6 +1176,7 @@ pub fn zmien_noc(
     params: &ZmienNocParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_kalendarz_noce
@@ -1222,7 +1240,7 @@ FROM lokal_krotkoterminowy_kalendarz_wyliczenia
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WyliczeniaCenRow::from_row).collect()
 }
 
@@ -1243,6 +1261,7 @@ pub fn wpisz_wyliczenie_cen(
     params: &WpiszWyliczenieCenParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_kalendarz_wyliczenia (id, chwila, dane_wejsciowe, zrodla, sciezka,

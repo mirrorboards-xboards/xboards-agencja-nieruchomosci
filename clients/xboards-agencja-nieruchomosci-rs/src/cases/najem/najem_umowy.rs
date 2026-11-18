@@ -1,12 +1,21 @@
 //! The kind `najem-umowy` of the room `cases/najem`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "najem-umowy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Umowy najmu: warunki umowy o zarządzanie, umowa najmu z opłatami i załącznikami, osoby
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "najem-umowy",
+    requires: &[
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_nieruchomosci::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umowy::KIND,
+    ],
+    migrations: &[
+        r#"-- Umowy najmu: warunki umowy o zarządzanie, umowa najmu z opłatami i załącznikami, osoby
 -- zamieszkujące z najemcą, lokal zastępczy przy najmie okazjonalnym, aneksy i koniec najmu. Biuro
 -- nie jest stroną umowy najmu: projekt przygotowuje Opiekun najmu według wzorów biura, a podpisują
 -- strony. Pisze Opiekun najmu.
@@ -908,7 +917,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `konce.sposob`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -1308,7 +1318,7 @@ FROM najem_umowy_aneksy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AneksyNajmuRow::from_row).collect()
 }
 
@@ -1328,6 +1338,7 @@ pub fn przygotuj_aneks_najmu(
     params: &PrzygotujAneksNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_umowy_aneksy (id, najem_id, opis, projekt_dokument_id)
@@ -1359,6 +1370,7 @@ pub fn wskaz_zgode_na_aneks_najmu(
     params: &WskazZgodeNaAneksNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_aneksy
@@ -1390,6 +1402,7 @@ pub fn odnotuj_podpisanie_aneksu_najmu(
     params: &OdnotujPodpisanieAneksuNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_aneksy
@@ -1461,7 +1474,7 @@ FROM najem_umowy_konce
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KonceNajmuRow::from_row).collect()
 }
 
@@ -1484,6 +1497,7 @@ pub fn wpisz_koniec_najmu(
     params: &WpiszKoniecNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_umowy_konce (id, najem_id, sposob, przyczyna, wysylka_id, wplyw_id, koniec_najmu)
@@ -1524,6 +1538,7 @@ pub fn odnotuj_doreczenie_konca_najmu(
     params: &OdnotujDoreczenieKoncaNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_konce
@@ -1555,6 +1570,7 @@ pub fn odnotuj_decyzje_po_smierci_najemcy(
     params: &OdnotujDecyzjePoSmierciNajemcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_konce
@@ -1590,6 +1606,7 @@ pub fn wskaz_zadanie_oproznienia(
     params: &WskazZadanieOproznieniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_konce
@@ -1621,6 +1638,7 @@ pub fn odnotuj_doreczenie_zadania_oproznienia(
     params: &OdnotujDoreczenieZadaniaOproznieniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_konce
@@ -1656,6 +1674,7 @@ pub fn odnotuj_oproznienie_lokalu(
     params: &OdnotujOproznienieLokaluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_konce
@@ -1708,7 +1727,7 @@ FROM najem_umowy_lokale_zastepcze
 ORDER BY wskazano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(LokaleZastepczeRow::from_row).collect()
 }
 
@@ -1726,6 +1745,7 @@ pub fn wpisz_lokal_zastepczy(
     params: &WpiszLokalZastepczyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_umowy_lokale_zastepcze (najem_id, adres, wskazano)
@@ -1753,6 +1773,7 @@ pub fn wskaz_zgode_na_lokal_zastepczy(
     params: &WskazZgodeNaLokalZastepczyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_lokale_zastepcze
@@ -1783,6 +1804,7 @@ pub fn odnotuj_utrate_lokalu_zastepczego(
     params: &OdnotujUtrateLokaluZastepczegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_lokale_zastepcze
@@ -1871,7 +1893,7 @@ FROM najem_umowy_najmu
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UmowyNajmuRow::from_row).collect()
 }
 
@@ -1902,6 +1924,7 @@ pub fn przygotuj_umowe_najmu(
     params: &PrzygotujUmoweNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_umowy_najmu (id, rodzaj, nieruchomosc_id, poczatek, koniec, forma,
@@ -1979,6 +2002,7 @@ pub fn zmien_projekt_umowy_najmu(
     params: &ZmienProjektUmowyNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_najmu
@@ -2048,6 +2072,7 @@ pub fn wskaz_oswiadczenie_najemcy(
     params: &WskazOswiadczenieNajemcyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_najmu
@@ -2080,6 +2105,7 @@ pub fn przekaz_umowe_najmu_do_podpisu(
     params: &PrzekazUmoweNajmuDoPodpisuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_najmu
@@ -2114,6 +2140,7 @@ pub fn odnotuj_zawarcie_umowy_najmu(
     params: &OdnotujZawarcieUmowyNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_najmu
@@ -2147,6 +2174,7 @@ pub fn odnotuj_przekazanie_swiadectwa(
     params: &OdnotujPrzekazanieSwiadectwaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_najmu
@@ -2180,6 +2208,7 @@ pub fn odnotuj_zgloszenie_najmu_do_urzedu(
     params: &OdnotujZgloszenieNajmuDoUrzeduParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_najmu
@@ -2217,6 +2246,7 @@ pub fn zakoncz_umowe_najmu(
     params: &ZakonczUmoweNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_najmu
@@ -2268,7 +2298,7 @@ FROM najem_umowy_oplaty
 ORDER BY najem_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OplatyNajmuRow::from_row).collect()
 }
 
@@ -2287,6 +2317,7 @@ pub fn dopisz_oplate_najmu(
     params: &DopiszOplateNajmuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_umowy_oplaty (najem_id, rodzaj, sposob, umowa_z_dostawca_ma)
@@ -2338,7 +2369,7 @@ FROM najem_umowy_zamieszkujacy
 ORDER BY od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZamieszkujacyRow::from_row).collect()
 }
 
@@ -2356,6 +2387,7 @@ pub fn wpisz_zamieszkujacego(
     params: &WpiszZamieszkujacegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_umowy_zamieszkujacy (najem_id, uczestnik_id, od)
@@ -2386,6 +2418,7 @@ pub fn odnotuj_wyprowadzke_zamieszkujacego(
     params: &OdnotujWyprowadzkeZamieszkujacegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE najem_umowy_zamieszkujacy
@@ -2435,7 +2468,7 @@ FROM najem_umowy_zarzadzanie
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WarunkiZarzadzaniaRow::from_row).collect()
 }
 
@@ -2456,6 +2489,7 @@ pub fn wpisz_warunki_zarzadzania(
     params: &WpiszWarunkiZarzadzaniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO najem_umowy_zarzadzanie (umowa_id, kwota_napraw, przeplyw, aneks_zdarzenie_id, od)

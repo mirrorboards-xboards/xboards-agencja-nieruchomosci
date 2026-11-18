@@ -1,12 +1,13 @@
 //! The kind `kierownik-biura-decyzje` of the room `positions/biuro/kierownik_biura`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-biura-decyzje";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Listy decyzji: pozycje z próśb kierowników działów o decyzję człowieka, po jednej liście dla
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-biura-decyzje",
+    requires: &[],
+    migrations: &[
+        r#"-- Listy decyzji: pozycje z próśb kierowników działów o decyzję człowieka, po jednej liście dla
 -- każdego, kto decyduje. Samej prośby kierownik nie widzi: pozycja wskazuje jej wiersz w teczce
 -- i niesie opis kierownika działu jako jego słowa, a nie rekomendację Kierownika biura. Prośby
 -- Kontroli nie trafiają na listę, bo Kontrola przekazuje je właścicielowi sama.
@@ -108,7 +109,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); zdjętych pozycji się nie wykreśla');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `pozycje.dzial`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -269,7 +271,7 @@ ORDER BY (termin IS NOT NULL AND termin <= :bliski_termin) DESC,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ListaDecyzjiRow::from_row).collect()
 }
 
@@ -331,7 +333,7 @@ ORDER BY przyjeto, id"#,
             ("przed", xmeta_room::ToSqlValue::to_sql_value(&params.przed)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PozycjeCzekajaceOdRow::from_row).collect()
 }
 
@@ -390,7 +392,7 @@ WHERE zdjeto >= :od
 ORDER BY zdjeto, id"#,
         parameters: Vec::from([("od", xmeta_room::ToSqlValue::to_sql_value(&params.od))]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PozycjeZdjeteOdRow::from_row).collect()
 }
 
@@ -411,6 +413,7 @@ pub fn przyjmij_pozycje(
     params: &PrzyjmijPozycjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_biura_decyzje_pozycje (prosba_odnosnik, dzial, decyduje, opis, termin,
@@ -447,6 +450,7 @@ pub fn odnow_pozycje(
     params: &OdnowPozycjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_decyzje_pozycje
@@ -481,6 +485,7 @@ pub fn odnotuj_wyslanie_pozycji(
     params: &OdnotujWyslaniePozycjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_decyzje_pozycje
@@ -513,6 +518,7 @@ pub fn odnotuj_osobne_zgloszenie(
     params: &OdnotujOsobneZgloszenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_decyzje_pozycje
@@ -544,6 +550,7 @@ pub fn zdejmij_pozycje(
     params: &ZdejmijPozycjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_decyzje_pozycje

@@ -1,12 +1,13 @@
 //! The kind `analityk-stanu-prawnego-sprawdzenia` of the room `positions/transakcje/analityk_stanu_prawnego`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "analityk-stanu-prawnego-sprawdzenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Sprawdzenia: każde sprawdzenie stanu prawnego osobno, np. dział III księgi, pierwokup gminy albo
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "analityk-stanu-prawnego-sprawdzenia",
+    requires: &[&super::analityk_stanu_prawnego_ksiega::KIND],
+    migrations: &[
+        r#"-- Sprawdzenia: każde sprawdzenie stanu prawnego osobno, np. dział III księgi, pierwokup gminy albo
 -- zgodność projektu aktu z umową przedwstępną. Analiza w teczce transakcji zbiera wnioski dla stron;
 -- pamięć trzyma pojedyncze sprawdzenia z dokumentem, przepisem i wynikiem, na których analiza stoi.
 --
@@ -105,7 +106,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.przedmiot`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -267,7 +269,7 @@ WHERE zastapione_przez_id IS NULL
 ORDER BY wynik = 'bez_uwag', sprawdzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaStanuPrawnegoRow::from_row).collect()
 }
 
@@ -331,7 +333,7 @@ ORDER BY sprawdzono, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaDokumentuRow::from_row).collect()
 }
 
@@ -382,7 +384,7 @@ WHERE analiza_odnosnik IS NULL
 ORDER BY sprawdzono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawdzeniaBezAnalizyRow::from_row).collect()
 }
 
@@ -407,6 +409,7 @@ pub fn zapisz_sprawdzenie_stanu_prawnego(
     params: &ZapiszSprawdzenieStanuPrawnegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO analityk_stanu_prawnego_sprawdzenia_wpisy (id, przedmiot, dokument_odnosnik,
@@ -457,6 +460,7 @@ pub fn odnotuj_analize_sprawdzenia(
     params: &OdnotujAnalizeSprawdzeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE analityk_stanu_prawnego_sprawdzenia_wpisy
@@ -487,6 +491,7 @@ pub fn zastap_sprawdzenie_stanu_prawnego(
     params: &ZastapSprawdzenieStanuPrawnegoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE analityk_stanu_prawnego_sprawdzenia_wpisy

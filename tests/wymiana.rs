@@ -905,7 +905,9 @@ fn entry_file_and_content() {
     // A writer outside the client can leave out the file that `przekaz_pelnomocnictwo` requires.
     // The table refuses the document without one. Both statements of the operation run in one
     // write, so the refusal leaves nothing behind.
-    let power_without_file = room.write(&[
+    let power_without_file = room.write(
+    &[&wymiana_dokumenty::KIND],
+    &[
         Statement {
             sql:
                 "INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, sciezka, skrot)
@@ -1340,7 +1342,9 @@ fn comments_on_draft() {
     // A writer outside the client can leave out the decision that `przekaz_uwagi_do_projektu`
     // requires. The table refuses the comments without one. Both statements of the operation run
     // in one write, so the refusal leaves nothing behind.
-    let comments_without_decision = room.write(&[
+    let comments_without_decision = room.write(
+    &[&wymiana_dokumenty::KIND],
+    &[
         Statement {
             sql: "INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, odpowiada_na_id,
               tresc)
@@ -1472,7 +1476,9 @@ fn person_data_of_the_act() {
     // A writer outside the client can leave out the source document that `przekaz_dane_osoby`
     // requires. The table refuses the data without one. Both statements of the operation run in
     // one write, so the refusal leaves nothing behind.
-    let data_without_source = room.write(&[
+    let data_without_source = room.write(
+    &[&wymiana_dane::KIND],
+    &[
         Statement {
             sql: "INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila)
             VALUES (:wpis_id, :strona, :autor, 'dane_osoby', :chwila)",

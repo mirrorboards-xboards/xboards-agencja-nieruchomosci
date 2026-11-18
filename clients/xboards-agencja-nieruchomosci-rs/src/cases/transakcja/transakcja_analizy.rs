@@ -1,12 +1,13 @@
 //! The kind `transakcja-analizy` of the room `cases/transakcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "transakcja-analizy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Analizy stanu prawnego i ryzyka transakcji: księga wieczysta, ograniczenia obrotu, projekty
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "transakcja-analizy",
+    requires: &[&super::sprawa_dokumenty::KIND, &super::transakcja_umowy::KIND],
+    migrations: &[
+        r#"-- Analizy stanu prawnego i ryzyka transakcji: księga wieczysta, ograniczenia obrotu, projekty
 -- i forma umów, przekazanie i przerwanie. Pisze Analityk stanu prawnego. Analiza ma plik z pełnym
 -- wywodem, a w tabeli krótkie wnioski i ryzyka.
 --
@@ -157,7 +158,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.przedmiot`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -249,7 +251,7 @@ FROM transakcja_analizy_ryzyka
 ORDER BY analiza_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RyzykaTransakcjiRow::from_row).collect()
 }
 
@@ -267,6 +269,7 @@ pub fn dopisz_ryzyko_transakcji(
     params: &DopiszRyzykoTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO transakcja_analizy_ryzyka (analiza_id, opis, skutek)
@@ -327,7 +330,7 @@ FROM transakcja_analizy_wpisy
 ORDER BY sporzadzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AnalizyTransakcjiRow::from_row).collect()
 }
 
@@ -375,7 +378,7 @@ WHERE aktualna = 1
 ORDER BY przedmiot, umowa_id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AnalizyAktualneTransakcjiRow::from_row).collect()
 }
 
@@ -399,6 +402,7 @@ pub fn wpisz_analize_transakcji(
     params: &WpiszAnalizeTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO transakcja_analizy_wpisy (id, przedmiot, umowa_id, dokument_id,

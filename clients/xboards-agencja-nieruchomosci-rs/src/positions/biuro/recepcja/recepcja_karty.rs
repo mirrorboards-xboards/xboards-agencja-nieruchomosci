@@ -1,12 +1,13 @@
 //! The kind `recepcja-karty` of the room `positions/biuro/recepcja`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "recepcja-karty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Karty dla Kierownika biura: nowe zgłoszenie, pismo, którego Recepcja nie umiała przypisać do
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "recepcja-karty",
+    requires: &[&super::recepcja_wplywy::KIND],
+    migrations: &[
+        r#"-- Karty dla Kierownika biura: nowe zgłoszenie, pismo, którego Recepcja nie umiała przypisać do
 -- żadnej sprawy, albo skarga na biuro, i to, jak Kierownik biura kartę rozstrzygnął.
 --
 -- Karta ma stałe pola, które Recepcja wypełniła z wiadomości albo rozmowy. Wolny tekst
@@ -116,7 +117,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -483,7 +485,7 @@ pub fn meldunek_dzienny(
             ("dzien", xmeta_room::ToSqlValue::to_sql_value(&params.dzien)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(MeldunekDziennyRow::from_row).transpose()
 }
 
@@ -541,7 +543,7 @@ WHERE stan = 'czeka'
 ORDER BY wyslano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KartyCzekajaceRow::from_row).collect()
 }
 
@@ -566,6 +568,7 @@ pub fn wyslij_karte(
     params: &WyslijKarteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO recepcja_karty_wpisy (rodzaj, wplyw_id, wyslano, rodzaj_sprawy, rodzaj_nieruchomosci,
@@ -621,6 +624,7 @@ pub fn odnotuj_rozstrzygniecie_karty(
     params: &OdnotujRozstrzygniecieKartyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE recepcja_karty_wpisy

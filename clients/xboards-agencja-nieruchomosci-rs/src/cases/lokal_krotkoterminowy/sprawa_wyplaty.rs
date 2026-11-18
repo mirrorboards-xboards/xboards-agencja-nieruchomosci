@@ -1,12 +1,20 @@
 //! The kind `sprawa-wyplaty` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-wyplaty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Wypłaty pieniędzy klienta, które przechodzą przez biuro, np. zwrot kaucji albo miesięczna
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-wyplaty",
+    requires: &[
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_rachunki::KIND,
+        &super::sprawa_sprawdzenia::KIND,
+        &super::sprawa_uczestnicy::KIND,
+    ],
+    migrations: &[
+        r#"-- Wypłaty pieniędzy klienta, które przechodzą przez biuro, np. zwrot kaucji albo miesięczna
 -- wypłata dla właściciela lokalu. Wypłatę przygotowuje agent sprawy z podstawą z typu sprawy
 -- i wyliczeniem z programu; agent nie zleca przelewów. Wykonanie wpisuje człowiek, który zlecił
 -- przelew, z potwierdzeniem z banku.
@@ -204,7 +212,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.stan`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -306,7 +315,7 @@ FROM sprawa_wyplaty_wpisy
 ORDER BY utworzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WyplatyRow::from_row).collect()
 }
 
@@ -364,7 +373,7 @@ WHERE stan = 'przygotowana'
 ORDER BY utworzono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WyplatyPrzygotowaneRow::from_row).collect()
 }
 
@@ -389,6 +398,7 @@ pub fn przygotuj_wyplate(
     params: &PrzygotujWyplateParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_wyplaty_wpisy (id, podstawa_tabela, podstawa_id, kwota, wyliczenie_sciezka,
@@ -447,6 +457,7 @@ pub fn wskaz_sprawdzenie_wyplaty(
     params: &WskazSprawdzenieWyplatyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_wyplaty_wpisy
@@ -477,6 +488,7 @@ pub fn wskaz_zgode_na_wyplate(
     params: &WskazZgodeNaWyplateParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_wyplaty_wpisy
@@ -509,6 +521,7 @@ pub fn odnotuj_wykonanie_wyplaty(
     params: &OdnotujWykonanieWyplatyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_wyplaty_wpisy
@@ -545,6 +558,7 @@ pub fn anuluj_wyplate(
     params: &AnulujWyplateParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_wyplaty_wpisy

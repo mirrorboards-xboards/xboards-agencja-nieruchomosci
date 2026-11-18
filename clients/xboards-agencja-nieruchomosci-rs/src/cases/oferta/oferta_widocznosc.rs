@@ -1,12 +1,13 @@
 //! The kind `oferta-widocznosc` of the room `cases/oferta`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "oferta-widocznosc";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Rodzaj oferty i jej widoczność z umowy pośrednictwa, w wersjach. Pierwszą wersję wpisuje Opiekun
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "oferta-widocznosc",
+    requires: &[&super::sprawa_umowy::KIND],
+    migrations: &[
+        r#"-- Rodzaj oferty i jej widoczność z umowy pośrednictwa, w wersjach. Pierwszą wersję wpisuje Opiekun
 -- oferty przy zawartej umowie, a każdą następną przy aneksie, który ją zmienia. Członkowie teczki
 -- ją czytają, a Kierownik pośrednictwa przepisuje ją do katalogu ofert (katalog wskazuje wersję
 -- tekstem, więc wersja ma UUID).
@@ -119,7 +120,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wersje.rodzaj_oferty`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -248,7 +250,7 @@ FROM oferta_widocznosc_wersje
 ORDER BY od, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WersjeWidocznosciRow::from_row).collect()
 }
 
@@ -288,7 +290,7 @@ pub fn biezaca_widocznosc(
 FROM oferta_widocznosc_biezaca"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(BiezacaWidocznoscRow::from_row).transpose()
 }
 
@@ -312,6 +314,7 @@ pub fn wpisz_wersje_widocznosci(
     params: &WpiszWersjeWidocznosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO oferta_widocznosc_wersje (id, umowa_id, rodzaj_oferty, widocznosc, granice_zgody,

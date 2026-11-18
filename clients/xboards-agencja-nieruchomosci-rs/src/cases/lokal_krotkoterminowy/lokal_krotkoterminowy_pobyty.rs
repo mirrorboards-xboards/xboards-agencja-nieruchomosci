@@ -1,12 +1,18 @@
 //! The kind `lokal-krotkoterminowy-pobyty` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "lokal-krotkoterminowy-pobyty";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Pobyty gości: rezerwacja z kanału, pieniądze pobytu, opłacenie, przebieg, zmiany, zgłoszenia,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "lokal-krotkoterminowy-pobyty",
+    requires: &[
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_uczestnicy::KIND,
+    ],
+    migrations: &[
+        r#"-- Pobyty gości: rezerwacja z kanału, pieniądze pobytu, opłacenie, przebieg, zmiany, zgłoszenia,
 -- wyjątki od regulaminu, opinie, zwroty, rekompensaty i szkody, a także skargi sąsiadów.
 -- Rezerwacje i pieniądze pisze Zarządca obiektu, zgłoszenia, wyjątki i opinie Konsjerż. Rozmowy
 -- z gośćmi zostają w kanale; teczka zapisuje ich skutki.
@@ -610,7 +616,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `pieniadze.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -857,7 +864,7 @@ FROM lokal_krotkoterminowy_pobyty_opinie
 ORDER BY opublikowano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OpinieGosciRow::from_row).collect()
 }
 
@@ -876,6 +883,7 @@ pub fn wpisz_opinie_goscia(
     params: &WpiszOpinieGosciaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_pobyty_opinie (id, pobyt_id, ocena, opublikowano)
@@ -907,6 +915,7 @@ pub fn wskaz_odpowiedz_na_opinie(
     params: &WskazOdpowiedzNaOpinieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_opinie
@@ -965,7 +974,7 @@ FROM lokal_krotkoterminowy_pobyty_pieniadze
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PieniadzePobytowRow::from_row).collect()
 }
 
@@ -989,6 +998,7 @@ pub fn wpisz_pieniadze_pobytu(
     params: &WpiszPieniadzePobytuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_pobyty_pieniadze (id, pobyt_id, rodzaj, wedlug_zasad_kanalu, kwota,
@@ -1050,7 +1060,7 @@ FROM lokal_krotkoterminowy_pobyty_skargi
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SkargiSasiadowRow::from_row).collect()
 }
 
@@ -1069,6 +1079,7 @@ pub fn wpisz_skarge(
     params: &WpiszSkargeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_pobyty_skargi (chwila, kto, tresc, pobyt_id)
@@ -1097,6 +1108,7 @@ pub fn wskaz_odpowiedz_na_skarge(
     params: &WskazOdpowiedzNaSkargeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_skargi
@@ -1177,7 +1189,7 @@ FROM lokal_krotkoterminowy_pobyty_wpisy
 ORDER BY przyjazd, przyjeto"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PobytyRow::from_row).collect()
 }
 
@@ -1243,7 +1255,7 @@ WHERE stan IN ('potwierdzona', 'kolizja', 'trwa')
 ORDER BY przyjazd, przyjeto"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PobytyWTokuRow::from_row).collect()
 }
 
@@ -1273,6 +1285,7 @@ pub fn przyjmij_rezerwacje(
     params: &PrzyjmijRezerwacjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_pobyty_wpisy (id, kanal, numer_rezerwacji, przyjeto, przyjazd,
@@ -1338,6 +1351,7 @@ pub fn zmien_rezerwacje(
     params: &ZmienRezerwacjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_wpisy
@@ -1383,6 +1397,7 @@ pub fn odnotuj_oplacenie_pobytu(
     params: &OdnotujOplaceniePobytuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_wpisy
@@ -1409,6 +1424,7 @@ pub fn odnotuj_instrukcje_wejscia(
     params: &OdnotujInstrukcjeWejsciaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_wpisy
@@ -1439,6 +1455,7 @@ pub fn zmien_stan_pobytu(
     params: &ZmienStanPobytuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_wpisy
@@ -1466,6 +1483,7 @@ pub fn zakoncz_pobyt(
     params: &ZakonczPobytParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_wpisy
@@ -1500,6 +1518,7 @@ pub fn odnotuj_rozliczenie_pobytu(
     params: &OdnotujRozliczeniePobytuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_wpisy
@@ -1563,7 +1582,7 @@ FROM lokal_krotkoterminowy_pobyty_wyjatki
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WyjatkiPobytowRow::from_row).collect()
 }
 
@@ -1583,6 +1602,7 @@ pub fn wpisz_wyjatek_pobytu(
     params: &WpiszWyjatekPobytuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_pobyty_wyjatki (id, pobyt_id, opis, decyzja_id)
@@ -1638,7 +1658,7 @@ FROM lokal_krotkoterminowy_pobyty_zgloszenia
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZgloszeniaGosciRow::from_row).collect()
 }
 
@@ -1661,6 +1681,7 @@ pub fn wpisz_zgloszenie_goscia(
     params: &WpiszZgloszenieGosciaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_pobyty_zgloszenia (id, pobyt_id, chwila, opis, przekazano,
@@ -1702,6 +1723,7 @@ pub fn odnotuj_przekazanie_zgloszenia(
     params: &OdnotujPrzekazanieZgloszeniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_pobyty_zgloszenia
@@ -1754,7 +1776,7 @@ FROM lokal_krotkoterminowy_pobyty_zmiany
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZmianyPobytowRow::from_row).collect()
 }
 
@@ -1774,6 +1796,7 @@ pub fn wpisz_zmiane_pobytu(
     params: &WpiszZmianePobytuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_pobyty_zmiany (pobyt_id, chwila, co, przyczyna, zdecydowal)

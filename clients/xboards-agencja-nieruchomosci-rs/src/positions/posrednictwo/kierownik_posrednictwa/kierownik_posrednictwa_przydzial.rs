@@ -1,12 +1,13 @@
 //! The kind `kierownik-posrednictwa-przydzial` of the room `positions/posrednictwo/kierownik_posrednictwa`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-posrednictwa-przydzial";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Przydział pośredników: reguły każdego pośrednika (obszar, rodzaje nieruchomości, limit spraw
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-posrednictwa-przydzial",
+    requires: &[&super::kierownik_dzialu_agenci::KIND],
+    migrations: &[
+        r#"-- Przydział pośredników: reguły każdego pośrednika (obszar, rodzaje nieruchomości, limit spraw
 -- i czy przyjmuje nowe) i karty od Kierownika biura z pośrednikiem, którego kierownik zaproponował.
 --
 -- Reguły pośrednika zmienia tylko jego wiadomość podpisana jego kluczem (podszywanie się); podpis
@@ -202,7 +203,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `karty.stan`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -307,7 +309,7 @@ WHERE stan IN ('czeka', 'zaproponowana')
 ORDER BY otrzymano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KartyOtwarteRow::from_row).collect()
 }
 
@@ -325,6 +327,7 @@ pub fn przyjmij_karte(
     params: &PrzyjmijKarteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_posrednictwa_przydzial_karty (karta_odnosnik, otrzymano, kontakt, stan)
@@ -363,6 +366,7 @@ pub fn zaproponuj_posrednika(
     params: &ZaproponujPosrednikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_posrednictwa_przydzial_karty
@@ -415,6 +419,7 @@ pub fn cofnij_propozycje(
     params: &CofnijPropozycjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_posrednictwa_przydzial_karty
@@ -448,6 +453,7 @@ pub fn odnotuj_zalozenie_teczki(
     params: &OdnotujZalozenieTeczkiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_posrednictwa_przydzial_karty
@@ -486,6 +492,7 @@ pub fn odrzuc_karte(
     params: &OdrzucKarteParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_posrednictwa_przydzial_karty
@@ -554,7 +561,7 @@ WHERE zastapione_od IS NULL
 ORDER BY posrednik, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PosrednicyRow::from_row).collect()
 }
 
@@ -611,7 +618,7 @@ ORDER BY od, id"#,
             ("posrednik", xmeta_room::ToSqlValue::to_sql_value(&params.posrednik)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(HistoriaRegulPosrednikaRow::from_row).collect()
 }
 
@@ -660,7 +667,7 @@ WHERE regula.zastapione_od IS NULL
 ORDER BY regula.posrednik, regula.id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ObciazeniePosrednikowRow::from_row).collect()
 }
 
@@ -683,6 +690,7 @@ pub fn zapisz_regule_posrednika(
     params: &ZapiszRegulePosrednikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_posrednictwa_przydzial_posrednicy (posrednik, obszar, rodzaje_nieruchomosci,
@@ -734,6 +742,7 @@ pub fn zastap_regule_posrednika(
     params: &ZastapRegulePosrednikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_posrednictwa_przydzial_posrednicy

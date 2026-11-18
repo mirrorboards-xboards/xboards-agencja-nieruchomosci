@@ -1,12 +1,13 @@
 //! The kind `wymiana-wpisy` of the room `cases/wymiana`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "wymiana-wpisy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Dziennik wpisów pokoju wymiany: każdy wpis obu stron, także wiadomości, z autorem, stroną
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "wymiana-wpisy",
+    requires: &[&super::wymiana_metryka::KIND],
+    migrations: &[
+        r#"-- Dziennik wpisów pokoju wymiany: każdy wpis obu stron, także wiadomości, z autorem, stroną
 -- i czasem. Pola typowe wpisu leżą w tabelach szczegółów innych rodzajów, które go wskazują
 -- (wymiana-dokumenty, wymiana-dane, wymiana-akt; decyzja T11). Podpis autora daje serwer pokoju.
 --
@@ -142,7 +143,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pokoju wymiany się nie usuwa (R9)');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.strona`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -326,7 +328,7 @@ FROM wymiana_wpisy_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WpisyRow::from_row).collect()
 }
 
@@ -380,7 +382,7 @@ FROM wymiana_wpisy_wpisy
 WHERE id = :id"#,
         parameters: Vec::from([("id", xmeta_room::ToSqlValue::to_sql_value(&params.id))]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(WpisRow::from_row).transpose()
 }
 
@@ -435,7 +437,7 @@ WHERE chwila >= :od
 ORDER BY rowid"#,
         parameters: Vec::from([("od", xmeta_room::ToSqlValue::to_sql_value(&params.od))]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WpisyOdChwiliRow::from_row).collect()
 }
 
@@ -460,6 +462,7 @@ pub fn wpisz_wiadomosc(
     params: &WpiszWiadomoscParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, odpowiada_na_id, poprawia_id,

@@ -1,12 +1,13 @@
 //! The kind `kierownik-biura-sprawozdania` of the room `positions/biuro/kierownik_biura`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-biura-sprawozdania";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Sprawozdania dla właściciela biura, robocze i przekazane. Tekst leży w repozytorium XGit pokoju
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-biura-sprawozdania",
+    requires: &[],
+    migrations: &[
+        r#"-- Sprawozdania dla właściciela biura, robocze i przekazane. Tekst leży w repozytorium XGit pokoju
 -- pamięci; wiersz trzyma okres, ścieżkę i skrót. Przekazanego sprawozdania się nie zmienia, bo
 -- właściciel biura opiera na nim decyzje; poprawka to nowe sprawozdanie.
 CREATE TABLE kierownik_biura_sprawozdania_wpisy (
@@ -64,7 +65,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -152,7 +154,7 @@ FROM kierownik_biura_sprawozdania_wpisy
 ORDER BY sporzadzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawozdaniaRow::from_row).collect()
 }
 
@@ -173,6 +175,7 @@ pub fn zapisz_sprawozdanie(
     params: &ZapiszSprawozdanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_biura_sprawozdania_wpisy (rodzaj, okres_od, okres_do, sciezka, skrot,
@@ -211,6 +214,7 @@ pub fn zmien_sprawozdanie(
     params: &ZmienSprawozdanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_sprawozdania_wpisy
@@ -249,6 +253,7 @@ pub fn przekaz_sprawozdanie(
     params: &PrzekazSprawozdanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_biura_sprawozdania_wpisy

@@ -1,12 +1,13 @@
 //! The kind `stanowisko-ustalenia` of the room `positions/biuro/kierownik_biura`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "stanowisko-ustalenia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Ustalenia: co agent ustalił o świecie, ze źródłem, pewnością, sposobem sprawdzenia i datą.
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "stanowisko-ustalenia",
+    requires: &[&super::stanowisko_zrodla::KIND],
+    migrations: &[
+        r#"-- Ustalenia: co agent ustalił o świecie, ze źródłem, pewnością, sposobem sprawdzenia i datą.
 -- Polecenia leżą osobno (stanowisko-polecenia), bo to, co agentowi kazano, nie jest faktem o świecie.
 --
 -- Ustalenie jest zapisem tego, co agent wiedział i skąd. Nowy fakt to nowe ustalenie, a poprzednie
@@ -85,7 +86,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.pewnosc`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -186,7 +188,7 @@ WHERE nieaktualne_od IS NULL
 ORDER BY ustalono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UstaleniaRow::from_row).collect()
 }
 
@@ -253,7 +255,7 @@ ORDER BY ustalono, id"#,
             ("zrodlo_id", xmeta_room::ToSqlValue::to_sql_value(&params.zrodlo_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UstaleniaOdZrodlaRow::from_row).collect()
 }
 
@@ -323,7 +325,7 @@ ORDER BY ustalono, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UstaleniaZWierszaRow::from_row).collect()
 }
 
@@ -392,7 +394,7 @@ ORDER BY ustalono, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UstaleniaORow::from_row).collect()
 }
 
@@ -418,6 +420,7 @@ pub fn zapisz_ustalenie(
     params: &ZapiszUstalenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO stanowisko_ustalenia_wpisy (id, tresc, zrodlo_id, wynika_z_tabela, wynika_z_odnosnik,
@@ -473,6 +476,7 @@ pub fn ocen_ustalenie_na_nowo(
     params: &OcenUstalenieNaNowoParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE stanowisko_ustalenia_wpisy
@@ -506,6 +510,7 @@ pub fn odnotuj_wykorzystanie_ustalenia(
     params: &OdnotujWykorzystanieUstaleniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE stanowisko_ustalenia_wpisy
@@ -545,6 +550,7 @@ pub fn uniewaznij_ustalenie(
     params: &UniewaznijUstalenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE stanowisko_ustalenia_wpisy

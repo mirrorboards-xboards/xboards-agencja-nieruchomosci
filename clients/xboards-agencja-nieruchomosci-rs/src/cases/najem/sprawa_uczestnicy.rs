@@ -1,12 +1,13 @@
 //! The kind `sprawa-uczestnicy` of the room `cases/najem`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-uczestnicy";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Osoby i podmioty w teczce z ich danymi oraz ich role w teczce. Rola należy do udziału w teczce,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-uczestnicy",
+    requires: &[],
+    migrations: &[
+        r#"-- Osoby i podmioty w teczce z ich danymi oraz ich role w teczce. Rola należy do udziału w teczce,
 -- a nie do osoby: ta sama osoba bywa w jednej teczce klientką, a w innej pełnomocniczką. Listę
 -- ról ustala typ sprawy tekstem; rdzeń sprawdza tylko format i reguły małżonka.
 --
@@ -343,7 +344,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `adresy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -693,7 +695,7 @@ FROM sprawa_uczestnicy_adresy
 ORDER BY uczestnik_id, rodzaj"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AdresyUczestnikowRow::from_row).collect()
 }
 
@@ -716,6 +718,7 @@ pub fn wpisz_adres_uczestnika(
     params: &WpiszAdresUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_uczestnicy_adresy (uczestnik_id, rodzaj, kraj, miejscowosc, ulica, numer_budynku,
@@ -770,6 +773,7 @@ pub fn zmien_adres_uczestnika(
     params: &ZmienAdresUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_uczestnicy_adresy
@@ -818,6 +822,7 @@ pub fn wykresl_adres_uczestnika(
     params: &WykreslAdresUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"DELETE FROM sprawa_uczestnicy_adresy
@@ -859,7 +864,7 @@ FROM sprawa_uczestnicy_obywatelstwa
 ORDER BY uczestnik_id, panstwo"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ObywatelstwaUczestnikowRow::from_row).collect()
 }
 
@@ -876,6 +881,7 @@ pub fn wpisz_obywatelstwo_uczestnika(
     params: &WpiszObywatelstwoUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_uczestnicy_obywatelstwa (uczestnik_id, panstwo)
@@ -904,6 +910,7 @@ pub fn wykresl_obywatelstwo_uczestnika(
     params: &WykreslObywatelstwoUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"DELETE FROM sprawa_uczestnicy_obywatelstwa
@@ -951,7 +958,7 @@ FROM sprawa_uczestnicy_role
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RoleUczestnikowRow::from_row).collect()
 }
 
@@ -970,6 +977,7 @@ pub fn nadaj_role_uczestnikowi(
     params: &NadajRoleUczestnikowiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_uczestnicy_role (uczestnik_id, rola, dotyczy_uczestnik_id)
@@ -1007,6 +1015,7 @@ pub fn zakoncz_role_uczestnika(
     params: &ZakonczRoleUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_uczestnicy_role
@@ -1103,7 +1112,7 @@ FROM sprawa_uczestnicy_wpisy
 ORDER BY rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(UczestnicyRow::from_row).collect()
 }
 
@@ -1189,7 +1198,7 @@ FROM sprawa_uczestnicy_wpisy
 WHERE id = :id"#,
         parameters: Vec::from([("id", xmeta_room::ToSqlValue::to_sql_value(&params.id))]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.first().map(UczestnikRow::from_row).transpose()
 }
 
@@ -1227,6 +1236,7 @@ pub fn wpisz_uczestnika(
     params: &WpiszUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_uczestnicy_wpisy (id, rodzaj_podmiotu, imiona, nazwisko, imie_ojca, imie_matki,
@@ -1321,6 +1331,7 @@ pub fn zmien_dane_uczestnika(
     params: &ZmienDaneUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_uczestnicy_wpisy
@@ -1389,6 +1400,7 @@ pub fn zmien_kontakt_uczestnika(
     params: &ZmienKontaktUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_uczestnicy_wpisy
@@ -1425,6 +1437,7 @@ pub fn ustal_sytuacje_rodzinna_uczestnika(
     params: &UstalSytuacjeRodzinnaUczestnikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_uczestnicy_wpisy
@@ -1461,6 +1474,7 @@ pub fn polacz_uczestnika_z_kartoteka(
     params: &PolaczUczestnikaZKartotekaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_uczestnicy_wpisy
@@ -1496,6 +1510,7 @@ pub fn odnotuj_poinformowanie_poza_teczka(
     params: &OdnotujPoinformowaniePozaTeczkaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_uczestnicy_wpisy

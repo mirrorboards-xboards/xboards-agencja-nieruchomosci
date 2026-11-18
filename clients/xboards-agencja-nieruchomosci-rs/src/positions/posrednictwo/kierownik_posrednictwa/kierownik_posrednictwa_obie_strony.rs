@@ -1,12 +1,13 @@
 //! The kind `kierownik-posrednictwa-obie-strony` of the room `positions/posrednictwo/kierownik_posrednictwa`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-posrednictwa-obie-strony";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Obie strony (rozstrzygnięcie biura R1): pary teczki oferty i teczki poszukiwania, które spotkały
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-posrednictwa-obie-strony",
+    requires: &[],
+    migrations: &[
+        r#"-- Obie strony (rozstrzygnięcie biura R1): pary teczki oferty i teczki poszukiwania, które spotkały
 -- się w jednej transakcji, i to, czy umowy pośrednictwa obu stron pozwalają biuru działać dla
 -- drugiej strony.
 --
@@ -110,7 +111,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `pary.umowy_pozwalaja`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -206,7 +208,7 @@ FROM kierownik_posrednictwa_obie_strony_pary
 ORDER BY stwierdzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ParyRow::from_row).collect()
 }
 
@@ -259,7 +261,7 @@ WHERE umowy_pozwalaja = 'do_wyjasnienia'
 ORDER BY stwierdzono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ParyDoWyjasnieniaRow::from_row).collect()
 }
 
@@ -277,6 +279,7 @@ pub fn zapisz_pare(
     params: &ZapiszPareParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_posrednictwa_obie_strony_pary (teczka_oferty_odnosnik,
@@ -321,6 +324,7 @@ pub fn ocen_umowy_pary(
     params: &OcenUmowyParyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_posrednictwa_obie_strony_pary
@@ -368,6 +372,7 @@ pub fn odnotuj_przekazanie_pary(
     params: &OdnotujPrzekazanieParyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_posrednictwa_obie_strony_pary
@@ -410,6 +415,7 @@ pub fn odnotuj_teczke_transakcji(
     params: &OdnotujTeczkeTransakcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_posrednictwa_obie_strony_pary

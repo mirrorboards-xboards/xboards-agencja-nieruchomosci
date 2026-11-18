@@ -1,12 +1,13 @@
 //! The kind `kierownik-dzialu-agenci` of the room `positions/transakcje/kierownik_transakcji`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-dzialu-agenci";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Agenci, których powołał kierownik działu, i każde wpuszczenie agenta do pokoju, które kierownik
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-dzialu-agenci",
+    requires: &[],
+    migrations: &[
+        r#"-- Agenci, których powołał kierownik działu, i każde wpuszczenie agenta do pokoju, które kierownik
 -- zrobił albo, w Kontroli, o które poprosił.
 --
 -- Agent sprawy pracuje w jednej teczce. Koordynator operacji nie ma teczki, bo obsługuje lokale
@@ -247,7 +248,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.stanowisko`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -426,7 +428,7 @@ FROM kierownik_dzialu_agenci_wpisy
 ORDER BY stan = 'wymieniony', stan = 'spi', powolano, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AgenciRow::from_row).collect()
 }
 
@@ -494,7 +496,7 @@ ORDER BY powolano, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AgenciTeczkiRow::from_row).collect()
 }
 
@@ -562,7 +564,7 @@ ORDER BY powolano, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(AgenciKlientaRow::from_row).collect()
 }
 
@@ -589,6 +591,7 @@ pub fn powolaj_agenta(
     params: &PowolajAgentaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_agenci_wpisy (id, stanowisko, tozsamosc, wlasciciel, teczka_odnosnik,
@@ -648,6 +651,7 @@ pub fn zatwierdz_powolanie(
     params: &ZatwierdzPowolanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_agenci_wpisy
@@ -684,6 +688,7 @@ pub fn uspij_agenta(
     params: &UspijAgentaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_agenci_wpisy
@@ -709,6 +714,7 @@ pub fn obudz_agenta(
     params: &ObudzAgentaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_agenci_wpisy
@@ -737,6 +743,7 @@ pub fn wymien_agenta(
     params: &WymienAgentaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_agenci_wpisy
@@ -817,7 +824,7 @@ WHERE usunieto IS NULL
 ORDER BY pokoj_odnosnik, wpuszczono, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WpuszczeniaOtwarteRow::from_row).collect()
 }
 
@@ -885,7 +892,7 @@ ORDER BY wpuszczono, id"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WpuszczeniaPokojuRow::from_row).collect()
 }
 
@@ -913,6 +920,7 @@ pub fn odnotuj_wpuszczenie(
     params: &OdnotujWpuszczenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_agenci_wpuszczenia (tozsamosc, stanowisko, agent_id, pokoj_odnosnik,
@@ -977,6 +985,7 @@ pub fn zatwierdz_wpuszczenie(
     params: &ZatwierdzWpuszczenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_agenci_wpuszczenia
@@ -1014,6 +1023,7 @@ pub fn odnotuj_usuniecie_z_pokoju(
     params: &OdnotujUsuniecieZPokojuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_agenci_wpuszczenia

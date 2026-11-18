@@ -1,12 +1,13 @@
 //! The kind `kierownik-biura-meldunki` of the room `positions/biuro/kierownik_biura`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-biura-meldunki";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Meldunki Recepcji i kierowników Pośrednictwa, Transakcji i Najmu. Z nich powstaje przebieg
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-biura-meldunki",
+    requires: &[],
+    migrations: &[
+        r#"-- Meldunki Recepcji i kierowników Pośrednictwa, Transakcji i Najmu. Z nich powstaje przebieg
 -- obłożenia w sprawozdaniu, więc kierownik trzyma wszystkie, a nie tylko ostatni. Kontrola nie
 -- melduje Kierownikowi biura, bo jej nie podlega.
 --
@@ -73,7 +74,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); meldunki tylko się dopisuje');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wpisy.nadawca`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -227,7 +229,7 @@ WHERE meldunek.id = (
 ORDER BY meldunek.nadawca"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(OstatnieMeldunkiRow::from_row).collect()
 }
 
@@ -286,7 +288,7 @@ WHERE otrzymano >= :od
 ORDER BY otrzymano, id"#,
         parameters: Vec::from([("od", xmeta_room::ToSqlValue::to_sql_value(&params.od))]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(MeldunkiOdRow::from_row).collect()
 }
 
@@ -309,6 +311,7 @@ pub fn dopisz_meldunek_dzialu(
     params: &DopiszMeldunekDzialuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_biura_meldunki_wpisy (nadawca, tozsamosc, otrzymano, agenci_pracuja,
@@ -368,6 +371,7 @@ pub fn dopisz_meldunek_recepcji(
     params: &DopiszMeldunekRecepcjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_biura_meldunki_wpisy (nadawca, tozsamosc, otrzymano, wiadomosci_wplynely,

@@ -1,12 +1,13 @@
 //! The kind `kierownik-dzialu-spis` of the room `positions/kierownik_dzialu`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "kierownik-dzialu-spis";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Spis spraw działu i ich znaki rozpoznawcze, które kierownik przekazuje Recepcji. Dzięki nim
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "kierownik-dzialu-spis",
+    requires: &[],
+    migrations: &[
+        r#"-- Spis spraw działu i ich znaki rozpoznawcze, które kierownik przekazuje Recepcji. Dzięki nim
 -- Recepcja przypisuje wiadomość do sprawy bez czytania teczek. Recepcja zmienia swój spis tylko na
 -- podstawie tego, co przekazał kierownik, więc kierownik pamięta, co i kiedy przekazał.
 --
@@ -157,7 +158,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); znaku się nie usuwa, tylko wycofuje');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `sprawy.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -304,7 +306,7 @@ FROM kierownik_dzialu_spis_sprawy
 ORDER BY zamknieto IS NOT NULL, oznaczenie, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(SprawyWSpisieRow::from_row).collect()
 }
 
@@ -354,7 +356,7 @@ WHERE przekazano IS NULL
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DoPrzekazaniaRecepcjiRow::from_row).collect()
 }
 
@@ -376,6 +378,7 @@ pub fn wpisz_sprawe_do_spisu(
     params: &WpiszSpraweDoSpisuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_spis_sprawy (teczka_odnosnik, rodzaj, oznaczenie, agent, otwarto, kancelaria_xnotariusz)
@@ -420,6 +423,7 @@ pub fn zmien_sprawe_w_spisie(
     params: &ZmienSpraweWSpisieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_spis_sprawy
@@ -460,6 +464,7 @@ pub fn odnotuj_przekazanie_sprawy(
     params: &OdnotujPrzekazanieSprawyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_spis_sprawy
@@ -490,6 +495,7 @@ pub fn zamknij_sprawe_w_spisie(
     params: &ZamknijSpraweWSpisieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_spis_sprawy
@@ -520,6 +526,7 @@ pub fn odnotuj_przekazanie_zamkniecia(
     params: &OdnotujPrzekazanieZamknieciaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_spis_sprawy
@@ -588,7 +595,7 @@ ORDER BY dodano, id"#,
             ("sprawa_id", xmeta_room::ToSqlValue::to_sql_value(&params.sprawa_id)),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZnakiSprawyRow::from_row).collect()
 }
 
@@ -633,7 +640,7 @@ WHERE (przekazano IS NULL AND wycofano IS NULL)
 ORDER BY sprawa_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZnakiDoPrzekazaniaRecepcjiRow::from_row).collect()
 }
 
@@ -652,6 +659,7 @@ pub fn dodaj_znak(
     params: &DodajZnakParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO kierownik_dzialu_spis_znaki (sprawa_id, rodzaj, wartosc, dodano)
@@ -683,6 +691,7 @@ pub fn odnotuj_przekazanie_znaku(
     params: &OdnotujPrzekazanieZnakuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_spis_znaki
@@ -713,6 +722,7 @@ pub fn wycofaj_znak(
     params: &WycofajZnakParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_spis_znaki
@@ -740,6 +750,7 @@ pub fn odnotuj_przekazanie_wycofania(
     params: &OdnotujPrzekazanieWycofaniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE kierownik_dzialu_spis_znaki

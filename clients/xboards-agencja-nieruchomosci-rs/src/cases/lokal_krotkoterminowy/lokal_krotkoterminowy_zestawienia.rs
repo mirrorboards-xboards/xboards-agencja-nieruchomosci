@@ -1,12 +1,22 @@
 //! The kind `lokal-krotkoterminowy-zestawienia` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "lokal-krotkoterminowy-zestawienia";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Miesięczne zestawienia dla właściciela lokalu (R3): pozycje ze źródłem w teczce, kwota do
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "lokal-krotkoterminowy-zestawienia",
+    requires: &[
+        &super::lokal_krotkoterminowy_pobyty::KIND,
+        &super::lokal_krotkoterminowy_umowa::KIND,
+        &super::lokal_krotkoterminowy_zlecenia::KIND,
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_metryka::KIND,
+        &super::sprawa_wyplaty::KIND,
+    ],
+    migrations: &[
+        r#"-- Miesięczne zestawienia dla właściciela lokalu (R3): pozycje ze źródłem w teczce, kwota do
 -- wypłaty i rezerwa. Zestawienie liczy program, a Zarządca obiektu dobiera dane i je wysyła; nie
 -- jest ono fakturą ani dokumentem księgowym.
 --
@@ -473,7 +483,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `pozycje.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -636,7 +647,7 @@ FROM lokal_krotkoterminowy_zestawienia_pozycje
 ORDER BY zestawienie_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PozycjeZestawienRow::from_row).collect()
 }
 
@@ -660,6 +671,7 @@ pub fn dopisz_pozycje_zestawienia(
     params: &DopiszPozycjeZestawieniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_zestawienia_pozycje (zestawienie_id, rodzaj, kwota, opis, pobyt_id,
@@ -742,7 +754,7 @@ FROM lokal_krotkoterminowy_zestawienia_wpisy
 ORDER BY miesiac"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZestawieniaRow::from_row).collect()
 }
 
@@ -763,6 +775,7 @@ pub fn przygotuj_zestawienie(
     params: &PrzygotujZestawienieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO lokal_krotkoterminowy_zestawienia_wpisy (id, miesiac, utworzono, korekta_do_id,
@@ -806,6 +819,7 @@ pub fn zamknij_zestawienie(
     params: &ZamknijZestawienieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zestawienia_wpisy
@@ -846,6 +860,7 @@ pub fn wskaz_wysylke_zestawienia(
     params: &WskazWysylkeZestawieniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zestawienia_wpisy
@@ -875,6 +890,7 @@ pub fn cofnij_zestawienie_do_projektu(
     params: &CofnijZestawienieDoProjektuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zestawienia_wpisy
@@ -901,6 +917,7 @@ pub fn odnotuj_wyslanie_zestawienia(
     params: &OdnotujWyslanieZestawieniaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE lokal_krotkoterminowy_zestawienia_wpisy

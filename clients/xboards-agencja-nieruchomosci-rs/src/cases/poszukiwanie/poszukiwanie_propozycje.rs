@@ -1,12 +1,19 @@
 //! The kind `poszukiwanie-propozycje` of the room `cases/poszukiwanie`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "poszukiwanie-propozycje";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Propozycje ofert dla klienta, prezentacje i pytania otwarte do strony, która sprzedaje albo
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "poszukiwanie-propozycje",
+    requires: &[
+        &super::poszukiwanie_profile::KIND,
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_korespondencja::KIND,
+        &super::sprawa_umowy::KIND,
+    ],
+    migrations: &[
+        r#"-- Propozycje ofert dla klienta, prezentacje i pytania otwarte do strony, która sprzedaje albo
 -- wynajmuje. Pisze Opiekun poszukującego. Kwoty w groszach.
 --
 -- Propozycja to oferta z portalu, z katalogu ofert biura albo od innego biura, porównana
@@ -359,7 +366,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `prezentacje.kto_pokazuje`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -649,7 +657,7 @@ FROM poszukiwanie_propozycje_prezentacje
 ORDER BY termin, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PrezentacjePropozycjiRow::from_row).collect()
 }
 
@@ -687,7 +695,7 @@ WHERE odpowiedz IS NULL
 ORDER BY prezentacja_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PytaniaOtwarteRow::from_row).collect()
 }
 
@@ -712,6 +720,7 @@ pub fn umow_prezentacje_propozycji(
     params: &UmowPrezentacjePropozycjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_propozycje_prezentacje (id, propozycja_id, termin, kto_pokazuje,
@@ -766,6 +775,7 @@ pub fn odnotuj_opinie_klienta(
     params: &OdnotujOpinieKlientaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_prezentacje
@@ -796,6 +806,7 @@ pub fn odnotuj_notatke_posrednika(
     params: &OdnotujNotatkePosrednikaParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_prezentacje
@@ -828,6 +839,7 @@ pub fn odwolaj_prezentacje_propozycji(
     params: &OdwolajPrezentacjePropozycjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_prezentacje
@@ -862,6 +874,7 @@ pub fn dopisz_pytanie_do_prezentacji(
     params: &DopiszPytanieDoPrezentacjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_propozycje_pytania (prezentacja_id, pytanie)
@@ -892,6 +905,7 @@ pub fn odnotuj_odpowiedz_na_pytanie(
     params: &OdnotujOdpowiedzNaPytanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_pytania
@@ -985,7 +999,7 @@ FROM poszukiwanie_propozycje_wpisy
 ORDER BY utworzono DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PropozycjeRow::from_row).collect()
 }
 
@@ -1020,6 +1034,7 @@ pub fn wpisz_propozycje(
     params: &WpiszPropozycjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO poszukiwanie_propozycje_wpisy (id, profil_wersja_id, zrodlo, ogloszenie_sciezka,
@@ -1108,6 +1123,7 @@ pub fn odnotuj_przegladanie_ksiegi_propozycji(
     params: &OdnotujPrzegladanieKsiegiPropozycjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_wpisy
@@ -1153,6 +1169,7 @@ pub fn odnotuj_ceny_transakcji_propozycji(
     params: &OdnotujCenyTransakcjiPropozycjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_wpisy
@@ -1185,6 +1202,7 @@ pub fn odnotuj_rozbieznosci_propozycji(
     params: &OdnotujRozbieznosciPropozycjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_wpisy
@@ -1215,6 +1233,7 @@ pub fn odnotuj_przedstawienie_propozycji(
     params: &OdnotujPrzedstawieniePropozycjiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_wpisy
@@ -1246,6 +1265,7 @@ pub fn odnotuj_reakcje_na_propozycje(
     params: &OdnotujReakcjeNaPropozycjeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE poszukiwanie_propozycje_wpisy

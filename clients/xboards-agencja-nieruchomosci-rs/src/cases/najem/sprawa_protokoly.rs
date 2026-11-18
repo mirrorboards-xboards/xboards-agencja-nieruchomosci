@@ -1,12 +1,13 @@
 //! The kind `sprawa-protokoly` of the room `cases/najem`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-protokoly";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Protokoły zdawczo-odbiorcze nieruchomości: przejęcie i wydanie lokalu, zwrot, przekazanie
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-protokoly",
+    requires: &[&super::sprawa_dokumenty::KIND, &super::sprawa_nieruchomosci::KIND],
+    migrations: &[
+        r#"-- Protokoły zdawczo-odbiorcze nieruchomości: przejęcie i wydanie lokalu, zwrot, przekazanie
 -- po akcie, przyjęcie i zwrot kluczy klienta. Jeden model służy transakcji, najmowi, lokalowi
 -- krótkoterminowemu i kluczom oferty, więc porównanie wydania ze zwrotem robi program na tych
 -- samych pozycjach. Typ sprawy wskazuje protokół kluczem obcym, np. etap najmu wymaga podpisanego
@@ -171,7 +172,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `pozycje.rodzaj`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -366,7 +368,7 @@ FROM sprawa_protokoly_pozycje
 ORDER BY protokol_id, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(PozycjeProtokolowRow::from_row).collect()
 }
 
@@ -388,6 +390,7 @@ pub fn dopisz_pozycje_protokolu(
     params: &DopiszPozycjeProtokoluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_protokoly_pozycje (protokol_id, rodzaj, nazwa, numer, opis_stanu, zdjecie_sciezka,
@@ -436,6 +439,7 @@ pub fn popraw_pozycje_protokolu(
     params: &PoprawPozycjeProtokoluParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_protokoly_pozycje
@@ -502,7 +506,7 @@ FROM sprawa_protokoly_wpisy
 ORDER BY chwila, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ProtokolyRow::from_row).collect()
 }
 
@@ -522,6 +526,7 @@ pub fn przygotuj_protokol(
     params: &PrzygotujProtokolParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_protokoly_wpisy (id, rodzaj, nieruchomosc_id, chwila, stan)
@@ -553,6 +558,7 @@ pub fn podpisz_protokol(
     params: &PodpiszProtokolParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_protokoly_wpisy

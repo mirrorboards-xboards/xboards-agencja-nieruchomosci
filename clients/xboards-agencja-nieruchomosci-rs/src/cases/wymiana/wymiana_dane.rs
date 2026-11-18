@@ -1,12 +1,17 @@
 //! The kind `wymiana-dane` of the room `cases/wymiana`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "wymiana-dane";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Dane do aktu w pokoju wymiany: dane osób, które biorą udział w akcie, dane nieruchomości,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "wymiana-dane",
+    requires: &[
+        &super::wymiana_dokumenty::KIND,
+        &super::wymiana_metryka::KIND,
+        &super::wymiana_wpisy::KIND,
+    ],
+    migrations: &[
+        r#"-- Dane do aktu w pokoju wymiany: dane osób, które biorą udział w akcie, dane nieruchomości,
 -- rachunki do aktu i kredyt kupującego. Każdy wiersz jest szczegółem jednego wpisu
 -- z wymiana_wpisy_wpisy, dopisuje się razem z nim i potem się nie zmienia; poprawka to nowy wpis.
 --
@@ -317,7 +322,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy pokoju wymiany się nie usuwa (R9)');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `osoby.udzial`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -548,7 +554,7 @@ JOIN wymiana_wpisy_wpisy AS wpis ON wpis.id = kredyt.wpis_id
 ORDER BY wpis.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(KredytyRow::from_row).collect()
 }
 
@@ -574,6 +580,7 @@ pub fn przekaz_kredyt(
     params: &PrzekazKredytParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, odpowiada_na_id, poprawia_id)
@@ -656,7 +663,7 @@ JOIN wymiana_wpisy_wpisy AS wpis ON wpis.id = nieruchomosc.wpis_id
 ORDER BY wpis.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DaneNieruchomosciRow::from_row).collect()
 }
 
@@ -682,6 +689,7 @@ pub fn przekaz_dane_nieruchomosci(
     params: &PrzekazDaneNieruchomosciParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, odpowiada_na_id, poprawia_id)
@@ -779,7 +787,7 @@ JOIN wymiana_wpisy_wpisy AS wpis ON wpis.id = osoba.wpis_id
 ORDER BY wpis.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(DaneOsobRow::from_row).collect()
 }
 
@@ -812,6 +820,7 @@ pub fn przekaz_dane_osoby(
     params: &PrzekazDaneOsobyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, odpowiada_na_id, poprawia_id)
@@ -927,7 +936,7 @@ JOIN wymiana_wpisy_wpisy AS wpis ON wpis.id = rachunek.wpis_id
 ORDER BY wpis.rowid"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(RachunkiDoAktuRow::from_row).collect()
 }
 
@@ -953,6 +962,7 @@ pub fn podaj_rachunek(
     params: &PodajRachunekParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO wymiana_wpisy_wpisy (id, strona, autor, rodzaj, chwila, odpowiada_na_id, poprawia_id,

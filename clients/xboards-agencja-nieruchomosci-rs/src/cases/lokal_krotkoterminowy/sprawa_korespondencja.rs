@@ -1,12 +1,18 @@
 //! The kind `sprawa-korespondencja` of the room `cases/lokal_krotkoterminowy`: its migrations, the values of its enumerated
 //! columns and its operations.
 
-/// The kind's name.
-pub const KIND: &str = "sprawa-korespondencja";
-
-/// The migrations of the kind, in the order of their numbers.
-pub const MIGRATIONS: &[&str] = &[
-    r#"-- Korespondencja teczki: wysyłki, które biuro wysłało w sprawie, i wpływy z zewnątrz, z dokumentami,
+/// The kind: its name, the kinds it requires and its migrations in the order of their
+/// numbers.
+pub const KIND: xmeta_room::Kind = xmeta_room::Kind {
+    name: "sprawa-korespondencja",
+    requires: &[
+        &super::sprawa_decyzje::KIND,
+        &super::sprawa_dokumenty::KIND,
+        &super::sprawa_uczestnicy::KIND,
+        &super::sprawa_umocowania::KIND,
+    ],
+    migrations: &[
+        r#"-- Korespondencja teczki: wysyłki, które biuro wysłało w sprawie, i wpływy z zewnątrz, z dokumentami,
 -- które z nimi przeszły. Prowadzi ją agent sprawy.
 --
 -- Wysyłka wskazuje adresata, kanał, wzór biura i jego wersję, plik treści i stan. Pismo spoza wzorów
@@ -347,7 +353,8 @@ BEGIN
   SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
 END;
 "#,
-];
+    ],
+};
 
 /// The values of column `wplywy.kanal`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -701,7 +708,7 @@ FROM sprawa_korespondencja_wplywy
 ORDER BY wplynelo DESC, id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WplywyRow::from_row).collect()
 }
 
@@ -727,6 +734,7 @@ pub fn wpisz_wplyw(
     params: &WpiszWplywParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_korespondencja_wplywy (id, nadawca, nadawca_uczestnik_id, kanal, wplynelo,
@@ -831,7 +839,7 @@ FROM sprawa_korespondencja_wysylki
 ORDER BY rowid DESC"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WysylkiRow::from_row).collect()
 }
 
@@ -916,7 +924,7 @@ ORDER BY rowid"#,
             ),
         ]),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(WysylkiDoUczestnikaRow::from_row).collect()
 }
 
@@ -949,6 +957,7 @@ pub fn przygotuj_wysylke(
     params: &PrzygotujWysylkeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_korespondencja_wysylki (id, adresat_uczestnik_id, adresat_rodzaj, adresat_nazwa,
@@ -1028,6 +1037,7 @@ pub fn zmien_tresc_wysylki(
     params: &ZmienTrescWysylkiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_korespondencja_wysylki
@@ -1057,6 +1067,7 @@ pub fn przekaz_wysylke_do_zgody(
     params: &PrzekazWysylkeDoZgodyParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_korespondencja_wysylki
@@ -1085,6 +1096,7 @@ pub fn odnotuj_wyslanie(
     params: &OdnotujWyslanieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_korespondencja_wysylki
@@ -1124,6 +1136,7 @@ pub fn odnotuj_doreczenie(
     params: &OdnotujDoreczenieParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_korespondencja_wysylki
@@ -1160,6 +1173,7 @@ pub fn odnotuj_zwrot(
     params: &OdnotujZwrotParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_korespondencja_wysylki
@@ -1190,6 +1204,7 @@ pub fn anuluj_wysylke(
     params: &AnulujWysylkeParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"UPDATE sprawa_korespondencja_wysylki
@@ -1234,7 +1249,7 @@ FROM sprawa_korespondencja_zalaczniki
 ORDER BY id"#,
         parameters: Vec::new(),
     };
-    let rows = room.read(&statement)?;
+    let rows = room.read(&KIND, &statement)?;
     rows.iter().map(ZalacznikiRow::from_row).collect()
 }
 
@@ -1252,6 +1267,7 @@ pub fn dolacz_dokument_do_wysylki(
     params: &DolaczDokumentDoWysylkiParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_korespondencja_zalaczniki (wysylka_id, dokument_id)
@@ -1284,6 +1300,7 @@ pub fn dolacz_dokument_do_wplywu(
     params: &DolaczDokumentDoWplywuParams,
 ) -> Result<(), xmeta_room::RoomError> {
     room.write(
+        &[&KIND],
         &[
             xmeta_room::Statement {
                 sql: r#"INSERT INTO sprawa_korespondencja_zalaczniki (wplyw_id, dokument_id)
