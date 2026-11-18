@@ -7,7 +7,7 @@ lokal, dom z działką, działka albo spółdzielcze własnościowe prawo do lok
 Teczkę zakłada człowiek, zwykle pośrednik, gdy strony przyjmą ofertę zakupu.
 Wtedy Kierownik transakcji powołuje do niej Koordynatora transakcji
 i Analityka stanu prawnego. Najem nie ma teczki transakcji: przyjęta oferta
-najmu trafia do działu Najmu (dokument „Agencja”, rozdział „Pokoje i dostęp”).
+najmu trafia do działu Najmu (dokument „Agencja nieruchomości”, rozdział „Pokoje i dostęp”).
 
 Teczka trzyma tylko to, co dotyczy obu stron i notariusza:
 

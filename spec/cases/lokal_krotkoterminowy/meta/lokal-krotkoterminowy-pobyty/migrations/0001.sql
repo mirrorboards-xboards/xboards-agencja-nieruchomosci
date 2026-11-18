@@ -4,7 +4,7 @@
 -- z gośćmi zostają w kanale; teczka zapisuje ich skutki.
 --
 -- Gość jest uczestnikiem rdzenia z rolą gosc i danymi z kanału. Innych danych gościa teczka nie
--- zbiera, dopóki biuro nie ustali obowiązków, które w „Agencji” są sprawami otwartymi (opłata
+-- zbiera, dopóki biuro nie ustali obowiązków, które w „Agencji nieruchomości” są sprawami otwartymi (opłata
 -- miejscowa, meldunek); miejscem na nie są liczba gości i noce pobytu.
 --
 -- Reguły, które zależą od późniejszych rodzajów, leżą w ich migracjach: kanał rezerwacji ma ofertę

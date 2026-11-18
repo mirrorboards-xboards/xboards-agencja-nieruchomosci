@@ -5,7 +5,7 @@ najmu. Pośrednictwo polega na odpłatnym wykonywaniu czynności, które prowadz
 inne osoby umowy nabycia praw do nieruchomości, nabycia spółdzielczego
 własnościowego prawa do lokalu albo najmu
 nieruchomości#footnote[Art. 179b pkt 1–3 ugn.]. Biuro występuje w imieniu
-klienta tylko w granicach jego pełnomocnictwa (dokument „Agencja”, zasada
+klienta tylko w granicach jego pełnomocnictwa (dokument „Agencja nieruchomości”, zasada
 „W imieniu klienta tylko z pełnomocnictwem”).
 
 == Umowa pośrednictwa
@@ -54,7 +54,7 @@ zatwierdza człowiek na wniosek Kierownika pośrednictwa.
 Biuro liczy zdolność kredytową klienta tylko orientacyjnie. Nie przedstawia
 ofert kredytów i nie poleca banków. Oferty kredytów przedstawiają banki
 i pośrednicy kredytu hipotecznego wpisani do rejestru Komisji Nadzoru
-Finansowego (dokument „Agencja”, rozdział „Wprowadzenie”). Każda analiza
+Finansowego (dokument „Agencja nieruchomości”, rozdział „Wprowadzenie”). Każda analiza
 mówi, że nie jest ofertą ani rekomendacją kredytu (rozstrzygnięcie biura
 R2). Wniosek kredytowy składa klient, a o kredycie decyduje bank.
 

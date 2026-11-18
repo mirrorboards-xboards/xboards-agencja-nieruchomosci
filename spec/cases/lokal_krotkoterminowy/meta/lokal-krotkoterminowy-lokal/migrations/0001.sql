@@ -9,7 +9,7 @@ CREATE TABLE lokal_krotkoterminowy_lokal_dane (
   -- Jeden wiersz na teczkę, bo teczka prowadzi jeden lokal.
   id INTEGER PRIMARY KEY CHECK (id = 1),
   nieruchomosc_id TEXT NOT NULL REFERENCES sprawa_nieruchomosci_wpisy (id),
-  -- Rejestracja lokalu, gdy biuro ustali, że jest wymagana (sprawa otwarta w „Agencji”).
+  -- Rejestracja lokalu, gdy biuro ustali, że jest wymagana (sprawa otwarta w „Agencji nieruchomości”).
   rejestracja_numer TEXT,
   rejestracja_data TEXT,
   lozka INTEGER NOT NULL CHECK (lozka > 0),

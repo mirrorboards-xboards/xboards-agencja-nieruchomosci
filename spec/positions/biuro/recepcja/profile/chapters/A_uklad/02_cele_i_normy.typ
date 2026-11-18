@@ -60,4 +60,4 @@ zapytanie z portalu to zasada biura, a nie przepis.
   i oddaje wiadomości także w sprawach wstrzymanych.
 
 Sprawy zakazane są wspólne dla wszystkich agentów i opisuje je dokument
-„Agencja”.
+„Agencja nieruchomości”.

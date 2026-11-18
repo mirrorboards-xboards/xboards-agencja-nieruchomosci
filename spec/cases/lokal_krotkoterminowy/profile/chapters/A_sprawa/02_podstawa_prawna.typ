@@ -3,7 +3,7 @@
 Biuro prowadzi lokal jako zarządca, na podstawie umowy o zarządzanie
 nieruchomością z jego właścicielem (rozstrzygnięcie biura R6). Biuro
 występuje wobec gości, kanałów sprzedaży i wspólnoty w imieniu właściciela
-lokalu, w granicach tej umowy i jego pełnomocnictwa (dokument „Agencja”, zasada
+lokalu, w granicach tej umowy i jego pełnomocnictwa (dokument „Agencja nieruchomości”, zasada
 „W imieniu klienta tylko z pełnomocnictwem”).
 
 == Umowa o zarządzanie
@@ -62,12 +62,12 @@ obowiązków opisanych niżej jako sprawy otwarte.
   biuro podaje mu informacje o przetwarzaniu jego
   danych#footnote[Art. 13 ust. 1 RODO.] (rozstrzygnięcie biura R8).
 / Dane gości: dane gości biuro dostaje z kanałów sprzedaży, a nie od gości.
-  Jak i kiedy informować gości o tych danych, jest w dokumencie „Agencja”
+  Jak i kiedy informować gości o tych danych, jest w dokumencie „Agencja nieruchomości”
   sprawą otwartą#footnote[Art. 14 RODO.].
 
 == Sprawy otwarte
 
-Dokument „Agencja” wymienia obowiązki najmu krótkoterminowego, które trzeba
+Dokument „Agencja nieruchomości” wymienia obowiązki najmu krótkoterminowego, które trzeba
 jeszcze zbadać w przepisach. Profil nie twierdzi, że któryś z nich dotyczy
 lokalu, i nie opisuje ich treści. Teczka ma na nie miejsce, które biuro
 wypełni po ustaleniu:
@@ -83,7 +83,7 @@ wypełni po ustaleniu:
 / Dane o czynszach dla gminy: czy dane, które zarządca przekazuje
   gminie#footnote[Art. 186a ugn.], obejmują pobyty krótkoterminowe.
 
-Ten profil dodaje jedną wątpliwość spoza listy „Agencji”. Przy zawarciu umowy
+Ten profil dodaje jedną wątpliwość spoza listy „Agencji nieruchomości”. Przy zawarciu umowy
 najmu wynajmujący przekazuje najemcy kopię albo wydruk świadectwa
 charakterystyki energetycznej#footnote[Art. 11 ust. 1 pkt 2 uceb.].
 Ogłoszenie o najmie podaje wskaźniki ze świadectwa, gdy świadectwo

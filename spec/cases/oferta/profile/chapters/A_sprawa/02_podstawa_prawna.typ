@@ -5,7 +5,7 @@ najmu. Pośrednictwo polega na odpłatnym wykonywaniu czynności, które prowadz
 inne osoby umowy zbycia praw do nieruchomości, zbycia spółdzielczego
 własnościowego prawa do lokalu albo najmu
 nieruchomości#footnote[Art. 179b pkt 1–3 ugn.]. Biuro występuje w imieniu
-klienta tylko w granicach jego pełnomocnictwa (dokument „Agencja”, zasada
+klienta tylko w granicach jego pełnomocnictwa (dokument „Agencja nieruchomości”, zasada
 „W imieniu klienta tylko z pełnomocnictwem”).
 
 == Umowa pośrednictwa

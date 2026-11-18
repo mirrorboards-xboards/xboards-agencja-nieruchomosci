@@ -12,7 +12,7 @@ Biuro nie jest stroną umowy sprzedaży. Pośrednictwo polega na odpłatnym
 wykonywaniu czynności, które prowadzą do zawarcia umowy przez inne
 osoby#footnote[Art. 179b pkt 1 ugn.].
 Wobec kancelarii biuro występuje w imieniu strony tylko w granicach jej
-pełnomocnictwa (dokument „Agencja”, zasada „W imieniu klienta tylko
+pełnomocnictwa (dokument „Agencja nieruchomości”, zasada „W imieniu klienta tylko
 z pełnomocnictwem”). Do czynności, które przekraczają zwykły zarząd,
 pełnomocnictwo musi określać ich rodzaj. Gdy ustawa wymaga pełnomocnictwa
 do poszczególnej czynności, pełnomocnictwo wskazuje tę

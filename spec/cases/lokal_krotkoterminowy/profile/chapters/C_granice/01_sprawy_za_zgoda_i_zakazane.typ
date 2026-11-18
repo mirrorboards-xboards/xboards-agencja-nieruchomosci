@@ -1,6 +1,6 @@
 = Sprawy za zgodą i zakazane
 
-Sprawy zakazane dla wszystkich agentów opisuje dokument „Agencja”, rozdział
+Sprawy zakazane dla wszystkich agentów opisuje dokument „Agencja nieruchomości”, rozdział
 „Granice działania”. W teczce lokalu obowiązują dodatkowo te zasady.
 
 *Za zgodą człowieka.*
@@ -54,4 +54,4 @@ Sprawy zakazane dla wszystkich agentów opisuje dokument „Agencja”, rozdzia�
   dopóki wątpliwości nie zdejmie.
 / Obowiązki niepotwierdzone: agenci nie zbierają od gości danych dla
   urzędów ani nie pobierają opłat, dopóki biuro nie ustali obowiązków, które
-  w dokumencie „Agencja” są sprawami otwartymi.
+  w dokumencie „Agencja nieruchomości” są sprawami otwartymi.

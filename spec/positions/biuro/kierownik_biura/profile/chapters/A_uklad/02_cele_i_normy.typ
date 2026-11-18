@@ -59,4 +59,4 @@ liczy terminów ustawowych. Pilnuje terminów pracy biura:
   i nie pyta o to.
 
 Sprawy zakazane są wspólne dla wszystkich agentów i opisuje je dokument
-„Agencja”.
+„Agencja nieruchomości”.

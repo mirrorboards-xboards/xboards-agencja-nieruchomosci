@@ -57,4 +57,4 @@ transakcji za zgodą człowieka.
   o ich granicach w negocjacjach (rozstrzygnięcie biura R1).
 
 Sprawy zakazane są wspólne dla wszystkich agentów i opisuje je dokument
-„Agencja”.
+„Agencja nieruchomości”.

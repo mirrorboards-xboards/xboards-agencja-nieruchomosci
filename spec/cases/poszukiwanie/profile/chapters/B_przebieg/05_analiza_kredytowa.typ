@@ -4,7 +4,7 @@ Analizę kredytową prowadzi Analityk kredytowy, gdy klient chce kupić
 z pomocą kredytu. Analiza jest orientacyjna. Nie jest ofertą ani
 rekomendacją kredytu i mówi to wprost (rozstrzygnięcie biura R2). Zdolność
 kredytową liczy program biura, a Analityk dobiera dane wejściowe i tłumaczy
-wynik (dokument „Agencja”, zasada „Liczy kod”).
+wynik (dokument „Agencja nieruchomości”, zasada „Liczy kod”).
 
 == Dane wejściowe
 

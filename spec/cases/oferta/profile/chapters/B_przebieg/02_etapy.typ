@@ -58,7 +58,7 @@
 + Przyjęta oferta najmu: Kierownik pośrednictwa przekazuje ją Kierownikowi
   najmu i zmienia status oferty w katalogu na „zarezerwowana”. Opiekun
   przenosi dane klienta potrzebne do umowy najmu w notatce do teczki najmu
-  (dokument „Agencja”, rozdział „Pokoje i dostęp”).
+  (dokument „Agencja nieruchomości”, rozdział „Pokoje i dostęp”).
 + Koniec: oferta kończy się, gdy transakcja albo najem doszły do skutku, gdy
   umowa pośrednictwa wygasła, gdy któraś ze stron ją wypowiedziała albo gdy
   klient od niej odstąpił. Opiekun zdejmuje ogłoszenia, zwraca klucze przez

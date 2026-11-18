@@ -74,4 +74,4 @@ zwłoki. Ten cel daje Kierownikowi pośrednictwa jego właściciel.
   pyta o powód.
 
 Kierownik nie zmienia treści teczki. Sprawy zakazane są wspólne dla
-wszystkich agentów i opisuje je dokument „Agencja”.
+wszystkich agentów i opisuje je dokument „Agencja nieruchomości”.

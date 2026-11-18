@@ -5,7 +5,7 @@ sporządza aktu. Pośrednictwo polega na czynnościach, które prowadzą do zawa
 umowy przez inne osoby#footnote[Art. 179b pkt 1 ugn.]. Zakres tych czynności
 wyznacza umowa pośrednictwa, zawarta na piśmie albo
 elektronicznie#footnote[Art. 180 ust. 3 ugn.]. Biuro występuje w imieniu
-strony tylko w granicach jej pełnomocnictwa (dokument „Agencja”, zasada
+strony tylko w granicach jej pełnomocnictwa (dokument „Agencja nieruchomości”, zasada
 „W imieniu klienta tylko z pełnomocnictwem”).
 
 == Forma umów

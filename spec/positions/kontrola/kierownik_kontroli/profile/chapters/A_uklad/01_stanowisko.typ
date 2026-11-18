@@ -54,4 +54,4 @@ Pośrednik nie przekazuje Generalnemu Inspektorowi informacji o wpłatach
 i transferach przekraczających 15 000 euro#footnote[Art. 72 ust. 1 AML.]. Kierownik
 kontroli nie przygotowuje więc takich informacji.
 
-Zasady wspólne dla wszystkich kierowników działów opisuje dokument „Agencja”.
+Zasady wspólne dla wszystkich kierowników działów opisuje dokument „Agencja nieruchomości”.

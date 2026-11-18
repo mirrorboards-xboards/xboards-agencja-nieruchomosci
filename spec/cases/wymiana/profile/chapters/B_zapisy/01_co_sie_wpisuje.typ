@@ -2,7 +2,7 @@
 
 Katalog danych pokoju leży w xboardzie agencji, w `cases/wymiana/meta`.
 XNotariusz pisze według tego samego katalogu, więc obie strony piszą do
-tych samych tabel (dokument „Agencja”, rozdział „Katalogi danych”).
+tych samych tabel (dokument „Agencja nieruchomości”, rozdział „Katalogi danych”).
 
 == Zasady wpisów
 
@@ -40,7 +40,7 @@ tych samych tabel (dokument „Agencja”, rozdział „Katalogi danych”).
 / Dane stron do aktu: dane, które akt podaje o osobach, które w nim
   uczestniczą#footnote[Art. 92 § 1 pkt 4 PoN.], i inne dane, o które prosi
   kancelaria, np. stan cywilny. Każda dana wskazuje dokument, z którego
-  pochodzi (dokument „Agencja”, zasada „Każda wartość ma źródło”).
+  pochodzi (dokument „Agencja nieruchomości”, zasada „Każda wartość ma źródło”).
 / Dane nieruchomości: oznaczenie z odpisu księgi wieczystej i z ewidencji
   gruntów i budynków.
 / Dokumenty: każdy dokument z listy kancelarii z wystawcą, datą wystawienia,

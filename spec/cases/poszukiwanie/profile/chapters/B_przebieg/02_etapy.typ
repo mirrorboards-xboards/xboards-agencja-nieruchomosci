@@ -46,7 +46,7 @@
   poszukiwania i prowadzi dokumenty klienta do wypłaty kredytu.
 + Przyjęta oferta najmu: Kierownik pośrednictwa przekazuje ją Kierownikowi
   najmu. Opiekun przenosi dane klienta potrzebne do umowy najmu w notatce do
-  teczki najmu (dokument „Agencja”, rozdział „Pokoje i dostęp”).
+  teczki najmu (dokument „Agencja nieruchomości”, rozdział „Pokoje i dostęp”).
 + Koniec: poszukiwanie kończy się, gdy transakcja albo najem doszły do
   skutku, gdy umowa pośrednictwa wygasła, gdy któraś ze stron ją
   wypowiedziała albo gdy klient od niej odstąpił. Opiekun składa raport

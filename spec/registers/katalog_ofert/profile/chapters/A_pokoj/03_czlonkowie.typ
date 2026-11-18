@@ -11,7 +11,7 @@
 )
 
 Członków dodaje właściciel biura albo Kierownik pośrednictwa (dokument
-„Agencja”, rozdział „Pokoje i dostęp”). Kierownik pośrednictwa dodaje Opiekuna
+„Agencja nieruchomości”, rozdział „Pokoje i dostęp”). Kierownik pośrednictwa dodaje Opiekuna
 poszukującego w dniu jego powołania. Usuwa go razem z wymianą klucza pokoju,
 gdy Opiekun zaśnie po raporcie końcowym albo zostanie wymieniony.
 Kogokolwiek innego dodaje tylko za zgodą właściciela biura.
@@ -20,7 +20,7 @@ Kogokolwiek innego dodaje tylko za zgodą właściciela biura.
 
 / Opiekunowie ofert: dane swojej oferty mają w teczce oferty. Zmiany do
   katalogu zgłaszają Kierownikowi pośrednictwa w raporcie. Cudzych ofert do
-  pracy nie potrzebują (dokument „Agencja”, zasada „Tylko potrzebny dostęp”).
+  pracy nie potrzebują (dokument „Agencja nieruchomości”, zasada „Tylko potrzebny dostęp”).
 / Kontrolerzy, Analitycy, Kierownik kontroli oraz działy Transakcji i Najmu:
   nie dobierają ofert i nie potrzebują katalogu do pracy.
 / Zarządcy obiektów: lokale krótkoterminowe nie należą do katalogu.

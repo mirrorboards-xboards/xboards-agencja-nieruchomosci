@@ -71,4 +71,4 @@ były gotowe wcześniej:
 
 Pieniędzy Zarządca nie rusza: wypłaty dla właściciela lokalu i zwroty dla
 gości zatwierdza człowiek (zasada „Pieniądze rusza człowiek” w dokumencie
-„Agencja”).
+„Agencja nieruchomości”).

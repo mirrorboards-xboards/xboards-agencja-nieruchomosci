@@ -1,6 +1,6 @@
 #import "/mirrorboards-core/mirrorboards-xmeta/xmeta-typ/lib.typ": dokument, part
 
-#show: dokument.with(produkt: "XEstates", tytul: [Agencja], podtytul: [Agenci agencji nieruchomości])
+#show: dokument.with(produkt: "XEstates", tytul: [Agencja nieruchomości], podtytul: [Agenci agencji nieruchomości])
 
 #part[Układ]
 #include "chapters/A_uklad/01_wprowadzenie.typ"

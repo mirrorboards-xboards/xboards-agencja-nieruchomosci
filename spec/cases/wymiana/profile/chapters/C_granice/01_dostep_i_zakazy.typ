@@ -1,6 +1,6 @@
 = Dostęp i zakazy
 
-Sprawy zakazane dla wszystkich agentów opisuje dokument „Agencja”, rozdział
+Sprawy zakazane dla wszystkich agentów opisuje dokument „Agencja nieruchomości”, rozdział
 „Granice działania”. W pokoju wymiany obowiązują dodatkowo te zasady. Dotyczą
 strony biura. Zasady strony kancelarii ustala kancelaria.
 
@@ -42,7 +42,7 @@ i zadaje pytania organizacyjne, np. o godzinę aktu albo postać dokumentu.
 / Członkowie: Koordynator nie dodaje nikogo do pokoju. Kierownik transakcji
   nie dodaje nikogo po stronie kancelarii.
 / Podpis za strony: żaden agent nie podpisuje aktu, umowy ani oświadczenia
-  w imieniu strony (dokument „Agencja”, rozdział „Granice działania”).
+  w imieniu strony (dokument „Agencja nieruchomości”, rozdział „Granice działania”).
 
 *Zakłócenia, na które pokój jest narażony.*
 

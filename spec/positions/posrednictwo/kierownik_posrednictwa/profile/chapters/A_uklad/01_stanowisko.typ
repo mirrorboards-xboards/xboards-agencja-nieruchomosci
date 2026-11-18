@@ -19,7 +19,7 @@ Podlega Kierownikowi biura. Działa przez całe życie biura.
 / Kartoteka klientów: po podpisaniu umowy pośrednictwa Kierownik przenosi
   dane klienta z umowy do kartoteki klientów. Danych klienta nie trzyma
   w swojej pamięci ani w teczce innego klienta.
-/ Katalog ofert: Kierownik prowadzi katalog ofert biura (dokument „Agencja”,
+/ Katalog ofert: Kierownik prowadzi katalog ofert biura (dokument „Agencja nieruchomości”,
   rozdział „Pokoje i dostęp”). Przenosi do niego z teczki oferty to, co
   klient pozwolił pokazać: opis, cenę, zdjęcia, przybliżoną lokalizację,
   rodzaj nieruchomości i powierzchnię. Wpisuje widoczność i wyłączność
@@ -54,4 +54,4 @@ Właścicielem Kierownika pośrednictwa jest właściciel biura albo pośrednik,
 który kieruje zespołem pośredników. W biurze jest jeden Kierownik
 pośrednictwa.
 
-Zasady wspólne dla wszystkich kierowników działów opisuje dokument „Agencja”.
+Zasady wspólne dla wszystkich kierowników działów opisuje dokument „Agencja nieruchomości”.

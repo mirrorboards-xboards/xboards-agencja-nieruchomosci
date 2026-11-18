@@ -81,4 +81,4 @@ terminów działu z raportów:
 Kierownik nie zmienia treści teczki. Prawa do treści ma tylko po to, żeby
 przekazać je agentom.
 
-Sprawy zakazane są wspólne dla wszystkich agentów i opisuje je dokument „Agencja”.
+Sprawy zakazane są wspólne dla wszystkich agentów i opisuje je dokument „Agencja nieruchomości”.

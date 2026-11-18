@@ -35,7 +35,7 @@ Kierownik zapisuje osobno to, co ustalił, i to, co mu polecono. Gdy zwyczaj
 okaże się nieprawdziwy, zmienia jego pewność albo go wykreśla. Gdy źródło
 podało nieprawdę, ocenia na nowo wszystkie zwyczaje od tego źródła.
 
-Kierownik transakcji jest kierownikiem działu w rozumieniu dokumentu „Agencja”.
+Kierownik transakcji jest kierownikiem działu w rozumieniu dokumentu „Agencja nieruchomości”.
 Jego pokój pamięci ma więc też pamięć wspólną kierowników działów. Trzyma ona
 agentów, raporty, zajrzenia, standardy, zwyczaje i spis spraw dla Recepcji.
 

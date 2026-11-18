@@ -2,7 +2,7 @@
 
 Pracę w lokalu zleca Koordynator operacji obszaru. Wykonawców i ich cenniki
 bierze z rejestru wykonawców, do którego wpisuje je Kierownik najmu po zatwierdzeniu przez
-człowieka. Wykonawcom płaci człowiek (dokument „Agencja”, zasada „Pieniądze
+człowieka. Wykonawcom płaci człowiek (dokument „Agencja nieruchomości”, zasada „Pieniądze
 rusza człowiek”).
 
 == Co teczka zapisuje przy zleceniu

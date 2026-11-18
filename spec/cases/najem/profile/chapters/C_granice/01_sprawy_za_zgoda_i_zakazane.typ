@@ -1,6 +1,6 @@
 = Sprawy za zgodą i zakazane
 
-Sprawy zakazane dla wszystkich agentów opisuje dokument „Agencja”, rozdział
+Sprawy zakazane dla wszystkich agentów opisuje dokument „Agencja nieruchomości”, rozdział
 „Granice działania”. W teczce najmu obowiązują dodatkowo te zasady.
 
 *Za zgodą człowieka.*

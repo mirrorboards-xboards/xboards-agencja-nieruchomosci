@@ -30,7 +30,7 @@ transakcji).
   Kontroler potrzebuje czegoś od kancelarii, prosi o to Koordynatora notatką
   w teczce transakcji.
 / Kierownik biura i Recepcja: nie należą do żadnej teczki ani do pokoju
-  wymiany (dokument „Agencja”, rozdział „Pokoje i dostęp”).
+  wymiany (dokument „Agencja nieruchomości”, rozdział „Pokoje i dostęp”).
 
 *Kto nie należy w ogóle.* Strony transakcji, bank kupującego, bank
 sprzedającego i inne biura nie należą do pokoju. Z kancelarią rozmawiają

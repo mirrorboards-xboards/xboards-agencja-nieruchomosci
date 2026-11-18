@@ -34,7 +34,7 @@ np. w dniu aktu. Gdy nie będzie, agent sprawy zamawia nowy wcześniej.
 == Pełnomocnictwa
 
 Agent występuje w imieniu klienta tylko w granicach pełnomocnictwa, którego
-klient udzielił biuru (dokument „Agencja”, zasada „W imieniu klienta tylko
+klient udzielił biuru (dokument „Agencja nieruchomości”, zasada „W imieniu klienta tylko
 z pełnomocnictwem”). Dlatego rdzeń zapisuje każde pełnomocnictwo osobno:
 
 / Mocodawca i pełnomocnik: uczestnik, który udziela pełnomocnictwa, i ten,

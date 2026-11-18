@@ -7,7 +7,7 @@
   Dzięki temu wiadomo, kto wpisał dane, a nikt nie może się pod nikogo
   podszyć.
 / Źródło: każda dana, którą biuro przekazuje notariuszowi, bankowi albo
-  klientowi, wskazuje dokument, z którego pochodzi (dokument „Agencja”, zasada
+  klientowi, wskazuje dokument, z którego pochodzi (dokument „Agencja nieruchomości”, zasada
   „Każda wartość ma źródło”). Dana bez dokumentu ma oznaczenie, od kogo
   pochodzi, np. „od klienta, niepotwierdzone”.
 / Decyzja człowieka: człowiek rozstrzyga w osobnym miejscu teczki. Inne dane
@@ -31,7 +31,7 @@
   usunąć, bo dziennik pokoju zachowuje jego poprzedni stan z autorem.
 / Bez zastępowania: nowy wpis nie zastępuje istniejącego wiersza. Wiersz
   zmienia się tylko zwykłą zmianą, której pilnują reguły teczki (dokument
-  „Agencja”, rozdział „Katalogi danych”).
+  „Agencja nieruchomości”, rozdział „Katalogi danych”).
 
 *Co teczka trzyma.*
 
@@ -93,7 +93,7 @@
   nieruchomości oraz przyjęcia i zwrotu kluczy, z licznikami, wyposażeniem
   i kluczami (rozdział „Dokumenty”).
 / Notatki przekazania: od kogo, do kogo, czego dotyczą i do kiedy. To jedyny
-  sposób, w jaki agenci rozmawiają ze sobą (dokument „Agencja”, zasada „Teczka
+  sposób, w jaki agenci rozmawiają ze sobą (dokument „Agencja nieruchomości”, zasada „Teczka
   jest wspólnym stanem sprawy”).
 / Powiązania: odnośniki do innych teczek, np. z teczki transakcji do teczki
   oferty sprzedającego. Odnośnik nie daje dostępu do tamtej teczki.

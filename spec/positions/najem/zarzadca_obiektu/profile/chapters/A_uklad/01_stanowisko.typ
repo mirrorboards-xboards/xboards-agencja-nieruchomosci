@@ -41,12 +41,12 @@ właściciela lokalu zweryfikuje jego tożsamość (rozstrzygnięcie biura R7).
 *Dane o czynszach dla gminy.* Biuro jako zarządca przekazuje gminie dane
 o czynszach najmu lokali mieszkalnych w zarządzanych
 budynkach#footnote[Art. 186a ugn.]. Czy te dane obejmują pobyty w lokalu
-krótkoterminowym, jest w dokumencie „Agencja” sprawą otwartą. Do czasu
+krótkoterminowym, jest w dokumencie „Agencja nieruchomości” sprawą otwartą. Do czasu
 ustalenia Zarządca nie przygotowuje danych swojego lokalu dla gminy. Teczka
 lokalu ma na nie miejsce, które biuro wypełni po ustaleniu.
 
 *Obowiązki wobec urzędów i platform.* Rejestracja lokalu, opłata miejscowa,
-meldunek gości i dane przekazywane przez platformy są w dokumencie „Agencja”
+meldunek gości i dane przekazywane przez platformy są w dokumencie „Agencja nieruchomości”
 sprawą otwartą. Zarządca pilnuje tych obowiązków, gdy biuro je ustali.
 
 *Pieniądze.* Przychód z najmu wypłaca właścicielowi lokalu człowiek. Przed

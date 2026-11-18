@@ -29,7 +29,7 @@ właściciela i Koordynatora operacji. Nie ocenia sam, czy zagrożenie jest
 prawdziwe.
 
 *Obowiązki wobec gości.* Meldunek gości, opłata miejscowa i dane
-przekazywane przez platformy są w dokumencie „Agencja” sprawą otwartą. Konsjerż
+przekazywane przez platformy są w dokumencie „Agencja nieruchomości” sprawą otwartą. Konsjerż
 zbiera od gości dane, gdy biuro ustali, których obowiązków dotyczą.
 
 Konsjerż jest jeden na lokal i podlega Kierownikowi najmu.

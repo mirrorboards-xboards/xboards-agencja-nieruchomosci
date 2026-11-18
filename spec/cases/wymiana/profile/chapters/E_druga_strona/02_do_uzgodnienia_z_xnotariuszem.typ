@@ -1,10 +1,10 @@
 = Do uzgodnienia z XNotariuszem
 
 XNotariusz nie ma dziś pokoju wymiany. Zna teczki spraw, pokoje stałe
-i pamięci agentów (dokument „Kancelaria” w XNotariuszu, rozdział „Pokoje
+i pamięci agentów (dokument „Kancelaria notarialna” w XNotariuszu, rozdział „Pokoje
 i dostęp”). Biura nieruchomości, banki i deweloperzy łączą się w nim
 z Sekretariatem, a kancelaria występuje na zewnątrz jako jeden agent
-(dokument „Kancelaria”, rozdział „Kancelaria w Systemie i na Platformie”).
+(dokument „Kancelaria notarialna”, rozdział „Kancelaria w Systemie i na Platformie”).
 Żeby pokój wymiany powstał, biuro musi uzgodnić z XNotariuszem te sprawy:
 
 + *Nowy rodzaj pokoju.* XNotariusz dopisuje pokój wymiany do swoich pokoi:
