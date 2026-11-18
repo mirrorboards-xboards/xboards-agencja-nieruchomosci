@@ -1,0 +1,3 @@
+# The settings of xmeta for the real estate office (xmeta-spec): where its positions and clients lie.
+boards = "spec"
+clients = "clients"

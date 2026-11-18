@@ -1,0 +1,88 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    name: Catalogs, generated clients and scenarios
+    runs-on: ubuntu-latest
+    env:
+      # The repository in the layout of the Mirrorboards workspace, beside what .github/ci syncs
+      # (written by mirrorboards-utils/utils-workspace-source/ci-workspace.mjs).
+      REPOSITORY_DIR: .github/ci/mirrorboards-xboards/xboards-kancelaria-obrotu-nieruchomosciami
+      XMETA: cargo run --quiet --locked --manifest-path ../../mirrorboards-core/mirrorboards-xmeta/xmeta-cli/Cargo.toml --
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH for private repos
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MCTL_SSH_KEY }}
+
+      - name: Setup SSH key file for mctl
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MCTL_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Install mctl
+        run: |
+          git clone --depth 1 --branch dist git@github.com:mirrorboards-cli/mirrorboards-mctl.git /tmp/mctl-dist
+          (cd /tmp/mctl-dist && sha256sum -c mctl-linux-amd64.sha256)
+          sudo install -m 0755 /tmp/mctl-dist/mctl-linux-amd64 /usr/local/bin/mctl
+
+      - name: Sync the dependencies at their main with mctl
+        working-directory: .github/ci
+        run: mctl sync
+
+      - name: Place the repository in the workspace layout
+        run: |
+          mkdir -p "$REPOSITORY_DIR"
+          rsync -a --exclude .git --exclude .github ./ "$REPOSITORY_DIR/"
+
+      - name: Setup Rust
+        # xmeta (xmeta-cli) is built from the source mctl synced, with its Cargo.lock.
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        # No lockfile: CI follows the current main of every dependency.
+        working-directory: .github/ci
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Check that the clients and the locks follow the catalogs
+        working-directory: ${{ env.REPOSITORY_DIR }}
+        run: $XMETA codegen --check
+
+      - name: Check that the book includes every profile of spec/
+        working-directory: ${{ env.REPOSITORY_DIR }}
+        # Only the source of the book; its PDF is built locally with typst by xmeta book.
+        run: $XMETA book --check
+
+      - name: Run the scenarios of the catalogs on SQLite
+        working-directory: ${{ env.REPOSITORY_DIR }}
+        # The rules each catalog keeps in its tables and triggers: what they allow and what they refuse.
+        run: python3 tests/run.py
+
+      - name: Check the React client
+        working-directory: ${{ env.REPOSITORY_DIR }}/clients/xboards-kancelaria-obrotu-nieruchomosciami-react
+        run: |
+          pnpm format:check
+          pnpm typecheck

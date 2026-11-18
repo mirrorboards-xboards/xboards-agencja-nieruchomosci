@@ -1,0 +1,11 @@
+# The Python style of the Mirrorboards workspace, from mirrorboards-dev/dev-formatter-python, for
+# `ruff format`. Ruff reads only a ruff.toml in or above a file, so every repository keeps an
+# identical copy at its root: `dev-formatter-python write <repository>` puts it there and
+# `dev-formatter-python check <repository>` fails while the copy differs.
+line-length = 100
+indent-width = 4
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

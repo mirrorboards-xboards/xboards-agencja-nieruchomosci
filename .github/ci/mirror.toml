@@ -1,0 +1,18 @@
+# Written by mirrorboards-utils/utils-workspace-source/ci-workspace.mjs: the repositories CI
+# syncs (`mctl sync` here) to test @xboards-kancelaria-obrotu-nieruchomosciami/react, at their current main.
+
+[[repositories]]
+git = "git@github.com:mirrorboards-dev/dev-formatter-typescript.git"
+path = "mirrorboards-core/mirrorboards-dev/dev-formatter-typescript"
+
+[[repositories]]
+git = "git@github.com:mirrorboards-xmeta/xmeta-cli.git"
+path = "mirrorboards-core/mirrorboards-xmeta/xmeta-cli"
+
+[[repositories]]
+git = "git@github.com:mirrorboards-xmeta/xmeta-react.git"
+path = "mirrorboards-core/mirrorboards-xmeta/xmeta-react"
+
+[[repositories]]
+git = "git@github.com:mirrorboards-utils/utils-workspace-source.git"
+path = "mirrorboards-utils/utils-workspace-source"
