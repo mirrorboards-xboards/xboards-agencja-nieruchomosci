@@ -1,5 +1,5 @@
 # Written by mirrorboards-utils/utils-workspace-source/ci-workspace.mjs: the repositories CI
-# syncs (`mctl sync` here) to test @xboards-kancelaria-obrotu-nieruchomosciami/react, at their current main.
+# syncs (`mctl sync` here) to test @xboards-agencja-nieruchomosci/react, at their current main.
 
 [[repositories]]
 git = "git@github.com:mirrorboards-dev/dev-formatter-typescript.git"

@@ -13,7 +13,7 @@ jobs:
     env:
       # The repository in the layout of the Mirrorboards workspace, beside what .github/ci syncs
       # (written by mirrorboards-utils/utils-workspace-source/ci-workspace.mjs).
-      REPOSITORY_DIR: .github/ci/mirrorboards-xboards/xboards-kancelaria-obrotu-nieruchomosciami
+      REPOSITORY_DIR: .github/ci/mirrorboards-xboards/xboards-agencja-nieruchomosci
       XMETA: cargo run --quiet --locked --manifest-path ../../mirrorboards-core/mirrorboards-xmeta/xmeta-cli/Cargo.toml --
 
     steps:
@@ -82,7 +82,7 @@ jobs:
         run: python3 tests/run.py
 
       - name: Check the React client
-        working-directory: ${{ env.REPOSITORY_DIR }}/clients/xboards-kancelaria-obrotu-nieruchomosciami-react
+        working-directory: ${{ env.REPOSITORY_DIR }}/clients/xboards-agencja-nieruchomosci-react
         run: |
           pnpm format:check
           pnpm typecheck

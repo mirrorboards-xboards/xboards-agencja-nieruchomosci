@@ -1,4 +1,4 @@
-# Powrót do rozmowy, w której powstała kancelaria obrotu nieruchomościami
+# Powrót do rozmowy, w której powstała agencja nieruchomości
 
 Sesja Claude Code: 30a95b7c-f40a-4ea0-99ca-f8f0fa235a82
 
@@ -8,7 +8,7 @@ Z katalogu workspace'u:
     claude --resume 30a95b7c-f40a-4ea0-99ca-f8f0fa235a82
 
 Stan pracy w chwili zapisu: szablon na podstawie xboards-kancelaria-notarialna. W korzeniu są
-spec/, clients/, tests/, xmeta.toml, resume i księga kancelaria-obrotu-nieruchomosciami.typ
-i .pdf. W spec/ jest pozycja całej kancelarii system/ i pamięć każdego stanowiska
-positions/stanowisko. Treść (dokument biura, sprawy, stanowiska, rejestry) przejdzie
-z applications/xestates/xestates-spec i xestates-meta.
+spec/, clients/, tests/, xmeta.toml, resume i księga agencja-nieruchomosci.typ i .pdf. W spec/
+jest pozycja całej agencji system/ i pamięć każdego stanowiska positions/stanowisko. Treść
+(dokument biura, sprawy, stanowiska, rejestry) przejdzie świadomie, etapami, z
+applications/xestates/xestates-spec i xestates-meta.
