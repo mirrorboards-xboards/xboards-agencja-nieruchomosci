@@ -12,15 +12,23 @@ mod expect;
 #[cfg(test)]
 mod katalog_ofert;
 #[cfg(test)]
+mod kierownik_biura;
+#[cfg(test)]
 mod kierownik_dzialu;
 #[cfg(test)]
 mod klienci;
+#[cfg(test)]
+mod konsjerz;
+#[cfg(test)]
+mod recepcja;
 #[cfg(test)]
 mod rejestr_kontroli;
 #[cfg(test)]
 mod sprawa;
 #[cfg(test)]
 mod sprawa_porzadek;
+#[cfg(test)]
+mod stanowiska_bez_rodzajow;
 #[cfg(test)]
 mod stanowisko;
 #[cfg(test)]
