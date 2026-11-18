@@ -18,6 +18,10 @@ mod klienci;
 #[cfg(test)]
 mod rejestr_kontroli;
 #[cfg(test)]
+mod sprawa;
+#[cfg(test)]
+mod sprawa_porzadek;
+#[cfg(test)]
 mod stanowisko;
 #[cfg(test)]
 mod wykonawcy;
