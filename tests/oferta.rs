@@ -86,11 +86,10 @@ use crate::sprawa_porzadek::{first_row_copy, first_row_copy_without_id, unique_k
 /// The moment the brokerage contract of [`brokerage_contract`] is concluded.
 const CONCLUDED: &str = "2026-11-04T12:00:00Z";
 
-/// The moment of a stage change when a scenario names none (the Python default of `stage`).
+/// The moment of a stage change when a scenario names none.
 const STAGE_CHANGED: &str = "2026-11-04T15:00:00Z";
 
-/// The moment of the first publication of an ad when a scenario names none (the Python default of
-/// `publish`).
+/// The moment of the first publication of an ad when a scenario names none.
 const PUBLISHED: &str = "2026-11-05T10:00:00Z";
 
 const REPLACEMENT: &str =
@@ -338,8 +337,8 @@ fn publication(ad_id: &str, opublikowano: &str) -> OdnotujPublikacjeOgloszeniaPa
     }
 }
 
-/// Records the publication of the ad `ad_id` at `opublikowano` (the Python defaults are
-/// „ogloszenie” and [`PUBLISHED`]).
+/// Records the publication of the ad `ad_id` at `opublikowano` (most scenarios pass „ogloszenie”
+/// and [`PUBLISHED`]).
 fn publish(room: &impl MetaRoom, ad_id: &str, opublikowano: &str) {
     let params = publication(ad_id, opublikowano);
 

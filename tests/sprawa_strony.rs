@@ -1918,8 +1918,8 @@ fn contract_frozen_after_conclusion() {
         warunki_od: warunki_od.to_string(),
         id: "umowa".to_string(),
     };
-    // Python leaves `obie_strony` out, which binds NULL; the contract already has „false”, so
-    // the change of terms passes the same value and is refused by the same rule.
+    // The change of terms keeps `obie_strony` as the contract has it („false”), so only the rule of
+    // annexes refuses it.
     let terms_change = ZmienWarunkiUmowyParams {
         nieruchomosc_id: None,
         poczatek: None,

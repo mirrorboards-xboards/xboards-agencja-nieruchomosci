@@ -87,10 +87,6 @@ jobs:
           cargo fmt --check
           cargo test --locked
 
-      - name: Run the scenarios not yet moved to Rust
-        working-directory: ${{ env.REPOSITORY_DIR }}
-        run: python3 tests/run.py
-
       - name: Check the React client
         working-directory: ${{ env.REPOSITORY_DIR }}/clients/xboards-agencja-nieruchomosci-react
         run: |

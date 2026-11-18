@@ -112,7 +112,7 @@ fn integer_value(room: &MemoryRoom, sql: &str) -> i64 {
 // Building blocks of a case -----------------------------------------------------------------------
 
 /// Writes the record of the case Najem 2026/017, accepted by the broker, in a room of the type
-/// `typ_pokoju` (the Python default is „najem”).
+/// `typ_pokoju` (most scenarios pass „najem”).
 pub(crate) fn open_case(room: &impl MetaRoom, typ_pokoju: &str) {
     let params = ZalozMetrykeParams {
         oznaczenie: "Najem 2026/017, ul. Polna 7 m. 12".to_string(),
@@ -259,8 +259,8 @@ pub(crate) fn add_company(room: &impl MetaRoom, company_id: &str) {
 }
 
 /// The default parameters of a property: the flat at ul. Polna 7 m. 12 in Wrocław, a separate
-/// ownership with its land register, 48.20 m², two rooms on the third floor (the Python default
-/// id is „lokal”).
+/// ownership with its land register, 48.20 m², two rooms on the third floor (most scenarios use the
+/// id „lokal”).
 pub(crate) fn flat(flat_id: &str) -> WpiszNieruchomoscParams {
     WpiszNieruchomoscParams {
         id: flat_id.to_string(),
@@ -286,8 +286,8 @@ pub(crate) fn add_flat(room: &impl MetaRoom, params: &WpiszNieruchomoscParams) {
     sprawa_nieruchomosci::wpisz_nieruchomosc(room, params).expect("add the property");
 }
 
-/// The default parameters of a document received from the client as a scan by e-mail, with its
-/// file `dokumenty/<id>.pdf` (the Python default kind is „inny”).
+/// The default parameters of a document received from the client as a scan by e-mail, with its file
+/// `dokumenty/<id>.pdf` (most scenarios use the kind „inny”).
 pub(crate) fn received_document(
     document_id: &str,
     rodzaj: RodzajDokumentu,
@@ -432,7 +432,7 @@ pub(crate) fn check(room: &impl MetaRoom, params: &WpiszSprawdzenieParams) {
 }
 
 /// Writes Kontroler's compliant check `check_id` of the identity of the participant `person_id`,
-/// made on 2026-11-03 at 09:00 (Python: `check(room, id, "tozsamosc", uczestnik_id=…)`).
+/// made on 2026-11-03 at 09:00.
 pub(crate) fn check_identity(room: &impl MetaRoom, check_id: &str, person_id: &str) {
     let params = WpiszSprawdzenieParams {
         uczestnik_id: Some(person_id.to_string()),
@@ -581,8 +581,8 @@ pub(crate) fn checked_and_approved_payout(
 }
 
 /// Writes the received document `dokument-<id>` and the written power of attorney `power_id` that
-/// the principal gave the office for the acts `czynnosci`, given on `udzielono` (the Python
-/// defaults are `["wystapienie_do_wspolnoty"]` and „2026-11-03”).
+/// the principal gave the office for the acts `czynnosci`, given on `udzielono` (most scenarios
+/// pass `["wystapienie_do_wspolnoty"]` and „2026-11-03”).
 pub(crate) fn add_power_for_office(
     room: &impl MetaRoom,
     power_id: &str,
@@ -705,7 +705,7 @@ pub(crate) const WITHDRAWAL_ENDS: &str = "2026-11-18";
 /// Writes the signed contract `podpisana-<id>` and the policy `polisa-<id>` as received documents
 /// and concludes the contract `contract_id` in writing on 2026-11-04, signed by the broker. A
 /// consumer's contract off premises or at a distance needs `odstapienie_do`, e.g.
-/// [`WITHDRAWAL_ENDS`] (the Python defaults are „w_lokalu_biura” and None).
+/// [`WITHDRAWAL_ENDS`] (most scenarios pass „w_lokalu_biura” and None).
 pub(crate) fn conclude_contract(
     room: &impl MetaRoom,
     contract_id: &str,
@@ -737,8 +737,8 @@ pub(crate) fn conclude_contract(
 }
 
 /// Writes the contract `contract_id` (see [`contract`]) whose one party `party_id` Kontroler
-/// checked (`tozsamosc-<id>`), hands it over for signing and concludes it without a withdrawal
-/// date (the Python default `sposob_zawarcia` is „w_lokalu_biura”).
+/// checked (`tozsamosc-<id>`), hands it over for signing and concludes it without a withdrawal date
+/// (most scenarios pass the `sposob_zawarcia` „w_lokalu_biura”).
 pub(crate) fn concluded_contract(
     room: &impl MetaRoom,
     contract_id: &str,

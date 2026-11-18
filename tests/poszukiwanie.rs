@@ -177,7 +177,7 @@ fn brokerage_contract(
     conclude_contract(room, "umowa", sposob_zawarcia, odstapienie_do);
 }
 
-/// A search case with the client and a concluded brokerage contract (the Python defaults are
+/// A search case with the client and a concluded brokerage contract (most scenarios pass
 /// „w_lokalu_biura” and no end of the withdrawal period).
 fn search_case(
     room: &impl MetaRoom,
@@ -520,7 +520,7 @@ fn send_with_consent(room: &impl MetaRoom, letter_id: &str, wyslano: &str) {
 }
 
 /// A client offer of `params` the client confirmed and a human allowed to send; its letter
-/// `wysylka-<offer>` goes out at `wyslano` (the Python default is 2026-11-08 at 12:00).
+/// `wysylka-<offer>` goes out at `wyslano` (most scenarios pass 2026-11-08 at 12:00).
 fn sent_client_offer(room: &impl MetaRoom, params: &PrzygotujOferteKlientaParams, wyslano: &str) {
     prepare_client_offer(room, params);
     confirm_offer(room, &params.id);
@@ -620,7 +620,7 @@ fn enter_stage(room: &impl MetaRoom, params: &ZmienEtapSprawyParams) {
     sprawa_metryka::zmien_etap_sprawy(room, params).expect("change the stage of the case");
 }
 
-/// Moves the case to `etap` on 2026-11-05 at 10:00 (the Python default of `stage`).
+/// Moves the case to `etap` on 2026-11-05 at 10:00.
 fn stage(room: &impl MetaRoom, etap: &str) {
     enter_stage(room, &stage_change(etap, "2026-11-05T10:00:00Z"));
 }

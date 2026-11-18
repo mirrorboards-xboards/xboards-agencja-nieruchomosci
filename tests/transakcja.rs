@@ -168,7 +168,7 @@ fn add_parties(room: &impl MetaRoom) {
 }
 
 /// The default parameters of the notary office of notary Maria Wiśniewska, in XNotariusz since
-/// 2026-11-04 (the Python default id is „kancelaria”).
+/// 2026-11-04 (most scenarios use the id „kancelaria”).
 fn notary_office(office_id: &str) -> WpiszKancelarieParams {
     WpiszKancelarieParams {
         id: office_id.to_string(),
@@ -238,7 +238,7 @@ fn admitted_account_for(room: &impl MetaRoom, account_id: &str, person_id: &str,
 }
 
 /// The default parameters of a draft agreement for 620 000.00 zł with the draft document
-/// `projekt-<id>` (the Python defaults are „przedwstepna” and „pisemna”).
+/// `projekt-<id>` (most scenarios pass „przedwstepna” and „pisemna”).
 fn agreement(
     agreement_id: &str,
     rodzaj: RodzajUmowy,
@@ -305,7 +305,7 @@ fn analyse_draft(room: &impl MetaRoom, agreement_id: &str) {
 }
 
 /// Writes the signed agreement `podpisana-<id>` and concludes the agreement at `zawarto`; a deed
-/// also gets its repertory number (the Python defaults are „pisemna” and 2026-11-10 at 12:00).
+/// also gets its repertory number (most scenarios pass „pisemna” and 2026-11-10 at 12:00).
 fn conclude_agreement(room: &impl MetaRoom, agreement_id: &str, forma: FormaUmowy, zawarto: &str) {
     let is_deed = forma == FormaUmowy::AktNotarialny;
     let signed_kind = if is_deed {
@@ -340,8 +340,8 @@ fn concluded_agreement(room: &impl MetaRoom, params: &PrzygotujUmoweTransakcjiPa
     conclude_agreement(room, &params.id, params.forma, "2026-11-10T12:00:00Z");
 }
 
-/// A notarial deed of the kind `rodzaj` signed at the notary office of the case (the Python
-/// default kind is „przenoszaca”).
+/// A notarial deed of the kind `rodzaj` signed at the notary office of the case (most scenarios use
+/// the kind „przenoszaca”).
 fn concluded_deed(room: &impl MetaRoom, agreement_id: &str, rodzaj: RodzajUmowy) {
     let deed = PrzygotujUmoweTransakcjiParams {
         kancelaria_id: Some("kancelaria".to_string()),
@@ -352,7 +352,7 @@ fn concluded_deed(room: &impl MetaRoom, agreement_id: &str, rodzaj: RodzajUmowy)
 }
 
 /// The default parameters of a payment of 60 000.00 zł of own money, due on 2026-11-12, with no
-/// account yet (the Python default kind is „zadatek”).
+/// account yet (most scenarios use the kind „zadatek”).
 fn payment(
     payment_id: &str,
     agreement_id: &str,
@@ -435,8 +435,8 @@ fn record_preemption_result(room: &impl MetaRoom, wynik: WynikPierwokupu) {
         .expect("record the result of the pre-emption");
 }
 
-/// The buyer's power of attorney `power_id` in the form `forma` for his brother, who signs the
-/// deed for him (the Python defaults are „pelnomocnictwo-kupujacego” and „akt_notarialny”).
+/// The buyer's power of attorney `power_id` in the form `forma` for his brother, who signs the deed
+/// for him (most scenarios pass „pelnomocnictwo-kupujacego” and „akt_notarialny”).
 fn add_deed_power(room: &impl MetaRoom, power_id: &str, forma: FormaUmocowania) {
     add_person(
         room,

@@ -565,7 +565,7 @@ fn work_start() {
 // Handover protocols ------------------------------------------------------------------------------
 
 /// Writes the draft protocol `protocol_id` of the kind `rodzaj` for the flat „lokal”, made on
-/// 2026-11-10 at 10:00 (the Python defaults are „protokol” and „wydanie”).
+/// 2026-11-10 at 10:00 (most scenarios pass „protokol” and „wydanie”).
 fn draft_protocol(room: &impl MetaRoom, protocol_id: &str, rodzaj: RodzajProtokolu) {
     let params = PrzygotujProtokolParams {
         id: protocol_id.to_string(),

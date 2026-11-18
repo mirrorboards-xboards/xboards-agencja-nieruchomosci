@@ -440,7 +440,7 @@ fn signed_protocol(room: &MemoryRoom, rodzaj: RodzajProtokolu, chwila: &str) {
 }
 
 /// An account (see [`account`]) for `cel`, held by `posiadacz`, confirmed by another channel,
-/// checked by Kontroler and admitted (R4). The Python default holder is „Anna Kowalska”.
+/// checked by Kontroler and admitted (R4). Most scenarios name the holder „Anna Kowalska”.
 fn admitted_account_for(
     room: &MemoryRoom,
     account_id: &str,
@@ -589,8 +589,8 @@ fn send_at(room: &MemoryRoom, letter_id: &str, wyslano: &str) {
     send(room, &params);
 }
 
-/// A letter that always needs a human: waiting for consent, the decision, then sending at
-/// `wyslano` (the Python default is „2027-02-25T10:00:00Z”).
+/// A letter that always needs a human: waiting for consent, the decision, then sending at `wyslano`
+/// (most scenarios pass „2027-02-25T10:00:00Z”).
 fn send_with_consent(room: &MemoryRoom, letter_id: &str, wyslano: &str) {
     let for_consent = PrzekazWysylkeDoZgodyParams {
         id: letter_id.to_string(),
@@ -644,7 +644,7 @@ fn rent_payment(payment_id: &str) -> WpiszWplateCzynszuParams {
 }
 
 /// Writes the received statement `wyciag-<id>` and the rent payment (see [`rent_payment`]) of
-/// `kwota` (the Python defaults are „wplata-grudzien” and 300_000).
+/// `kwota` (most scenarios pass „wplata-grudzien” and 300_000).
 fn rent_paid_to_office(room: &MemoryRoom, payment_id: &str, kwota: i64) {
     let statement_id = format!("wyciag-{payment_id}");
     add_received_document(
@@ -777,7 +777,7 @@ fn consent_to_deduction(room: &MemoryRoom, deduction_id: &str, decision_id: &str
         .expect("point the deduction to its consent");
 }
 
-/// [`add_deduction`] with a human's consent `zgoda-<id>` (Python: `approved=True`).
+/// [`add_deduction`] with a human's consent `zgoda-<id>`.
 fn add_approved_deduction(room: &MemoryRoom, params: &DopiszPotracenieZKaucjiParams) {
     add_deduction(room, params);
 
@@ -793,7 +793,7 @@ fn add_approved_deduction(room: &MemoryRoom, params: &DopiszPotracenieZKaucjiPar
 }
 
 /// The tenant reports a leaking siphon in the inflow `zgloszenie-usterka`; it burdens `obciaza`
-/// (the Python default is „wynajmujacy”).
+/// (most scenarios pass „wynajmujacy”).
 fn report_defect(room: &MemoryRoom, obciaza: ObciazaUsterka) {
     add_inflow_from(room, "zgloszenie-usterka", "najemca");
 
@@ -2518,8 +2518,8 @@ fn eviction_demand_institutional() {
 
 // Rent ----------------------------------------------------------------------------------------------
 
-/// A concluded ordinary lease under a management contract with the money flow `przeplyw` (the
-/// Python default is „przez_biuro”).
+/// A concluded ordinary lease under a management contract with the money flow `przeplyw` (most
+/// scenarios pass „przez_biuro”).
 fn managed_lease(room: &MemoryRoom, przeplyw: Przeplyw) {
     open_rental(room);
     add_rental_parties(room);

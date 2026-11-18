@@ -574,8 +574,7 @@ pub(crate) fn first_row_copy(room: &MemoryRoom, table: &str) -> String {
     copy_of_first_row(table, &columns)
 }
 
-/// [`first_row_copy`] that leaves the `id` out, so only a UNIQUE key collides (Python:
-/// `first_row_copy(room, table, replace_unique_key=True)`).
+/// [`first_row_copy`] that leaves the `id` out, so only a UNIQUE key collides.
 pub(crate) fn first_row_copy_without_id(room: &MemoryRoom, table: &str) -> String {
     let columns: Vec<String> = columns_of(room, table)
         .into_iter()

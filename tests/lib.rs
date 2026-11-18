@@ -32,6 +32,8 @@ mod konsjerz;
 #[cfg(test)]
 mod kontroler;
 #[cfg(test)]
+mod lokal_krotkoterminowy;
+#[cfg(test)]
 mod najem;
 #[cfg(test)]
 mod oferta;
