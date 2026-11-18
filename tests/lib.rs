@@ -12,4 +12,10 @@ mod expect;
 #[cfg(test)]
 mod kierownik_dzialu;
 #[cfg(test)]
+mod klienci;
+#[cfg(test)]
 mod stanowisko;
+#[cfg(test)]
+mod wykonawcy;
+#[cfg(test)]
+mod wymiana;
