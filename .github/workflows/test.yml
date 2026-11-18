@@ -49,8 +49,11 @@ jobs:
           rsync -a --exclude .git --exclude .github ./ "$REPOSITORY_DIR/"
 
       - name: Setup Rust
-        # xmeta (xmeta-cli) is built from the source mctl synced, with its Cargo.lock.
+        # xmeta (xmeta-cli) and the Rust generator (xmeta-rust) are built from the source mctl
+        # synced, with their Cargo.lock.
         uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -76,9 +79,16 @@ jobs:
         # Only the source of the book; its PDF is built locally with typst by xmeta book.
         run: $XMETA book --check
 
-      - name: Run the scenarios of the catalogs on SQLite
+      - name: Run the scenarios of the catalogs in Rust
+        working-directory: ${{ env.REPOSITORY_DIR }}/tests
+        # The rules each catalog keeps in its tables and triggers, through the generated Rust client:
+        # what they allow and what they refuse.
+        run: |
+          cargo fmt --check
+          cargo test --locked
+
+      - name: Run the scenarios not yet moved to Rust
         working-directory: ${{ env.REPOSITORY_DIR }}
-        # The rules each catalog keeps in its tables and triggers: what they allow and what they refuse.
         run: python3 tests/run.py
 
       - name: Check the React client

@@ -1,0 +1,17 @@
+# The scenarios of the agency's catalogs in Rust: `cargo test` here runs every module listed in
+# lib.rs on rooms in memory, through the generated Rust client.
+[package]
+name = "xboards-agencja-nieruchomosci-tests"
+version = "0.1.0"
+edition = "2024"
+license = "UNLICENSED"
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+xboards-agencja-nieruchomosci = { path = "../clients/xboards-agencja-nieruchomosci-rs" }
+
+# Its own workspace: CI runs the scenarios from the XBoard alone, with this Cargo.lock.
+[workspace]

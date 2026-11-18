@@ -14,7 +14,8 @@
     "format:check": "prettier --check package.json tsconfig.json"
   },
   "ciRepositories": [
-    "mirrorboards-core/mirrorboards-xmeta/xmeta-cli"
+    "mirrorboards-core/mirrorboards-xmeta/xmeta-cli",
+    "mirrorboards-core/mirrorboards-xmeta/xmeta-rust"
   ],
   "dependencies": {
     "@mirrorboards-xmeta/react": "workspace:*"

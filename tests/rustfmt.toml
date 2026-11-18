@@ -1,0 +1,8 @@
+# The rustfmt style of the Mirrorboards workspace, from mirrorboards-dev/dev-formatter-rust. rustfmt reads only
+# a rustfmt.toml in or above a crate, so every repository keeps an identical copy at its root:
+# `dev-formatter-rust write <repository>` puts it there and `dev-formatter-rust check <repository>`
+# fails while the copy differs. The style edition follows each crate's edition.
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Unix"

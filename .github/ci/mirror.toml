@@ -14,5 +14,9 @@ git = "git@github.com:mirrorboards-xmeta/xmeta-react.git"
 path = "mirrorboards-core/mirrorboards-xmeta/xmeta-react"
 
 [[repositories]]
+git = "git@github.com:mirrorboards-xmeta/xmeta-rust.git"
+path = "mirrorboards-core/mirrorboards-xmeta/xmeta-rust"
+
+[[repositories]]
 git = "git@github.com:mirrorboards-utils/utils-workspace-source.git"
 path = "mirrorboards-utils/utils-workspace-source"
