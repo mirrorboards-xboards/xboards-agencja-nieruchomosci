@@ -1,0 +1,12 @@
+profile = "./profile"
+meta = [
+  "../../stanowisko/meta/stanowisko-polecenia",
+  "../../stanowisko/meta/stanowisko-ustalenia",
+  "../../stanowisko/meta/stanowisko-zrodla",
+  "../../kierownik_dzialu/meta/kierownik-dzialu-agenci",
+  "../../kierownik_dzialu/meta/kierownik-dzialu-raporty",
+  "../../kierownik_dzialu/meta/kierownik-dzialu-spis",
+  "../../kierownik_dzialu/meta/kierownik-dzialu-standardy",
+  "../../kierownik_dzialu/meta/kierownik-dzialu-zajrzenia",
+  "../../kierownik_dzialu/meta/kierownik-dzialu-zwyczaje",
+]

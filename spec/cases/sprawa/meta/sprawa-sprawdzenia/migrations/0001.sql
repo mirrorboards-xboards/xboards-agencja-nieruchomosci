@@ -1,0 +1,181 @@
+-- Wyniki sprawdzeń Kontrolera, które nie należą do przeciwdziałania praniu pieniędzy: tożsamość,
+-- tytuł do nieruchomości, umocowanie i rachunek. Typ sprawy mówi, co Kontroler w nim sprawdza.
+-- Wpisuje je tylko Kontroler klienta (R7), a wynik ma tylko trzy słowa; ustalenia ze środków
+-- bezpieczeństwa finansowego leżą w rejestrze kontroli.
+--
+-- Wynik dotyczy wersji wiersza, którą Kontroler widział (D6). Nowe sprawdzenie tego samego wiersza
+-- i zmiana danych identyfikujących uczestnika albo umocowania odbierają poprzedniemu wynikowi
+-- aktualność. Wpisu się nie zmienia; ponowne sprawdzenie to nowy wpis.
+--
+-- Reguły, które zależą od późniejszych rodzajów, leżą w ich migracjach: sprawdzenie stron przed
+-- podpisem umowy w sprawa-umowy (sprawa_umowy_do_podpisu_po_sprawdzeniu_stron), sprawdzenie
+-- rachunku przed wypłatą w sprawa-wyplaty (sprawa_wyplaty_sprawdzenie_po_przygotowaniu).
+CREATE TABLE sprawa_sprawdzenia_wpisy (
+  id TEXT PRIMARY KEY,
+  rodzaj TEXT NOT NULL CHECK (rodzaj IN ('tozsamosc', 'tytul', 'umocowanie', 'rachunek')),
+  -- Sprawdzany wiersz: uczestnik (tożsamość), uczestnik z nieruchomością albo dokumentem (tytuł),
+  -- umocowanie albo rachunek.
+  uczestnik_id TEXT REFERENCES sprawa_uczestnicy_wpisy (id),
+  nieruchomosc_id TEXT REFERENCES sprawa_nieruchomosci_wpisy (id),
+  dokument_id TEXT REFERENCES sprawa_dokumenty_wpisy (id),
+  umocowanie_id TEXT REFERENCES sprawa_umocowania_wpisy (id),
+  rachunek_id TEXT REFERENCES sprawa_rachunki_wpisy (id),
+  -- Wersja uczestnika albo umocowania, którą Kontroler sprawdził; rachunek się nie zmienia.
+  wersja_wiersza INTEGER,
+  -- Źródło spoza teczki, np. dział II księgi wieczystej, odpis z KRS, telefon do posiadacza.
+  zrodlo TEXT NOT NULL,
+  zrodlo_data TEXT,
+  wynik TEXT NOT NULL CHECK (wynik IN ('zgodne', 'uwagi', 'nie_mozna_ustalic')),
+  -- Czego brakuje; tylko to, co wolno przeczytać osobom obsługującym klienta.
+  opis TEXT,
+  sprawdzil TEXT NOT NULL,
+  sprawdzono TEXT NOT NULL,
+  aktualne INTEGER NOT NULL CHECK (aktualne IN (0, 1)),
+
+  CONSTRAINT rodzaj_pasuje_do_wiersza CHECK (
+    CASE rodzaj
+      WHEN 'tozsamosc' THEN uczestnik_id IS NOT NULL AND nieruchomosc_id IS NULL
+        AND dokument_id IS NULL AND umocowanie_id IS NULL AND rachunek_id IS NULL
+      WHEN 'tytul' THEN uczestnik_id IS NOT NULL
+        AND (nieruchomosc_id IS NOT NULL OR dokument_id IS NOT NULL)
+        AND umocowanie_id IS NULL AND rachunek_id IS NULL
+      WHEN 'umocowanie' THEN umocowanie_id IS NOT NULL AND uczestnik_id IS NULL
+        AND nieruchomosc_id IS NULL AND dokument_id IS NULL AND rachunek_id IS NULL
+      WHEN 'rachunek' THEN rachunek_id IS NOT NULL AND uczestnik_id IS NULL
+        AND nieruchomosc_id IS NULL AND dokument_id IS NULL AND umocowanie_id IS NULL
+    END
+  ),
+  CONSTRAINT wersja_wiersza_przy_wierszu_z_wersja CHECK (
+    (wersja_wiersza IS NOT NULL) = (rodzaj IN ('tozsamosc', 'tytul', 'umocowanie'))
+  ),
+  CONSTRAINT wynik_z_uwagami_ma_opis CHECK (wynik = 'zgodne' OR opis IS NOT NULL)
+) STRICT;
+
+-- Aktualność odbierają tylko triggery, więc sprawdzenie powstaje aktualne.
+CREATE TRIGGER sprawa_sprawdzenia_powstaje_aktualne
+BEFORE INSERT ON sprawa_sprawdzenia_wpisy
+WHEN NEW.aktualne <> 1
+BEGIN
+  SELECT RAISE(ABORT, 'sprawdzenie powstaje jako aktualne');
+END;
+
+CREATE TRIGGER sprawa_sprawdzenia_dotyczy_biezacej_wersji
+BEFORE INSERT ON sprawa_sprawdzenia_wpisy
+WHEN (
+    NEW.uczestnik_id IS NOT NULL
+    AND NEW.wersja_wiersza IS NOT (
+      SELECT wersja
+      FROM sprawa_uczestnicy_wpisy
+      WHERE id = NEW.uczestnik_id
+    )
+  )
+  OR (
+    NEW.umocowanie_id IS NOT NULL
+    AND NEW.wersja_wiersza IS NOT (
+      SELECT wersja
+      FROM sprawa_umocowania_wpisy
+      WHERE id = NEW.umocowanie_id
+    )
+  )
+BEGIN
+  SELECT RAISE(ABORT, 'sprawdzenie dotyczy bieżącej wersji wiersza');
+END;
+
+CREATE TRIGGER sprawa_sprawdzenia_nowe_zeruje_poprzednie
+AFTER INSERT ON sprawa_sprawdzenia_wpisy
+BEGIN
+  UPDATE sprawa_sprawdzenia_wpisy
+  SET aktualne = 0
+  WHERE id <> NEW.id
+    AND aktualne = 1
+    AND rodzaj = NEW.rodzaj
+    AND uczestnik_id IS NEW.uczestnik_id
+    AND nieruchomosc_id IS NEW.nieruchomosc_id
+    AND dokument_id IS NEW.dokument_id
+    AND umocowanie_id IS NEW.umocowanie_id
+    AND rachunek_id IS NEW.rachunek_id;
+END;
+
+-- Wynik ma podpis Kontrolera; jedyną zmianą jest utrata aktualności.
+CREATE TRIGGER sprawa_sprawdzenia_bez_zmian
+BEFORE UPDATE ON sprawa_sprawdzenia_wpisy
+WHEN NEW.id IS NOT OLD.id
+  OR NEW.rodzaj IS NOT OLD.rodzaj
+  OR NEW.uczestnik_id IS NOT OLD.uczestnik_id
+  OR NEW.nieruchomosc_id IS NOT OLD.nieruchomosc_id
+  OR NEW.dokument_id IS NOT OLD.dokument_id
+  OR NEW.umocowanie_id IS NOT OLD.umocowanie_id
+  OR NEW.rachunek_id IS NOT OLD.rachunek_id
+  OR NEW.wersja_wiersza IS NOT OLD.wersja_wiersza
+  OR NEW.zrodlo IS NOT OLD.zrodlo
+  OR NEW.zrodlo_data IS NOT OLD.zrodlo_data
+  OR NEW.wynik IS NOT OLD.wynik
+  OR NEW.opis IS NOT OLD.opis
+  OR NEW.sprawdzil IS NOT OLD.sprawdzil
+  OR NEW.sprawdzono IS NOT OLD.sprawdzono
+  OR (OLD.aktualne = 0 AND NEW.aktualne = 1)
+BEGIN
+  SELECT RAISE(ABORT, 'wyniku sprawdzenia się nie zmienia; ponowne sprawdzenie to nowy wpis');
+END;
+
+CREATE TRIGGER sprawa_sprawdzenia_nowa_wersja_uczestnika
+AFTER UPDATE OF wersja ON sprawa_uczestnicy_wpisy
+WHEN NEW.wersja IS NOT OLD.wersja
+BEGIN
+  UPDATE sprawa_sprawdzenia_wpisy
+  SET aktualne = 0
+  WHERE uczestnik_id = NEW.id
+    AND aktualne = 1;
+END;
+
+CREATE TRIGGER sprawa_sprawdzenia_nowa_wersja_umocowania
+AFTER UPDATE OF wersja ON sprawa_umocowania_wpisy
+WHEN NEW.wersja IS NOT OLD.wersja
+BEGIN
+  UPDATE sprawa_sprawdzenia_wpisy
+  SET aktualne = 0
+  WHERE umocowanie_id = NEW.id
+    AND aktualne = 1;
+END;
+
+-- Zgoda na rachunek stoi na aktualnym sprawdzeniu „zgodne” i potwierdzeniu posiadacza innym
+-- kanałem, a zastąpiony rachunek nie dostaje zgody (R4). Odmówić wolno zawsze.
+CREATE TRIGGER sprawa_sprawdzenia_dopuszczenie_rachunku_wymaga_sprawdzenia
+BEFORE UPDATE OF stan ON sprawa_decyzje_wpisy
+WHEN NEW.stan = 'rozstrzygnieta'
+  AND NEW.rodzaj = 'dopuszczenie_rachunku'
+  AND NEW.rozstrzygniecie IN ('zgoda', 'zgoda_z_warunkiem')
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sprawa_rachunki_wpisy AS rachunek
+    JOIN sprawa_sprawdzenia_wpisy AS sprawdzenie ON sprawdzenie.rachunek_id = rachunek.id
+    WHERE NEW.dotyczy_tabela = 'sprawa_rachunki_wpisy'
+      AND rachunek.id = NEW.dotyczy_id
+      AND rachunek.potwierdzono IS NOT NULL
+      AND rachunek.zastapiony_przez_id IS NULL
+      AND sprawdzenie.rodzaj = 'rachunek'
+      AND sprawdzenie.aktualne = 1
+      AND sprawdzenie.wynik = 'zgodne'
+  )
+BEGIN
+  SELECT RAISE(ABORT, 'zgoda na rachunek wymaga aktualnego sprawdzenia „zgodne”, potwierdzenia innym kanałem i niezastąpionego rachunku');
+END;
+
+-- INSERT OR REPLACE i upsert (ON CONFLICT DO UPDATE) zastąpiłyby istniejący wiersz z ominięciem
+-- reguł zmian i blokady usuwania, bo pokój nie włącza recursive_triggers.
+CREATE TRIGGER sprawa_sprawdzenia_wpisy_bez_zastepowania
+BEFORE INSERT ON sprawa_sprawdzenia_wpisy
+WHEN EXISTS (
+  SELECT 1
+  FROM sprawa_sprawdzenia_wpisy
+  WHERE id = NEW.id
+)
+BEGIN
+  SELECT RAISE(ABORT, 'wiersza teczki nie zastępuje się nowym wpisem; zmiana idzie przez UPDATE');
+END;
+
+CREATE TRIGGER sprawa_sprawdzenia_wpisy_bez_usuwania
+BEFORE DELETE ON sprawa_sprawdzenia_wpisy
+BEGIN
+  SELECT RAISE(ABORT, 'wierszy teczki się nie usuwa (R9); pomyłkę poprawia stan albo nowy wiersz');
+END;

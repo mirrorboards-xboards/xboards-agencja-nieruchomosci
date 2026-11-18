@@ -14,7 +14,8 @@ export const stanowiskoPolecenia: XMetaKind = {
   name: "stanowisko-polecenia",
   requires: [],
   migrations: [
-    `-- Polecenia: co agentowi polecił właściciel albo przełożony, zapisane osobno od ustaleń.
+    `-- Polecenia: co agentowi polecił właściciel albo ktoś, komu właściciel na to pozwolił (np. wspólnik
+-- u Kierownika biura), zapisane osobno od ustaleń.
 --
 -- Agent przyjmuje tylko polecenie podpisane kluczem wydającego, bo niepodpisana wiadomość może
 -- udawać właściciela. Podpis sprawdza aplikacja, a baza wymaga jego obecności.
@@ -22,7 +23,7 @@ CREATE TABLE stanowisko_polecenia_wpisy (
   -- Klucz nadany przez bazę jest dodatni; zob. stanowisko_polecenia_wpisy_bez_zastepowania.
   id INTEGER PRIMARY KEY CHECK (id > 0),
   wydal TEXT NOT NULL,
-  wydal_jako TEXT NOT NULL CHECK (wydal_jako IN ('wlasciciel', 'przelozony')),
+  wydal_jako TEXT NOT NULL CHECK (wydal_jako IN ('wlasciciel', 'upowazniony')),
   otrzymano TEXT NOT NULL,
   tresc TEXT NOT NULL,
   podpis TEXT NOT NULL,
@@ -34,19 +35,6 @@ CREATE TABLE stanowisko_polecenia_wpisy (
   CONSTRAINT odmowa_z_uwagami CHECK (stan <> 'odmowione' OR uwagi IS NOT NULL)
 ) STRICT;
 
--- INSERT OR REPLACE i upsert (ON CONFLICT DO UPDATE) zastąpiłyby istniejący wiersz z ominięciem
--- triggerów UPDATE i DELETE, bo pokój nie włącza recursive_triggers; zmianę wiersza robi UPDATE.
-CREATE TRIGGER stanowisko_polecenia_wpisy_bez_zastepowania
-BEFORE INSERT ON stanowisko_polecenia_wpisy
-WHEN EXISTS (
-  SELECT 1
-  FROM stanowisko_polecenia_wpisy
-  WHERE id = NEW.id
-)
-BEGIN
-  SELECT RAISE(ABORT, 'wiersza nie zastępuje się nowym wpisem (INSERT OR REPLACE, upsert); zmiana idzie przez UPDATE');
-END;
-
 CREATE TRIGGER stanowisko_polecenia_powstaje_przyjete
 BEFORE INSERT ON stanowisko_polecenia_wpisy
 WHEN NEW.stan <> 'przyjete'
@@ -57,7 +45,8 @@ END;
 -- Podpis obejmuje treść, więc zmieniona treść nie byłaby już poleceniem wydającego.
 CREATE TRIGGER stanowisko_polecenia_tresc_niezmienna
 BEFORE UPDATE ON stanowisko_polecenia_wpisy
-WHEN NEW.wydal IS NOT OLD.wydal
+WHEN NEW.id IS NOT OLD.id
+  OR NEW.wydal IS NOT OLD.wydal
   OR NEW.wydal_jako IS NOT OLD.wydal_jako
   OR NEW.otrzymano IS NOT OLD.otrzymano
   OR NEW.tresc IS NOT OLD.tresc
@@ -72,6 +61,29 @@ WHEN OLD.stan <> 'przyjete'
 BEGIN
   SELECT RAISE(ABORT, 'wykonanego ani odmówionego polecenia się nie zmienia');
 END;
+
+-- Bez zastępowania i usuwania --------------------------------------------------------------------
+
+-- INSERT OR REPLACE i upsert (ON CONFLICT DO UPDATE) zastąpiłyby istniejący wiersz z ominięciem
+-- reguł zmian i blokady usuwania, bo pokój nie włącza recursive_triggers. Bez podanego klucza
+-- NEW.id jest tu -1 albo NULL i nie wskazuje żadnego wiersza, bo klucze są dodatnie.
+CREATE TRIGGER stanowisko_polecenia_wpisy_bez_zastepowania
+BEFORE INSERT ON stanowisko_polecenia_wpisy
+WHEN EXISTS (
+  SELECT 1
+  FROM stanowisko_polecenia_wpisy
+  WHERE id = NEW.id
+)
+BEGIN
+  SELECT RAISE(ABORT, 'wiersza pamięci nie zastępuje się nowym wpisem (INSERT OR REPLACE, upsert); zmiana idzie przez UPDATE');
+END;
+
+-- R9: polecenie zostaje jako ślad tego, co agentowi kazano.
+CREATE TRIGGER stanowisko_polecenia_wpisy_bez_usuwania
+BEFORE DELETE ON stanowisko_polecenia_wpisy
+BEGIN
+  SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
+END;
 `,
   ],
 };
@@ -79,7 +91,7 @@ END;
 /** The values each enumerated column of the kind's tables allows (its CHECK … IN), by table and column. */
 export const stanowiskoPoleceniaValues = {
   wpisy: {
-    wydal_jako: ["wlasciciel", "przelozony"],
+    wydal_jako: ["wlasciciel", "upowazniony"],
     stan: ["przyjete", "wykonane", "odmowione"],
   },
 } as const;
@@ -89,7 +101,7 @@ export const stanowiskoPoleceniaValues = {
 export type PoleceniaRow = {
   id: number;
   wydal: string;
-  wydal_jako: "wlasciciel" | "przelozony";
+  wydal_jako: "wlasciciel" | "upowazniony";
   otrzymano: string;
   tresc: string;
   podpis: string;
@@ -122,7 +134,7 @@ export function usePolecenia(): MetaState<PoleceniaRow[]> {
 export type PoleceniaOtwarteRow = {
   id: number;
   wydal: string;
-  wydal_jako: "wlasciciel" | "przelozony";
+  wydal_jako: "wlasciciel" | "upowazniony";
   otrzymano: string;
   tresc: string;
   podpis: string;
@@ -155,14 +167,15 @@ export function usePoleceniaOtwarte(): MetaState<PoleceniaOtwarteRow[]> {
 
 export type PrzyjmijPolecenieParams = {
   wydal: string;
-  wydal_jako: "wlasciciel" | "przelozony";
+  wydal_jako: "wlasciciel" | "upowazniony";
   otrzymano: string;
   tresc: string;
   podpis: string;
 };
 
 /**
- * Podpisane polecenie właściciela albo przełożonego; podpis sprawdziła aplikacja.
+ * Podpisane polecenie właściciela albo upoważnionego przez niego człowieka; podpis sprawdziła
+ * aplikacja.
  */
 export const przyjmijPolecenie: XMetaMutation<PrzyjmijPolecenieParams> = {
   kind: stanowiskoPolecenia,
@@ -177,7 +190,8 @@ VALUES (:wydal, :wydal_jako, :otrzymano, :tresc, :podpis, 'przyjete')`,
 };
 
 /**
- * Podpisane polecenie właściciela albo przełożonego; podpis sprawdziła aplikacja.
+ * Podpisane polecenie właściciela albo upoważnionego przez niego człowieka; podpis sprawdziła
+ * aplikacja.
  */
 export function usePrzyjmijPolecenie(): MetaRun<PrzyjmijPolecenieParams> {
   return useMetaMutation(przyjmijPolecenie);

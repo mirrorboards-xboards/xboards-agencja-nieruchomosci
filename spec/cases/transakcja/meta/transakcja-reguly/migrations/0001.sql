@@ -1,0 +1,98 @@
+-- Reguły teczki transakcji na tabelach rdzenia: typ pokoju, etapy z przejściami, role uczestników,
+-- rodzaje zgód i zakaz umów z biurem. Rodzaj nie ma własnych tabel i wskazuje tylko rdzeń, więc
+-- jest pierwszym rodzajem typu. Każdy trigger tylko odmawia; rdzenia nie zmienia.
+--
+-- Etapy są fazami (decyzja T8): w jednej fazie kilka prac biegnie równolegle, np. kredyt,
+-- dokumenty do aktu i projekt aktu. Kolejność faz:
+--   przyjeta → przygotowanie → [umowa_przedwstepna →] przygotowanie_aktu → [akt_warunkowy →] akt
+--   → przekazanie → po_przekazaniu → zamknieta.
+-- Z każdej fazy przed zamknięciem sprawa przechodzi do przerwana, a z niej do zamknieta albo
+-- z powrotem do fazy sprzed przerwania (sprawa_metryka_powrot_z_przerwania). Decyzje
+-- przerwanie_sprawy i wznowienie_sprawy wymaga rdzeń.
+--
+-- Reguły etapów, które zależą od tabel typu, leżą w ich migracjach: wejście w przekazanie wymaga
+-- zawartej umowy przenoszącej (transakcja-umowy, transakcja_umowy_przekazanie_po_umowie_przenoszacej).
+
+-- Teczka transakcji to pokój typu transakcja (decyzja T2): reguły tego katalogu dotyczą tylko jej.
+CREATE TRIGGER transakcja_reguly_typ_pokoju
+BEFORE INSERT ON sprawa_metryka_wpis
+WHEN NEW.typ_pokoju <> 'transakcja'
+BEGIN
+  SELECT RAISE(ABORT, 'teczka transakcji ma typ pokoju transakcja');
+END;
+
+-- Etap transakcji i przejście z bieżącego etapu (ostatniego wiersza dziennika): etap spoza listy
+-- nie ma dozwolonego przejścia. Bez umowy przedwstępnej sprawa idzie z przygotowania wprost do
+-- przygotowania aktu, a akt warunkowy jest tylko przy pierwokupie. Pierwszy wpis (przyjeta, którego
+-- pilnuje rdzeń) nie ma poprzedniego etapu, więc coalesce go przepuszcza.
+CREATE TRIGGER transakcja_reguly_przejscie_etapu
+BEFORE INSERT ON sprawa_metryka_etapy
+WHEN NOT coalesce(
+  (
+    SELECT
+      CASE etap
+        WHEN 'przyjeta' THEN NEW.etap IN ('przygotowanie', 'przerwana')
+        WHEN 'przygotowanie' THEN NEW.etap IN ('umowa_przedwstepna', 'przygotowanie_aktu', 'przerwana')
+        WHEN 'umowa_przedwstepna' THEN NEW.etap IN ('przygotowanie_aktu', 'przerwana')
+        WHEN 'przygotowanie_aktu' THEN NEW.etap IN ('akt_warunkowy', 'akt', 'przerwana')
+        WHEN 'akt_warunkowy' THEN NEW.etap IN ('akt', 'przerwana')
+        WHEN 'akt' THEN NEW.etap IN ('przekazanie', 'przerwana')
+        WHEN 'przekazanie' THEN NEW.etap IN ('po_przekazaniu', 'przerwana')
+        WHEN 'po_przekazaniu' THEN NEW.etap IN ('zamknieta', 'przerwana')
+        WHEN 'przerwana' THEN NEW.etap = 'zamknieta' OR NEW.etap IN (
+          SELECT etap
+          FROM sprawa_metryka_powrot_z_przerwania
+        )
+        ELSE 0
+      END
+    FROM sprawa_metryka_etapy
+    ORDER BY id DESC
+    LIMIT 1
+  ),
+  1
+)
+BEGIN
+  SELECT RAISE(ABORT, 'etapy transakcji idą po kolei: przyjeta, przygotowanie, umowa_przedwstepna (albo bez niej), przygotowanie_aktu, akt_warunkowy (przy pierwokupie), akt, przekazanie, po_przekazaniu, zamknieta; każdy etap przed zamknięciem można przerwać (przerwana), a po przerwaniu przychodzi zamknieta albo powrót do etapu sprzed przerwania');
+END;
+
+-- Strony podpisują protokół zdawczo-odbiorczy przy przekazaniu, więc sprawa wychodzi z tej fazy
+-- dopiero z podpisanym protokołem przekazania.
+CREATE TRIGGER transakcja_reguly_po_przekazaniu_z_protokolem
+BEFORE INSERT ON sprawa_metryka_etapy
+WHEN NEW.etap = 'po_przekazaniu'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sprawa_protokoly_wpisy
+    WHERE rodzaj = 'przekazanie'
+      AND stan = 'podpisany'
+  )
+BEGIN
+  SELECT RAISE(ABORT, 'faza po przekazaniu wymaga podpisanego protokołu przekazania');
+END;
+
+-- Pełnomocnik wynika z umocowań, a klient biura ze znacznika uczestnika, więc rolą jest tylko
+-- strona sprzedaży i małżonek, którego zgody wymaga umowa (art. 37 § 1 pkt 1 KRO).
+CREATE TRIGGER transakcja_reguly_rola_uczestnika
+BEFORE INSERT ON sprawa_uczestnicy_role
+WHEN NEW.rola NOT IN ('sprzedajacy', 'kupujacy', 'malzonek')
+BEGIN
+  SELECT RAISE(ABORT, 'rola w teczce transakcji to sprzedajacy, kupujacy albo malzonek');
+END;
+
+-- Strony zgadzają się, żeby biuro dostawało od kancelarii projekt aktu. Zgód z umowy z biurem
+-- (żądanie rozpoczęcia pracy, odstąpienie) tu nie ma, bo umowy z biurem leżą w teczkach oferty
+-- i poszukiwania.
+CREATE TRIGGER transakcja_reguly_rodzaj_zgody
+BEFORE INSERT ON sprawa_zgody_wpisy
+WHEN NEW.rodzaj <> 'informacje_od_kancelarii'
+BEGIN
+  SELECT RAISE(ABORT, 'zgoda w teczce transakcji to informacje_od_kancelarii');
+END;
+
+-- Biuro nie jest stroną umów w transakcji, a umowy pośrednictwa leżą w teczkach oferty
+-- i poszukiwania; teczka transakcji wskazuje je powiązaniem.
+CREATE TRIGGER transakcja_reguly_bez_umow_z_biurem
+BEFORE INSERT ON sprawa_umowy_wpisy
+BEGIN
+  SELECT RAISE(ABORT, 'w teczce transakcji nie ma umów z biurem; leżą w teczkach oferty i poszukiwania');
+END;

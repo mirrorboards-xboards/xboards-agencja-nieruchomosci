@@ -1,7 +1,7 @@
 """A room of XEstates on SQLite in memory, for scenarios of its catalogs.
 
-`Room(position)` reads the `meta` list of the position's `board.toml` the way XMeta does (own kinds in
-its `meta/` and the own kinds of imported positions, by name or pattern; imports are not
+`Room(position)` reads the `meta` list of the position's `board.toml` the way XMeta does (own
+kinds in its `meta/` and the own kinds of imported positions, by name or pattern; imports are not
 transitive), applies the
 migrations of the kinds of the room in the order the generator uses (a kind after the kinds whose
 tables its migrations name), and runs operations by name the way the app does: the statements of
@@ -190,9 +190,7 @@ def _imported_kinds(position, folder, pattern):
         raise ValueError(f"{position}: import {folder}/{pattern}: position does not exist")
 
     matching = [
-        kind
-        for kind in _own_kinds(imported_position)
-        if fnmatch.fnmatchcase(kind.name, pattern)
+        kind for kind in _own_kinds(imported_position) if fnmatch.fnmatchcase(kind.name, pattern)
     ]
     if not matching:
         raise ValueError(

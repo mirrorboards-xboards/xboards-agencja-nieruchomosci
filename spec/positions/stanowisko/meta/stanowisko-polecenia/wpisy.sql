@@ -12,7 +12,8 @@ WHERE stan = 'przyjete'
 ORDER BY otrzymano, id;
 
 -- name: przyjmij_polecenie :exec
--- Podpisane polecenie właściciela albo przełożonego; podpis sprawdziła aplikacja.
+-- Podpisane polecenie właściciela albo upoważnionego przez niego człowieka; podpis sprawdziła
+-- aplikacja.
 INSERT INTO stanowisko_polecenia_wpisy (wydal, wydal_jako, otrzymano, tresc, podpis, stan)
 VALUES (:wydal, :wydal_jako, :otrzymano, :tresc, :podpis, 'przyjete');
 

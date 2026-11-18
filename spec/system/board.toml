@@ -1,4 +1,1 @@
 profile = "./profile"
-meta = [
-  "../positions/stanowisko/meta/*",
-]

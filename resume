@@ -7,8 +7,10 @@ Z katalogu workspace'u:
     cd ~/workspaces/mirrorboards-prod
     claude --resume 30a95b7c-f40a-4ea0-99ca-f8f0fa235a82
 
-Stan pracy w chwili zapisu: szablon na podstawie xboards-kancelaria-notarialna. W korzeniu są
-spec/, clients/, tests/, xmeta.toml, resume i księga agencja-nieruchomosci.typ i .pdf. W spec/
-jest pozycja całej agencji system/ i pamięć każdego stanowiska positions/stanowisko. Treść
-(dokument biura, sprawy, stanowiska, rejestry) przejdzie świadomie, etapami, z
-applications/xestates/xestates-spec i xestates-meta.
+Stan pracy w chwili zapisu: XEstates przeniesione z applications/xestates/xestates-spec (f8fe65b)
+i xestates-meta (fc99f8a) w układzie kancelarii notarialnej. Dokument biura to profil pozycji
+system/. Rdzeń teczki to cases/sprawa, pokój wymiany cases/wymiana, pamięć agentów
+positions/stanowisko (rodzaje stanowisko-*), pamięć kierowników działów positions/kierownik_dzialu
+(rodzaje kierownik-dzialu-*). Stanowiska leżą w działach positions/biuro, posrednictwo,
+transakcje, najem i kontrola. Scenariusze z xestates-meta są w tests/ (524). Dokumenty robocze
+xestates-spec/docs zostały w starym repozytorium; stare repozytoria nie są jeszcze wygaszone.

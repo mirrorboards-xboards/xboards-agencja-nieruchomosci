@@ -1,11 +1,14 @@
 {
+  "stanowisko-kontakty": [
+    "52bb56e8e579fcbb41a6867b6a71589375f91282cb622d10e0e8e527a8e2d121"
+  ],
   "stanowisko-polecenia": [
-    "771144f0e68185ef080621138cec8b1081aad3e6152297214d1f116355207cb8"
+    "e2f6d7d09334cbb6f1bdc7e8d545f78d91e05fa2eba8b5a102425bbdaece1acd"
   ],
   "stanowisko-ustalenia": [
-    "cea993b10d9083c23b13ab88effcc0a1ccb295f91be4b5b7dc2f2d6e81949a51"
+    "b5a8aa25739b097ef69d2e76b49758cab745d21ebbda4a915920e00f62742d1a"
   ],
   "stanowisko-zrodla": [
-    "8a80091f291c19e423f5306f003ff60f8dba39702aa5f8e608f00b655d931a81"
+    "550fdb3c2feb23d629723b2d698600bac93c53e5c0c111b2a57544d45250e2f8"
   ]
 }

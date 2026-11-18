@@ -1,0 +1,7 @@
+profile = "./profile"
+meta = [
+  "../../stanowisko/meta/stanowisko-kontakty",
+  "../../stanowisko/meta/stanowisko-polecenia",
+  "../../stanowisko/meta/stanowisko-ustalenia",
+  "../../stanowisko/meta/stanowisko-zrodla",
+]

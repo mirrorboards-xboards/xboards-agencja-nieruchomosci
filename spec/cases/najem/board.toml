@@ -1,0 +1,5 @@
+profile = "./profile"
+meta = [
+  "./meta/*",
+  "../sprawa/meta/*",
+]

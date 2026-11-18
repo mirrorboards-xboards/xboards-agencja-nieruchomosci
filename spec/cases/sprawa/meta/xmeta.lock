@@ -1,0 +1,50 @@
+{
+  "sprawa-decyzje": [
+    "7a85f39a7cfcfc1b32dcd2f11120e7360a05727f537d2fbef3410802bc37f85b"
+  ],
+  "sprawa-dokumenty": [
+    "0460775eae21550007da4706267c806e59ada2a39ba7ff7f48ef60b80c7bee43"
+  ],
+  "sprawa-korespondencja": [
+    "23c58c9cff0a58d284f1bc3b225c5781e998b98cc6bd457f72e0dc73d7073eaa"
+  ],
+  "sprawa-metryka": [
+    "b62cb53d91fd91aab3b08dc54fc1ae784e7913fa32a86d892b1594809479d9a2"
+  ],
+  "sprawa-nieruchomosci": [
+    "bd615659daed4d7aa6f38aa0374ffd8d3bce7b30df5602131e15cbf48b97086f"
+  ],
+  "sprawa-notatki": [
+    "935581e1b7c8804f6145d714119cb56906b2ac9933bd0ad2b5b7b0d549590a6f"
+  ],
+  "sprawa-powiazania": [
+    "1d40ba164a22617d7088c70e7870945339e451380cc94a8ec405e03b1c2336b9"
+  ],
+  "sprawa-protokoly": [
+    "a643ff0b920924df27e3c0b3863354650b4e940561f1c750367802b6753b27a9"
+  ],
+  "sprawa-rachunki": [
+    "5552b0b97a1501ff0fa5516516a23378e0318ef4305b2eb8b575e3ebd63e130f"
+  ],
+  "sprawa-sprawdzenia": [
+    "f75a6d5bde7217b60d82b1c1260974c094ef7e9ec0e5de5509a64f0342eb76bf"
+  ],
+  "sprawa-terminy": [
+    "f348a8e2f6107ec251a3aad3280a40cbdbd949e560d99f4d8a7a753141d81b2d"
+  ],
+  "sprawa-uczestnicy": [
+    "3481d650bce43462ab4e10129c82ab33ada8eeff68e0a15bbd81130e2ebad758"
+  ],
+  "sprawa-umocowania": [
+    "490747db6000a62bb804c4115357e30946072bfc22b009a7201ed12b68f159e4"
+  ],
+  "sprawa-umowy": [
+    "de490a6bfac6ba4513ed909768064dad17ce9023fe0155e58b46ed8ddda32c15"
+  ],
+  "sprawa-wyplaty": [
+    "be19ba9ed4b0fb4c84e46af07a95ad785bbb3b591f01b96c14555ff3d20a02e7"
+  ],
+  "sprawa-zgody": [
+    "9897941c526985cf8c7fb347943b40bfd86d6079d06768f89cd8e8d237eea5fe"
+  ]
+}

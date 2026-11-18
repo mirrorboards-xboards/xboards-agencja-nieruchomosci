@@ -1,0 +1,4 @@
+meta = [
+  "./meta/*",
+  "../stanowisko/meta/stanowisko-zrodla",
+]

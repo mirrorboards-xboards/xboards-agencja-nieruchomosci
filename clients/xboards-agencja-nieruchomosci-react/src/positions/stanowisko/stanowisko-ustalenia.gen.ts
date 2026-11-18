@@ -20,8 +20,8 @@ export const stanowiskoUstalenia: XMetaKind = {
 -- Polecenia leżą osobno (stanowisko-polecenia), bo to, co agentowi kazano, nie jest faktem o świecie.
 --
 -- Ustalenie jest zapisem tego, co agent wiedział i skąd. Nowy fakt to nowe ustalenie, a poprzednie
--- staje się nieaktualne. Następca agenta widzi w kolumnie \`zapisal\`, które ustalenia są cudze, i może
--- ocenić je na nowo.
+-- staje się nieaktualne. Tabela nie ma kolumny autora: autora każdego zapisu zapisuje dziennik
+-- pokoju, więc następca agenta odróżnia w nim ustalenia poprzednika i może ocenić je na nowo.
 CREATE TABLE stanowisko_ustalenia_wpisy (
   id TEXT PRIMARY KEY,
   tresc TEXT NOT NULL,
@@ -29,11 +29,14 @@ CREATE TABLE stanowisko_ustalenia_wpisy (
   -- Wiersz teczki, z którego ustalenie wynika: tabela i pokój z wierszem, tekstem.
   wynika_z_tabela TEXT,
   wynika_z_odnosnik TEXT,
-  pewnosc TEXT NOT NULL CHECK (pewnosc IN ('potwierdzone', 'prawdopodobne', 'watpliwe')),
+  -- Czego ustalenie dotyczy, gdy agent pracuje w wielu teczkach, np. teczka lokalu (jej metryka),
+  -- propozycja w teczce poszukiwania albo pobyt gościa: tabela i pokój z wierszem, tekstem.
+  dotyczy_tabela TEXT,
+  dotyczy_odnosnik TEXT,
+  pewnosc TEXT NOT NULL CHECK (pewnosc IN ('potwierdzone', 'prawdopodobne', 'niepewne')),
   sposob_sprawdzenia TEXT,
   ustalono TEXT NOT NULL,
-  zapisal TEXT NOT NULL,
-  -- Gdzie ustalenie weszło, np. wersja projektu albo notatka w teczce.
+  -- Gdzie ustalenie weszło, np. notatka w teczce albo raport.
   wykorzystano_tabela TEXT,
   wykorzystano_odnosnik TEXT,
   nieaktualne_od TEXT,
@@ -41,13 +44,39 @@ CREATE TABLE stanowisko_ustalenia_wpisy (
 
   CONSTRAINT ustalenie_ze_zrodlem CHECK (zrodlo_id IS NOT NULL OR wynika_z_odnosnik IS NOT NULL),
   CONSTRAINT wynika_z_tabela_razem_z_odnosnikiem CHECK ((wynika_z_tabela IS NULL) = (wynika_z_odnosnik IS NULL)),
+  CONSTRAINT dotyczy_tabela_razem_z_odnosnikiem CHECK ((dotyczy_tabela IS NULL) = (dotyczy_odnosnik IS NULL)),
   CONSTRAINT wykorzystano_tabela_razem_z_odnosnikiem CHECK ((wykorzystano_tabela IS NULL) = (wykorzystano_odnosnik IS NULL)),
   CONSTRAINT potwierdzone_ze_sposobem_sprawdzenia CHECK (pewnosc <> 'potwierdzone' OR sposob_sprawdzenia IS NOT NULL),
   CONSTRAINT zastapione_jest_nieaktualne CHECK (zastapione_przez_id IS NULL OR nieaktualne_od IS NOT NULL)
 ) STRICT;
 
+-- Nieaktualność przychodzi po ustaleniu, więc ustalenie powstaje aktualne.
+CREATE TRIGGER stanowisko_ustalenia_powstaje_aktualne
+BEFORE INSERT ON stanowisko_ustalenia_wpisy
+WHEN NEW.nieaktualne_od IS NOT NULL
+BEGIN
+  SELECT RAISE(ABORT, 'ustalenie powstaje aktualne; nieaktualność odnotowuje się później');
+END;
+
+-- Pewność, wykorzystanie i nieaktualność się zmieniają; to, co, skąd i o czym agent ustalił, już nie.
+CREATE TRIGGER stanowisko_ustalenia_tresc_niezmienna
+BEFORE UPDATE ON stanowisko_ustalenia_wpisy
+WHEN NEW.id IS NOT OLD.id
+  OR NEW.tresc IS NOT OLD.tresc
+  OR NEW.zrodlo_id IS NOT OLD.zrodlo_id
+  OR NEW.wynika_z_tabela IS NOT OLD.wynika_z_tabela
+  OR NEW.wynika_z_odnosnik IS NOT OLD.wynika_z_odnosnik
+  OR NEW.dotyczy_tabela IS NOT OLD.dotyczy_tabela
+  OR NEW.dotyczy_odnosnik IS NOT OLD.dotyczy_odnosnik
+  OR NEW.ustalono IS NOT OLD.ustalono
+BEGIN
+  SELECT RAISE(ABORT, 'treści, źródła, przedmiotu ani daty ustalenia się nie zmienia; nowy fakt to nowe ustalenie');
+END;
+
+-- Bez zastępowania i usuwania --------------------------------------------------------------------
+
 -- INSERT OR REPLACE i upsert (ON CONFLICT DO UPDATE) zastąpiłyby istniejący wiersz z ominięciem
--- triggerów UPDATE i DELETE, bo pokój nie włącza recursive_triggers; zmianę wiersza robi UPDATE.
+-- reguł zmian i blokady usuwania, bo pokój nie włącza recursive_triggers.
 CREATE TRIGGER stanowisko_ustalenia_wpisy_bez_zastepowania
 BEFORE INSERT ON stanowisko_ustalenia_wpisy
 WHEN EXISTS (
@@ -56,20 +85,14 @@ WHEN EXISTS (
   WHERE id = NEW.id
 )
 BEGIN
-  SELECT RAISE(ABORT, 'wiersza nie zastępuje się nowym wpisem (INSERT OR REPLACE, upsert); zmiana idzie przez UPDATE');
+  SELECT RAISE(ABORT, 'wiersza pamięci nie zastępuje się nowym wpisem (INSERT OR REPLACE, upsert); zmiana idzie przez UPDATE');
 END;
 
--- Pewność, wykorzystanie i nieaktualność się zmieniają; to, co i skąd agent ustalił, już nie.
-CREATE TRIGGER stanowisko_ustalenia_tresc_niezmienna
-BEFORE UPDATE ON stanowisko_ustalenia_wpisy
-WHEN NEW.tresc IS NOT OLD.tresc
-  OR NEW.zrodlo_id IS NOT OLD.zrodlo_id
-  OR NEW.wynika_z_tabela IS NOT OLD.wynika_z_tabela
-  OR NEW.wynika_z_odnosnik IS NOT OLD.wynika_z_odnosnik
-  OR NEW.ustalono IS NOT OLD.ustalono
-  OR NEW.zapisal IS NOT OLD.zapisal
+-- R9: pamięć trwa bez terminu; ustalenie, które przestało być prawdą, staje się nieaktualne.
+CREATE TRIGGER stanowisko_ustalenia_wpisy_bez_usuwania
+BEFORE DELETE ON stanowisko_ustalenia_wpisy
 BEGIN
-  SELECT RAISE(ABORT, 'treści, źródła, daty ani autora ustalenia się nie zmienia; nowy fakt to nowe ustalenie');
+  SELECT RAISE(ABORT, 'wierszy pamięci się nie usuwa (R9); pomyłkę poprawia nowy wpis');
 END;
 `,
   ],
@@ -78,7 +101,7 @@ END;
 /** The values each enumerated column of the kind's tables allows (its CHECK … IN), by table and column. */
 export const stanowiskoUstaleniaValues = {
   wpisy: {
-    pewnosc: ["potwierdzone", "prawdopodobne", "watpliwe"],
+    pewnosc: ["potwierdzone", "prawdopodobne", "niepewne"],
   },
 } as const;
 
@@ -90,10 +113,11 @@ export type UstaleniaRow = {
   zrodlo_id: string | null;
   wynika_z_tabela: string | null;
   wynika_z_odnosnik: string | null;
-  pewnosc: "potwierdzone" | "prawdopodobne" | "watpliwe";
+  dotyczy_tabela: string | null;
+  dotyczy_odnosnik: string | null;
+  pewnosc: "potwierdzone" | "prawdopodobne" | "niepewne";
   sposob_sprawdzenia: string | null;
   ustalono: string;
-  zapisal: string;
   wykorzystano_tabela: string | null;
   wykorzystano_odnosnik: string | null;
   nieaktualne_od: string | null;
@@ -132,10 +156,11 @@ export type UstaleniaOdZrodlaRow = {
   zrodlo_id: string | null;
   wynika_z_tabela: string | null;
   wynika_z_odnosnik: string | null;
-  pewnosc: "potwierdzone" | "prawdopodobne" | "watpliwe";
+  dotyczy_tabela: string | null;
+  dotyczy_odnosnik: string | null;
+  pewnosc: "potwierdzone" | "prawdopodobne" | "niepewne";
   sposob_sprawdzenia: string | null;
   ustalono: string;
-  zapisal: string;
   wykorzystano_tabela: string | null;
   wykorzystano_odnosnik: string | null;
   nieaktualne_od: string | null;
@@ -144,7 +169,7 @@ export type UstaleniaOdZrodlaRow = {
 
 /**
  * Aktualne ustalenia, które stoją na jednym źródle; po nieprawdzie tego źródła agent ocenia je na
- * nowo i oznacza jako wątpliwe to, czego nie potwierdził niezależnie.
+ * nowo i oznacza jako niepewne to, czego nie potwierdził niezależnie.
  */
 export const ustaleniaOdZrodla: XMetaQuery<UstaleniaOdZrodlaParams, UstaleniaOdZrodlaRow, "many"> = {
   kind: stanowiskoUstalenia,
@@ -161,7 +186,7 @@ ORDER BY ustalono, id`,
 
 /**
  * Aktualne ustalenia, które stoją na jednym źródle; po nieprawdzie tego źródła agent ocenia je na
- * nowo i oznacza jako wątpliwe to, czego nie potwierdził niezależnie.
+ * nowo i oznacza jako niepewne to, czego nie potwierdził niezależnie.
  */
 export function useUstaleniaOdZrodla(params: UstaleniaOdZrodlaParams): MetaState<UstaleniaOdZrodlaRow[]> {
   return useMetaQuery(ustaleniaOdZrodla, params);
@@ -177,10 +202,11 @@ export type UstaleniaZWierszaRow = {
   zrodlo_id: string | null;
   wynika_z_tabela: string | null;
   wynika_z_odnosnik: string | null;
-  pewnosc: "potwierdzone" | "prawdopodobne" | "watpliwe";
+  dotyczy_tabela: string | null;
+  dotyczy_odnosnik: string | null;
+  pewnosc: "potwierdzone" | "prawdopodobne" | "niepewne";
   sposob_sprawdzenia: string | null;
   ustalono: string;
-  zapisal: string;
   wykorzystano_tabela: string | null;
   wykorzystano_odnosnik: string | null;
   nieaktualne_od: string | null;
@@ -212,41 +238,87 @@ export function useUstaleniaZWiersza(params: UstaleniaZWierszaParams): MetaState
   return useMetaQuery(ustaleniaZWiersza, params);
 }
 
+export type UstaleniaOParams = {
+  dotyczy_odnosnik: string;
+};
+
+export type UstaleniaORow = {
+  id: string;
+  tresc: string;
+  zrodlo_id: string | null;
+  wynika_z_tabela: string | null;
+  wynika_z_odnosnik: string | null;
+  dotyczy_tabela: string | null;
+  dotyczy_odnosnik: string | null;
+  pewnosc: "potwierdzone" | "prawdopodobne" | "niepewne";
+  sposob_sprawdzenia: string | null;
+  ustalono: string;
+  wykorzystano_tabela: string | null;
+  wykorzystano_odnosnik: string | null;
+  nieaktualne_od: string | null;
+  zastapione_przez_id: string | null;
+};
+
+/**
+ * Aktualne ustalenia o jednej rzeczy, np. o lokalu, propozycji albo pobycie.
+ */
+export const ustaleniaO: XMetaQuery<UstaleniaOParams, UstaleniaORow, "many"> = {
+  kind: stanowiskoUstalenia,
+  name: "ustalenia_o",
+  sql: `SELECT *
+FROM stanowisko_ustalenia_wpisy
+WHERE dotyczy_odnosnik = :dotyczy_odnosnik
+  AND nieaktualne_od IS NULL
+ORDER BY ustalono, id`,
+  parameters: ["dotyczy_odnosnik"],
+  returns: "many",
+  booleanColumns: [],
+};
+
+/**
+ * Aktualne ustalenia o jednej rzeczy, np. o lokalu, propozycji albo pobycie.
+ */
+export function useUstaleniaO(params: UstaleniaOParams): MetaState<UstaleniaORow[]> {
+  return useMetaQuery(ustaleniaO, params);
+}
+
 export type ZapiszUstalenieParams = {
   id: string;
   tresc: string;
   zrodlo_id?: string | null;
   wynika_z_tabela?: string | null;
   wynika_z_odnosnik?: string | null;
-  pewnosc: "potwierdzone" | "prawdopodobne" | "watpliwe";
+  dotyczy_tabela?: string | null;
+  dotyczy_odnosnik?: string | null;
+  pewnosc: "potwierdzone" | "prawdopodobne" | "niepewne";
   sposob_sprawdzenia?: string | null;
   ustalono: string;
-  zapisal: string;
 };
 
 /**
  * Nowe ustalenie ze źródłem albo wierszem teczki; identyfikator (UUID) nadaje aplikacja, żeby
- * pytanie albo nowsze ustalenie mogło go od razu wskazać.
+ * nowsze ustalenie mogło go od razu wskazać.
  */
 export const zapiszUstalenie: XMetaMutation<ZapiszUstalenieParams> = {
   kind: stanowiskoUstalenia,
   name: "zapisz_ustalenie",
   statements: [
     {
-      sql: `INSERT INTO stanowisko_ustalenia_wpisy (id, tresc, zrodlo_id, wynika_z_tabela, wynika_z_odnosnik, pewnosc,
-  sposob_sprawdzenia, ustalono, zapisal)
-VALUES (:id, :tresc, :zrodlo_id, :wynika_z_tabela, :wynika_z_odnosnik, :pewnosc, :sposob_sprawdzenia,
-  :ustalono, :zapisal)`,
+      sql: `INSERT INTO stanowisko_ustalenia_wpisy (id, tresc, zrodlo_id, wynika_z_tabela, wynika_z_odnosnik,
+  dotyczy_tabela, dotyczy_odnosnik, pewnosc, sposob_sprawdzenia, ustalono)
+VALUES (:id, :tresc, :zrodlo_id, :wynika_z_tabela, :wynika_z_odnosnik, :dotyczy_tabela,
+  :dotyczy_odnosnik, :pewnosc, :sposob_sprawdzenia, :ustalono)`,
       parameters: [
         "id",
         "tresc",
         "zrodlo_id",
         "wynika_z_tabela",
         "wynika_z_odnosnik",
+        "dotyczy_tabela",
+        "dotyczy_odnosnik",
         "pewnosc",
         "sposob_sprawdzenia",
         "ustalono",
-        "zapisal",
       ],
     },
   ],
@@ -254,14 +326,14 @@ VALUES (:id, :tresc, :zrodlo_id, :wynika_z_tabela, :wynika_z_odnosnik, :pewnosc,
 
 /**
  * Nowe ustalenie ze źródłem albo wierszem teczki; identyfikator (UUID) nadaje aplikacja, żeby
- * pytanie albo nowsze ustalenie mogło go od razu wskazać.
+ * nowsze ustalenie mogło go od razu wskazać.
  */
 export function useZapiszUstalenie(): MetaRun<ZapiszUstalenieParams> {
   return useMetaMutation(zapiszUstalenie);
 }
 
 export type OcenUstalenieNaNowoParams = {
-  pewnosc: "potwierdzone" | "prawdopodobne" | "watpliwe";
+  pewnosc: "potwierdzone" | "prawdopodobne" | "niepewne";
   sposob_sprawdzenia?: string | null;
   id: string;
 };
@@ -297,7 +369,7 @@ export type OdnotujWykorzystanieUstaleniaParams = {
 };
 
 /**
- * Ustalenie weszło do wiersza teczki, np. wersji projektu albo notatki.
+ * Ustalenie weszło do wiersza teczki albo raportu.
  */
 export const odnotujWykorzystanieUstalenia: XMetaMutation<OdnotujWykorzystanieUstaleniaParams> = {
   kind: stanowiskoUstalenia,
@@ -314,7 +386,7 @@ WHERE id = :id`,
 };
 
 /**
- * Ustalenie weszło do wiersza teczki, np. wersji projektu albo notatki.
+ * Ustalenie weszło do wiersza teczki albo raportu.
  */
 export function useOdnotujWykorzystanieUstalenia(): MetaRun<OdnotujWykorzystanieUstaleniaParams> {
   return useMetaMutation(odnotujWykorzystanieUstalenia);

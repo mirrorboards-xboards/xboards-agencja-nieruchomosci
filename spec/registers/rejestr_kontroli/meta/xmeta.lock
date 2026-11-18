@@ -1,0 +1,23 @@
+{
+  "rejestr-kontroli-decyzje": [
+    "bec5695f796130358a24badbd6cbaf84b5427902e23f7f74f8de5f81c15abf80"
+  ],
+  "rejestr-kontroli-klienci": [
+    "f555df38337b1fde45dac6d6d9c805855b69042b9003454363097c729c9ea7ad"
+  ],
+  "rejestr-kontroli-oceny": [
+    "59843d952e2848689e5011eeeda9d5e41db680a00b427775e6c53b1a9b353976"
+  ],
+  "rejestr-kontroli-organizacja": [
+    "0546744d39a23a0264d07490ed926ef8ba8fbe36cd5fca41d806a9a244719869"
+  ],
+  "rejestr-kontroli-sprawdzenia": [
+    "b891e8766e68e143ad5f3bc53c27449ed8e85935cc30a2c098781d59b00e9516"
+  ],
+  "rejestr-kontroli-watpliwosci": [
+    "2fd483dae327c476c37b8f1ed33203dc14e60c34e98511e8ad7049676dd4d2c3"
+  ],
+  "rejestr-kontroli-zawiadomienia": [
+    "cf1c5de48675fc139322edd8c0aeb658f44b7f44c2adc3590d6626fd9f27ba80"
+  ]
+}

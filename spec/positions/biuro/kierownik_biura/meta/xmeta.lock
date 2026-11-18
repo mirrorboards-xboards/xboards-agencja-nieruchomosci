@@ -1,0 +1,20 @@
+{
+  "kierownik-biura-decyzje": [
+    "4981af15ed4cd32fd4e40df7b07872d0d630b5c4423c99c4c339940d55ff8bae"
+  ],
+  "kierownik-biura-meldunki": [
+    "8fe516ee358011594cb29c8bc8a14933406ee86e10fae942766a83e03c3be681"
+  ],
+  "kierownik-biura-nieobecnosci": [
+    "afb824bc537dce7f4a22c5d86a0643a98419f29dc54a8d664063c82406dd5548"
+  ],
+  "kierownik-biura-polisy": [
+    "8e665d2ad6b6c18661ef410dbec854cbfac264955388b94f3d22f88bd3c6a956"
+  ],
+  "kierownik-biura-przydzial": [
+    "94475616e87e27aded9ff6bb3f1d627526404f600300ecee0e93a747ce77f13f"
+  ],
+  "kierownik-biura-sprawozdania": [
+    "29ff06b814c2e97ccd0d1e9c7e508cd124afb5392076cb0f37a19f8289034843"
+  ]
+}
