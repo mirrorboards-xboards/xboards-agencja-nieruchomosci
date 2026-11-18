@@ -10,9 +10,13 @@
 #[cfg(test)]
 mod expect;
 #[cfg(test)]
+mod katalog_ofert;
+#[cfg(test)]
 mod kierownik_dzialu;
 #[cfg(test)]
 mod klienci;
+#[cfg(test)]
+mod rejestr_kontroli;
 #[cfg(test)]
 mod stanowisko;
 #[cfg(test)]
