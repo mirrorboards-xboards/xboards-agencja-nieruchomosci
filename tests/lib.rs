@@ -9,3 +9,7 @@
 
 #[cfg(test)]
 mod expect;
+#[cfg(test)]
+mod kierownik_dzialu;
+#[cfg(test)]
+mod stanowisko;
