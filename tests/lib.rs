@@ -32,6 +32,10 @@ mod konsjerz;
 #[cfg(test)]
 mod kontroler;
 #[cfg(test)]
+mod oferta;
+#[cfg(test)]
+mod poszukiwanie;
+#[cfg(test)]
 mod recepcja;
 #[cfg(test)]
 mod rejestr_kontroli;
