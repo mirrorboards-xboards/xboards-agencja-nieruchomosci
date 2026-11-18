@@ -38,11 +38,15 @@ mod rejestr_kontroli;
 #[cfg(test)]
 mod sprawa;
 #[cfg(test)]
+mod sprawa_dodatki;
+#[cfg(test)]
 mod sprawa_porzadek;
 #[cfg(test)]
 mod stanowiska_bez_rodzajow;
 #[cfg(test)]
 mod stanowisko;
+#[cfg(test)]
+mod transakcja;
 #[cfg(test)]
 mod wykonawcy;
 #[cfg(test)]
