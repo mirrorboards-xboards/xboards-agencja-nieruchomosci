@@ -67,4 +67,4 @@ Zmienia je właściciel.
   tajemnicą#footnote[Art. 54 ust. 1 pkt 2 AML.].
 
 Kierownik nie zmienia treści teczki. Sprawy zakazane są wspólne dla
-wszystkich agentów i opisuje je dokument „Biuro”.
+wszystkich agentów i opisuje je dokument „Agencja”.

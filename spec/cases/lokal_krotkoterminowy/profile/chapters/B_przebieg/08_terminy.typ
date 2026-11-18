@@ -25,6 +25,6 @@ ustaliło biuro w standardzie lokalu, a nie przepis.
   [Rozliczenie przez kanał], [Termin wypłaty z regulaminu kanału. Zarządca porównuje go z wpływem na rachunek.], [regulamin kanału],
 )
 
-Terminy obowiązków, które w dokumencie „Biuro” są sprawami otwartymi, np.
+Terminy obowiązków, które w dokumencie „Agencja” są sprawami otwartymi, np.
 opłaty miejscowej albo meldunku gości, biuro dopisze do tej tabeli po ich
 ustaleniu.

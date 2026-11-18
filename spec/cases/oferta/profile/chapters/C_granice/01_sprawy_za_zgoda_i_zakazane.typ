@@ -1,6 +1,6 @@
 = Sprawy za zgodą i zakazane
 
-Sprawy zakazane dla wszystkich agentów opisuje dokument „Biuro”, rozdział
+Sprawy zakazane dla wszystkich agentów opisuje dokument „Agencja”, rozdział
 „Granice działania”. W teczce oferty obowiązują dodatkowo te zasady.
 
 *Za zgodą klienta.*

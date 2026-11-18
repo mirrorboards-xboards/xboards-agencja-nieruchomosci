@@ -81,4 +81,4 @@ opiekun przygotuje umowę do podpisu.
   a nie pośrednikom#footnote[Art. 54 ust. 2 pkt 3 AML.].
 
 Sprawy zakazane są wspólne dla wszystkich agentów i opisuje je dokument
-„Biuro”.
+„Agencja”.

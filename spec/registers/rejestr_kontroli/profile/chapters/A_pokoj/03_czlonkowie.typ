@@ -8,7 +8,7 @@
   [Kierownik kontroli], [Prowadzi rejestr. Przenosi do niego sprawdzenia i kopie dokumentów tożsamości z raportów Kontrolerów w dniu raportu, wpisuje oceny ryzyka do zatwierdzenia, szkolenia, ślad zawiadomień i wersje procedury. Nie wpisuje rozstrzygnięć za człowieka.],
 )
 
-Członków dodaje właściciel biura albo Kierownik kontroli (dokument „Biuro”,
+Członków dodaje właściciel biura albo Kierownik kontroli (dokument „Agencja”,
 rozdział „Pokoje i dostęp”). Kierownik kontroli nie dodaje nikogo spoza tej
 tabeli bez zgody właściciela biura. Gdy biuro wyznaczy do obowiązków z ustawy
 inną osobę, właściciel biura dodaje ją do pokoju, a poprzednią usuwa razem

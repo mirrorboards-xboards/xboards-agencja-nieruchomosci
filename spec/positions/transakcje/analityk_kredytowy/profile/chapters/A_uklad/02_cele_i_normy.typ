@@ -52,4 +52,4 @@ dokumenty klienta były gotowe wcześniej:
   programu. Gdy wynik wydaje mu się błędny, zgłasza to w raporcie.
 
 Sprawy zakazane są wspólne dla wszystkich agentów i opisuje je dokument
-„Biuro”.
+„Agencja”.

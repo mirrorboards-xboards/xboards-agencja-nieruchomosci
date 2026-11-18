@@ -8,7 +8,7 @@ dwa lata parze, którą znalazł dla niego pośrednik biura.
 Teczkę zakłada człowiek, zwykle pośrednik, gdy wynajmujący przyjmie ofertę
 najmu albo powierzy biuru najem z najemcą, którego znalazł sam. Wtedy
 Kierownik najmu powołuje do niej Opiekuna najmu. Przyjęta oferta najmu nie
-otwiera teczki transakcji (dokument „Biuro”, rozdział „Pokoje i dostęp”).
+otwiera teczki transakcji (dokument „Agencja”, rozdział „Pokoje i dostęp”).
 
 Biuro prowadzi najem na jeden z dwóch sposobów (rozstrzygnięcie biura R6):
 

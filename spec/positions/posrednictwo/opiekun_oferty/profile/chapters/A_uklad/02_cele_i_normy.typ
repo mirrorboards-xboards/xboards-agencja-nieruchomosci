@@ -94,5 +94,5 @@ do oferty.
   później niż miesiąc od otrzymania danych#footnote[Art. 14 ust. 1–3 RODO.].
 
 Pieniędzy Opiekun nie rusza: przelewów i wypłat nie zleca żaden agent
-(zasada „Pieniądze rusza człowiek” w dokumencie „Biuro”). Sprawy zakazane są
-wspólne dla wszystkich agentów i opisuje je dokument „Biuro”.
+(zasada „Pieniądze rusza człowiek” w dokumencie „Agencja”). Sprawy zakazane są
+wspólne dla wszystkich agentów i opisuje je dokument „Agencja”.

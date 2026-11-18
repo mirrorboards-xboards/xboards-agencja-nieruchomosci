@@ -5,7 +5,7 @@ krótkoterminowych, oraz ich cenników. Wykonawca to firma albo osoba, której
 biuro zleca pracę w lokalu. Trafiają do niego tylko wykonawcy i cenniki,
 które zatwierdził człowiek. Dzięki temu wszyscy Koordynatorzy operacji
 zlecają pracę tym samym wykonawcom na tych samych warunkach (dokument
-„Biuro”, rozdział „Pokoje i dostęp”).
+„Agencja”, rozdział „Pokoje i dostęp”).
 
 Rejestr obejmuje tych, którzy pracują w lokalach na zlecenie Koordynatora
 operacji:

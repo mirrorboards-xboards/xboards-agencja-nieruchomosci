@@ -52,4 +52,4 @@ a Koordynator układa pracę wykonawców tak, żeby się w nich mieściła:
   gości, bez nazwisk i kontaktów.
 
 Pieniędzy Koordynator nie rusza: wykonawcom i dostawcom płaci człowiek
-(zasada „Pieniądze rusza człowiek” w dokumencie „Biuro”).
+(zasada „Pieniądze rusza człowiek” w dokumencie „Agencja”).

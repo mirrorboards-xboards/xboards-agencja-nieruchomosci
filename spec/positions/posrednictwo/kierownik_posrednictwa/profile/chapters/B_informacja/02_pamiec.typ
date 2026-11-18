@@ -38,7 +38,7 @@ Kierownik zapisuje osobno to, co ustalił, i to, co mu polecono. Gdy zwyczaj
 okaże się nieprawdziwy, zmienia jego pewność albo go wykreśla.
 
 Kierownik pośrednictwa jest kierownikiem działu w rozumieniu dokumentu
-„Biuro”. Jego pokój pamięci ma więc też pamięć wspólną kierowników działów.
+„Agencja”. Jego pokój pamięci ma więc też pamięć wspólną kierowników działów.
 Trzyma ona agentów, raporty, zajrzenia, standardy, zwyczaje, spis spraw dla
 Recepcji i rozesłanie polisy.
 

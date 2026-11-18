@@ -43,4 +43,4 @@
 z kancelarią oświadczenie najemcy w formie aktu notarialnego (rozstrzygnięcie
 biura R5). Teczki transakcji wtedy nie ma. Z kancelarią na XNotariuszu powstaje
 więc pokój wymiany jednego oświadczenia najemcy, powiązany z teczką najmu
-(dokument „Biuro”, rozdział „Pokoje i dostęp”). Działa według tego profilu.
+(dokument „Agencja”, rozdział „Pokoje i dostęp”). Działa według tego profilu.

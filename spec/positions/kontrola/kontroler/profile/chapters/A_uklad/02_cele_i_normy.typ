@@ -73,4 +73,4 @@ Dwa dni robocze to próg standardu Kontroli. Zmienia go właściciel biura.
   tytułu i pełnomocnictwa nie jest taką informacją, więc trafia do teczki.
 
 Sprawy zakazane są wspólne dla wszystkich agentów i opisuje je dokument
-„Biuro”.
+„Agencja”.

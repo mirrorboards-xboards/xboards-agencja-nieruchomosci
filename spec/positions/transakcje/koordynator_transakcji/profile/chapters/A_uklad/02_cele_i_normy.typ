@@ -52,4 +52,4 @@ dokumenty i uzgodnienia były gotowe wcześniej:
   człowiek. Dokumenty zbiera dalej.
 
 Pieniędzy Koordynator nie rusza: przelewów i wypłat nie zleca żaden agent
-(zasada „Pieniądze rusza człowiek” w dokumencie „Biuro”).
+(zasada „Pieniądze rusza człowiek” w dokumencie „Agencja”).

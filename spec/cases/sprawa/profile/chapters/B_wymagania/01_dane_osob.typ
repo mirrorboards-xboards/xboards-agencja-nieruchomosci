@@ -119,7 +119,7 @@ uczestniku, skąd biuro ma jego dane, kiedy i jak przekazało mu informację.
   ją ma.
 
 Jak informować gości o danych, które biuro dostaje z kanałów sprzedaży, jest
-sprawą otwartą w dokumencie „Biuro”.
+sprawą otwartą w dokumencie „Agencja”.
 
 == Informacja, że pisze agent
 
@@ -138,5 +138,5 @@ poinformowany, i nie zaczyna rozmowy od nowa.
 Gość lokalu krótkoterminowego jest uczestnikiem teczki lokalu tylko na czas
 pobytu i jego rozliczenia. Rdzeń zapisuje imię i nazwisko, kontakt z kanału
 sprzedaży, liczbę gości i rezerwację, której dotyczy. Meldunek gości, opłata
-miejscowa i dane dla platform są w dokumencie „Biuro” sprawą otwartą. Gdy
+miejscowa i dane dla platform są w dokumencie „Agencja” sprawą otwartą. Gdy
 biuro je ustali, rdzeń dostanie dane, których wymagają.

@@ -11,7 +11,7 @@
 )
 
 Członków dodaje właściciel biura albo kierownik, który pokój prowadzi
-(dokument „Biuro”, rozdział „Pokoje i dostęp”). Kierownik dodaje tylko
+(dokument „Agencja”, rozdział „Pokoje i dostęp”). Kierownik dodaje tylko
 stanowiska z tej tabeli, np. następcę Kierownika biura po jego wymianie.
 Kogokolwiek innego dodaje tylko za zgodą właściciela biura.
 
@@ -19,7 +19,7 @@ Kogokolwiek innego dodaje tylko za zgodą właściciela biura.
 Koordynatorzy operacji i ludzie spoza biura nie należą do pokoju.
 
 / Agenci spraw: agent jednej sprawy nie widzi danych innych klientów
-  (dokument „Biuro”, zasada „Tylko potrzebny dostęp”). Dane powracającego
+  (dokument „Agencja”, zasada „Tylko potrzebny dostęp”). Dane powracającego
   klienta dostaje od kierownika działu.
 / Recepcja: czyta niezaufaną pocztę od wszystkich. Powracającego klienta
   rozpoznaje Kierownik biura, a nie ona.

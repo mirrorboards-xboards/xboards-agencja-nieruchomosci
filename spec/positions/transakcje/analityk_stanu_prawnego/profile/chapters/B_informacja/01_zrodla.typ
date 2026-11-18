@@ -23,7 +23,7 @@ transakcji.
 / Właściciel i Kierownik transakcji: cel, normy, standardy działu
   i polecenia. Polecenia wydaje tylko właściciel i Kierownik transakcji,
   któremu właściciel na to pozwolił.
-/ Teksty przepisów: listę aktów i ich teksty podaje dokument „Biuro”.
+/ Teksty przepisów: listę aktów i ich teksty podaje dokument „Agencja”.
   Analityk cytuje przepis tylko z tego tekstu, a nie z pamięci.
 
 *Sprawdzanie.* Analityk ocenia treść, a nie tylko nadawcę. Dane z umowy

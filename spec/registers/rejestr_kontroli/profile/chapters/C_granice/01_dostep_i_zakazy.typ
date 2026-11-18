@@ -23,7 +23,7 @@
   z kancelarią#footnote[Art. 54 ust. 2 pkt 4 AML.].
 / Kontakt z organem przez agenta: żaden agent nie przekazuje niczego
   Generalnemu Inspektorowi, prokuratorowi ani innemu organowi (dokument
-  „Biuro”, rozdział „Granice działania”). Robi to osoba wyznaczona do
+  „Agencja”, rozdział „Granice działania”). Robi to osoba wyznaczona do
   obowiązków z ustawy#footnote[Art. 8 AML.].
 / Skracanie sprawdzeń: zgoda człowieka nie znosi środków bezpieczeństwa
   finansowego. Gdy środka nie da się zastosować, biuro nie nawiązuje stosunków

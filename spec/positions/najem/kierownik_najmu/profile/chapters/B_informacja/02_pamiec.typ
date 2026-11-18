@@ -35,7 +35,7 @@ właściciel, zawiera to, czego nie trzymają teczki:
 Kierownik zapisuje osobno to, co ustalił, i to, co mu polecono. Gdy zwyczaj
 okaże się nieprawdziwy, zmienia jego pewność albo go wykreśla.
 
-Kierownik najmu jest kierownikiem działu w rozumieniu dokumentu „Biuro”. Jego
+Kierownik najmu jest kierownikiem działu w rozumieniu dokumentu „Agencja”. Jego
 pokój pamięci ma więc też pamięć wspólną kierowników działów. Trzyma ona
 agentów, raporty, zajrzenia, standardy, zwyczaje, spis spraw dla Recepcji i
 rozesłanie polisy.

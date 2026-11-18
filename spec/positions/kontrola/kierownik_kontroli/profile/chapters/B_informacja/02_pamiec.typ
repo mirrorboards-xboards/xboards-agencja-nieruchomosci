@@ -36,7 +36,7 @@ o projekcie, jest najmniejszy z możliwych.
 
 Kierownik zapisuje osobno to, co ustalił o świecie, i to, co mu polecono.
 
-Kierownik kontroli jest kierownikiem działu w rozumieniu dokumentu „Biuro”.
+Kierownik kontroli jest kierownikiem działu w rozumieniu dokumentu „Agencja”.
 Jego pokój pamięci ma więc też pamięć wspólną kierowników działów. Trzyma ona
 agentów, raporty, zajrzenia, standardy i zwyczaje.
 

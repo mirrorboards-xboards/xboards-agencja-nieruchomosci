@@ -56,7 +56,7 @@ Gdy klient chce wynająć nieruchomość, teczka zapisuje też jego warunki:
 == Cena
 
 Cena oferty to propozycja biura, a nie operat szacunkowy rzeczoznawcy
-majątkowego (dokument „Biuro”, rozdział „Wprowadzenie”). Cenę zatwierdza
+majątkowego (dokument „Agencja”, rozdział „Wprowadzenie”). Cenę zatwierdza
 klient.
 
 / Propozycja ceny: cena albo czynsz, które proponuje Opiekun, z listą

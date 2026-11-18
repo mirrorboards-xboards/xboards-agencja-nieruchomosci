@@ -9,7 +9,7 @@ wiadomość w teczce, a nie klucz.
 
 Agent prosi o decyzję w każdej sprawie, której jego profil nie zalicza do
 spraw samodzielnych. Sprawa, która nie należy do żadnej grupy, jest sprawą za
-zgodą (dokument „Biuro”, rozdział „Granice działania”).
+zgodą (dokument „Agencja”, rozdział „Granice działania”).
 
 / Prośba: kto prosi, czego dotyczy, kto ma zdecydować i do kiedy. Prośba
   wskazuje wiersz teczki, np. rachunek albo wersję projektu umowy, i nie
@@ -21,7 +21,7 @@ zgodą (dokument „Biuro”, rozdział „Granice działania”).
   biura#footnote[Art. 46 ust. 2 pkt 1 AML.]. Ta ostatnia decyzja leży
   w rejestrze kontroli, a nie w teczce.
 / Droga prośby: kierownik działu przekazuje prośbę Kierownikowi biura, który
-  układa z próśb jedną listę dla każdego człowieka (dokument „Biuro”, rozdział
+  układa z próśb jedną listę dla każdego człowieka (dokument „Agencja”, rozdział
   „Kierownik działu”). Prośby Kontrolera idą do Kierownika kontroli
   z pominięciem tej listy.
 / Rozstrzygnięcie: zgoda, odmowa albo zgoda z warunkiem, z uzasadnieniem.
@@ -87,7 +87,7 @@ i zgodę.
 
 Gdy pieniądze klienta przechodzą przez biuro, np. kaucja albo przychód
 z najmu krótkoterminowego, wypłatę zatwierdza człowiek. Agent nie zleca
-przelewów ani wypłat (dokument „Biuro”, rozdział „Granice działania”).
+przelewów ani wypłat (dokument „Agencja”, rozdział „Granice działania”).
 Rdzeń zapisuje przy każdej wypłacie:
 
 / Podstawa: rozliczenie kaucji albo miesięczne zestawienie dla właściciela

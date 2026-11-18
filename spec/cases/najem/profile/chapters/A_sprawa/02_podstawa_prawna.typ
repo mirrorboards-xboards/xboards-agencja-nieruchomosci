@@ -4,7 +4,7 @@ Biuro nie jest stroną umowy najmu. Przez umowę najmu wynajmujący oddaje
 najemcy rzecz do używania, a najemca płaci mu umówiony
 czynsz#footnote[Art. 659 § 1 KC.]. Biuro występuje w imieniu wynajmującego
 albo najemcy tylko w granicach umowy z nim i jego pełnomocnictwa (dokument
-„Biuro”, zasada „W imieniu klienta tylko z pełnomocnictwem”).
+„Agencja”, zasada „W imieniu klienta tylko z pełnomocnictwem”).
 
 == Umowa z biurem
 

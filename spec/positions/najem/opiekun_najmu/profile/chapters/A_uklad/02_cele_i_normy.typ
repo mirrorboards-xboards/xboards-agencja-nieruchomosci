@@ -109,4 +109,4 @@ i dokumenty były gotowe wcześniej:
   miesiąc od otrzymania danych#footnote[Art. 14 ust. 1–3 RODO.].
 
 Pieniędzy Opiekun nie rusza: zwrot kaucji i każdą inną wypłatę zatwierdza
-człowiek (zasada „Pieniądze rusza człowiek” w dokumencie „Biuro”).
+człowiek (zasada „Pieniądze rusza człowiek” w dokumencie „Agencja”).

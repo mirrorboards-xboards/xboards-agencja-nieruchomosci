@@ -19,7 +19,7 @@ Koszty prac trafiają do miesięcznego zestawienia dla właściciela lokalu
 (rozstrzygnięcie biura R3). Cennik z rejestru jest więc podstawą kosztu,
 który biuro pokazuje właścicielowi. Faktury wykonawców i płatności
 prowadzi księgowość biura poza XEstates. Wykonawcom płaci człowiek
-(dokument „Biuro”, zasada „Pieniądze rusza człowiek”).
+(dokument „Agencja”, zasada „Pieniądze rusza człowiek”).
 
 == Ubezpieczenie zarządcy
 
@@ -36,7 +36,7 @@ własne ubezpieczenie odpowiedzialności cywilnej, jeśli biuro tego wymaga.
 Umowę z wykonawcą zawiera biuro. Podpisuje ją człowiek, np.
 właściciel Kierownika najmu (profil Kierownika najmu). Cennik jest częścią
 tej umowy albo załącznikiem do niej. Agent umowy nie podpisuje (dokument
-„Biuro”, rozdział „Granice działania”).
+„Agencja”, rozdział „Granice działania”).
 
 == Dane osobowe
 

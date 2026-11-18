@@ -8,7 +8,7 @@
   [Koordynatorzy operacji], [Czytają. Zlecają pracę tylko wykonawcom z rejestru według ich cenników. Nie piszą.],
 )
 
-Członków dodaje właściciel biura albo Kierownik najmu (dokument „Biuro”,
+Członków dodaje właściciel biura albo Kierownik najmu (dokument „Agencja”,
 rozdział „Pokoje i dostęp”). Kierownik najmu dodaje Koordynatora operacji
 w dniu jego powołania i usuwa go, gdy Koordynator zostanie wymieniony.
 Kogokolwiek innego dodaje tylko za zgodą właściciela biura.
@@ -27,4 +27,4 @@ z podpisem.
 / Wykonawcy: to firmy i osoby spoza biura. Nie czytają rejestru. Zlecenie
   dostają kanałem ustalonym z Koordynatorem.
 / Pozostali agenci, Recepcja i Kierownik biura: nie potrzebują rejestru do
-  pracy (dokument „Biuro”, zasada „Tylko potrzebny dostęp”).
+  pracy (dokument „Agencja”, zasada „Tylko potrzebny dostęp”).

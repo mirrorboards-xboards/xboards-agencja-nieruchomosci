@@ -60,4 +60,4 @@ Koordynatorów i od właściciela i przekazuje je nowym agentom na start.
 Przykład zwyczaju: „Kancelaria przy ul. Długiej chce odpisu księgi
 wieczystej z dnia aktu, a nie wcześniejszego”.
 
-Zasady wspólne dla wszystkich kierowników działów opisuje dokument „Biuro”.
+Zasady wspólne dla wszystkich kierowników działów opisuje dokument „Agencja”.

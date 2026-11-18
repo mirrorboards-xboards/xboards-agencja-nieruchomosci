@@ -58,16 +58,16 @@ długoterminowego, który biuro prowadzi na umowie o zarządzanie
 Kierownik zestawia je dla całego działu, a gminie wysyła je człowiek. Termin
 i wzór określają odrębne przepisy. Kierownik wpisze je do standardu działu,
 gdy biuro je ustali. Czy dane obejmują pobyty w lokalach krótkoterminowych,
-jest w dokumencie „Biuro” sprawą otwartą. Do czasu ustalenia Zarządca
+jest w dokumencie „Agencja” sprawą otwartą. Do czasu ustalenia Zarządca
 obiektu nie przygotowuje danych swojego lokalu dla gminy.
 
 Umów z wynajmującymi i właścicielami lokali kierownik nie zawiera. Projekt
 umowy przygotowuje agent sprawy według wzoru, a podpisuje człowiek. Żaden
 agent nie podpisuje umowy w imieniu biura ani klienta (granice działania
-w dokumencie „Biuro”).
+w dokumencie „Agencja”).
 
 Obowiązki najmu krótkoterminowego wobec urzędów i gości, np. rejestracja
-lokalu, opłata miejscowa i meldunek gości, są w dokumencie „Biuro” sprawą
+lokalu, opłata miejscowa i meldunek gości, są w dokumencie „Agencja” sprawą
 otwartą. Gdy biuro je ustali, kierownik wpisze je do standardu działu.
 
-Zasady wspólne dla wszystkich kierowników działów opisuje dokument „Biuro”.
+Zasady wspólne dla wszystkich kierowników działów opisuje dokument „Agencja”.
