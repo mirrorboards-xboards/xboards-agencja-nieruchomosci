@@ -8,17 +8,29 @@
 //! itself with `MemoryRoom::execute` and expects the table to refuse it.
 
 #[cfg(test)]
+mod analityk_stanu_prawnego;
+#[cfg(test)]
 mod expect;
 #[cfg(test)]
 mod katalog_ofert;
+#[cfg(test)]
+mod kierownicy_bez_rodzajow;
 #[cfg(test)]
 mod kierownik_biura;
 #[cfg(test)]
 mod kierownik_dzialu;
 #[cfg(test)]
+mod kierownik_kontroli;
+#[cfg(test)]
+mod kierownik_najmu;
+#[cfg(test)]
+mod kierownik_posrednictwa;
+#[cfg(test)]
 mod klienci;
 #[cfg(test)]
 mod konsjerz;
+#[cfg(test)]
+mod kontroler;
 #[cfg(test)]
 mod recepcja;
 #[cfg(test)]
