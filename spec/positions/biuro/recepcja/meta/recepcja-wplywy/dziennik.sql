@@ -23,7 +23,7 @@ ORDER BY wplynelo, id;
 -- name: wplywy_wedlug_kanalow :many
 -- Ile wiadomości wpłynęło jednego dnia (RRRR-MM-DD) każdym kanałem, do meldunku.
 -- param dzien: string
--- column liczba: number
+-- column liczba: integer
 SELECT kanal,
   count(*) AS liczba
 FROM recepcja_wplywy_dziennik

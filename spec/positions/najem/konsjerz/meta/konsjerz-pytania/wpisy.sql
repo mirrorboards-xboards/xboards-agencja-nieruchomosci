@@ -1,7 +1,7 @@
 -- name: pytania_gosci :many
 -- Aktualne odpowiedzi z liczbą wystąpień i liczbą tych, w których pomogły; najczęstsze pierwsze.
--- column wystapienia: number
--- column pomocne: number
+-- column wystapienia: integer
+-- column pomocne: integer
 SELECT pytanie.*,
   count(wystapienie.id) AS wystapienia,
   coalesce(sum(wystapienie.pomogla), 0) AS pomocne
@@ -19,7 +19,7 @@ VALUES (:temat, :odpowiedz, :zapisano);
 
 -- name: zastap_odpowiedz :exec
 -- Poprzednia odpowiedź staje się nieaktualna, bo zastępuje ją lepsza na ten sam temat.
--- param zastapione_przez_id: number
+-- param zastapione_przez_id: integer
 UPDATE konsjerz_pytania_wpisy
 SET zastapione_przez_id = :zastapione_przez_id
 WHERE id = :id;

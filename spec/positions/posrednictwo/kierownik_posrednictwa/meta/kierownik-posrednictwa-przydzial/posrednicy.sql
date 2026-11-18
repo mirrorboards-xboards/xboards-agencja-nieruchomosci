@@ -15,7 +15,7 @@ ORDER BY od, id;
 -- name: obciazenie_posrednikow :many
 -- Ile spraw prowadzi każdy pośrednik z aktualną regułą wobec swojego limitu: tyle, ilu niewymienionych
 -- opiekunów ma jako właściciel. Według tego kierownik proponuje pośrednika i melduje obłożenie.
--- column sprawy: number
+-- column sprawy: integer
 SELECT regula.id AS regula_id,
   regula.posrednik,
   regula.limit_spraw,

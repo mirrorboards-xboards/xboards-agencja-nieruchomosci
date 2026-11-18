@@ -45,7 +45,7 @@ WHERE id = :id;
 
 -- name: wpisz_koszt_zlecenia :exec
 -- Koszt po potwierdzeniu wykonania; inny niż cena wskazuje decyzję człowieka.
--- param koszt: number
+-- param koszt: integer
 UPDATE lokal_krotkoterminowy_zlecenia_wpisy
 SET koszt = :koszt,
   koszt_decyzja_id = :koszt_decyzja_id

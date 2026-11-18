@@ -23,7 +23,7 @@ WHERE id = :id;
 -- name: zlec_naprawe_usterki :exec
 -- Człowiek z biura zleca naprawę obciążającą wynajmującego: wykonawca i koszt, a ponad kwotę
 -- napraw także zgoda wynajmującego i decyzja.
--- param koszt: number
+-- param koszt: integer
 -- param zlecil: string
 -- param zlecono: string
 -- param wykonawca: string

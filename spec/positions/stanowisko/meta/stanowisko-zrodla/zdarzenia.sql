@@ -15,7 +15,7 @@ ORDER BY zaszlo, id;
 -- name: zdarzenia_zrodel :many
 -- Liczba zdarzeń każdego źródła według rodzaju, np. spóźnienia i poprawki wykonawców u Koordynatora
 -- operacji albo manipulacje według nadawców w meldunku Recepcji.
--- column liczba: number
+-- column liczba: integer
 -- column ostatnio: string
 SELECT zrodlo_id,
   rodzaj,

@@ -6,8 +6,8 @@ ORDER BY termin, id;
 
 -- name: saldo_naleznosci :many
 -- Saldo każdej należności: ile pokryły wpłaty i ile zostało; z niego program liczy zaległość.
--- column zaplacono: number
--- column zostalo: number
+-- column zaplacono: integer
+-- column zostalo: integer
 SELECT
   naleznosc.id,
   naleznosc.najem_id,

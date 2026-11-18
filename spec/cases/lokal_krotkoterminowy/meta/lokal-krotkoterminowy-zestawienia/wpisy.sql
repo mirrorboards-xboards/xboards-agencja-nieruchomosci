@@ -16,8 +16,8 @@ VALUES (:id, :miesiac, :utworzono, :korekta_do_id, :korekta_decyzja_id, 'projekt
 -- zestawieniu.
 -- param sciezka: string
 -- param skrot: string
--- param kwota_do_wyplaty: number
--- param rezerwa_po: number
+-- param kwota_do_wyplaty: integer
+-- param rezerwa_po: integer
 UPDATE lokal_krotkoterminowy_zestawienia_wpisy
 SET stan = 'gotowe',
   sciezka = :sciezka,

@@ -5,12 +5,12 @@
 -- podaje wplywy_wedlug_kanalow, a zakłócenia zdarzenia_zrodel. Meldunek jest wiadomością; pamięć
 -- trzyma tylko to, z czego się go liczy.
 -- param dzien: string
--- column wplynelo: number
--- column oddano_agentom: number
--- column zapytania_po_godzinie: number
--- column wyslano_kart: number
--- column karty_czekaja_od_wczesniej: number
--- column niejednoznaczne: number
+-- column wplynelo: integer
+-- column oddano_agentom: integer
+-- column zapytania_po_godzinie: integer
+-- column wyslano_kart: integer
+-- column karty_czekaja_od_wczesniej: integer
+-- column niejednoznaczne: integer
 SELECT
   (
     SELECT count(*)

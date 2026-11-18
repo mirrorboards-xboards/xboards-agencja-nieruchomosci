@@ -63,8 +63,8 @@ WHERE id = :id;
 
 -- name: odnotuj_rozliczenie_pobytu :exec
 -- Rozliczenie z konta kanału: prowizja, wypłata i jej dzień; wpisuje się raz.
--- param prowizja_kanalu: number
--- param wyplata_kanalu: number
+-- param prowizja_kanalu: integer
+-- param wyplata_kanalu: integer
 -- param wyplacono: string
 -- param rozliczono: string
 UPDATE lokal_krotkoterminowy_pobyty_wpisy
