@@ -132,7 +132,7 @@ Zasady wiążą każdy katalog:
   Rodzaj nie wskazuje rodzaju z późniejszej migracji. Regułę, która zależy
   od późniejszego rodzaju, zapisuje migracja tego rodzaju.
 / Sprawdzenie: `xmeta codegen --check` i `tsc` w kliencie. Do tego
-  scenariusze na SQLite (`python3 tests/run.py`):
+  scenariusze na SQLite (`cargo test` w `tests/`):
   przebieg z profilu pozycji i złe stany, które baza ma odrzucić.
   Scenariusze próbują też zastąpić istniejący wiersz każdej tabeli przez
   `INSERT OR REPLACE` i upsert.
