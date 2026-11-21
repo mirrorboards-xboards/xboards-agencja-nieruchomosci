@@ -1,7 +1,7 @@
-# Written by mirrorboards-utils/utils-workspace-source/ci-workspace.mjs: the workspace packages
+# Written by mirrorboards-core/mirrorboards-utils/utils-workspace-source/ci-workspace.mjs: the workspace packages
 # @xboards-agencja-nieruchomosci/react needs, at their workspace paths.
 packages:
   - "mirrorboards-core/mirrorboards-dev/dev-formatter-typescript"
+  - "mirrorboards-core/mirrorboards-utils/utils-workspace-source"
   - "mirrorboards-core/mirrorboards-xmeta/xmeta-react"
-  - "mirrorboards-utils/utils-workspace-source"
   - "mirrorboards-xboards/xboards-agencja-nieruchomosci/clients/xboards-agencja-nieruchomosci-react"
