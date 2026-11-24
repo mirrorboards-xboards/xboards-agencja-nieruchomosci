@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # The repository in the layout of the Mirrorboards workspace, beside what .github/ci syncs
-      # (written by mirrorboards-core/mirrorboards-utils/utils-workspace-source/ci-workspace.mjs).
+      # (written by mirrorboards-core/mirrorboards-dev/dev-utils-workspace-source/ci-workspace.mjs).
       REPOSITORY_DIR: .github/ci/mirrorboards-xboards/xboards-agencja-nieruchomosci
       XMETA: cargo run --quiet --locked --manifest-path ../../mirrorboards-core/mirrorboards-xmeta/xmeta-cli/Cargo.toml --
 

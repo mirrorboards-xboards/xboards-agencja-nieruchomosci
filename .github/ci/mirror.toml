@@ -1,4 +1,4 @@
-# Written by mirrorboards-core/mirrorboards-utils/utils-workspace-source/ci-workspace.mjs: the repositories CI
+# Written by mirrorboards-core/mirrorboards-dev/dev-utils-workspace-source/ci-workspace.mjs: the repositories CI
 # syncs (`mctl sync` here) to test @xboards-agencja-nieruchomosci/react, at their current main.
 
 [[repositories]]
@@ -6,8 +6,8 @@ git = "git@github.com:mirrorboards-dev/dev-formatter-typescript.git"
 path = "mirrorboards-core/mirrorboards-dev/dev-formatter-typescript"
 
 [[repositories]]
-git = "git@github.com:mirrorboards-utils/utils-workspace-source.git"
-path = "mirrorboards-core/mirrorboards-utils/utils-workspace-source"
+git = "git@github.com:mirrorboards-dev/dev-utils-workspace-source.git"
+path = "mirrorboards-core/mirrorboards-dev/dev-utils-workspace-source"
 
 [[repositories]]
 git = "git@github.com:mirrorboards-xmeta/xmeta-cli.git"

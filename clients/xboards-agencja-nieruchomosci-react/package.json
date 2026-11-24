@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@mirrorboards-dev/formatter-typescript": "workspace:*",
-    "@mirrorboards-utils/workspace-source": "workspace:*",
+    "@mirrorboards-dev/utils-workspace-source": "workspace:*",
     "@types/node": "^25.9.5",
     "@types/react": "^19.3.0",
     "prettier": "3.9.5",
